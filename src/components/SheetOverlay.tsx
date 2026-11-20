@@ -75,7 +75,7 @@ export function SheetOverlay({
         />
       )}
       {circles.map(({ p, s, k }) => (
-        <circle key={k} cx={p[0]} cy={H - p[1]} r={ring} fill="none" stroke={scoreColor(s)} strokeWidth={s >= DUDOSA ? 0.55 : 0.3} opacity={s >= DUDOSA ? 0.95 : 0.7} />
+        <circle key={k} cx={p[0]} cy={H - p[1]} r={ring} fill="none" stroke={scoreColor(s)} strokeWidth={s >= DUDOSA ? 0.4 : 0.25} opacity={s >= DUDOSA ? 0.95 : 0.7} />
       ))}
     </svg>
   );

@@ -87,17 +87,22 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   const T = (name: string) => (tables[name] ??= []);
+  const flush = () => {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = null;
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(tables));
+    } catch {
+      console.warn('Modo demo: no queda espacio en el navegador para guardar más datos.');
+    }
+  };
   const save = () => {
     if (!persist) return;
     if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(tables));
-      } catch {
-        console.warn('Modo demo: no queda espacio en el navegador para guardar más datos.');
-      }
-    }, 150);
+    saveTimer = setTimeout(flush, 150);
   };
+  // que no se pierda la última escritura si se recarga o se cierra la pestaña
+  if (persist && typeof addEventListener === 'function') addEventListener('pagehide', () => saveTimer && flush());
   const setUser = (u: SessionUser | null) => {
     user = u;
     try {
