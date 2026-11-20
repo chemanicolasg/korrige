@@ -8,3 +8,7 @@ e2e/out
 .DS_Store
 public/pdfjs-wasm
 .netlify
+
+# Ofertas comerciales: contienen datos de clientes y precios, no se suben al repositorio
+ofertas/
+scripts/oferta-*.mjs
