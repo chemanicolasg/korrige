@@ -15,6 +15,7 @@ export interface Organization {
   id: string;
   name: string;
   retention_months: number | null;
+  exam_defaults?: ExamDefaults | null;
   created_at: string;
 }
 export interface Profile {
@@ -49,8 +50,19 @@ export interface GradingConfig {
   decimals: number;
   /** Permitir notas negativas (por defecto la mínima es 0). */
   allowNegative: boolean;
+  /** Puntos que resta cada pregunta en blanco (por defecto 0: no restan). */
+  blankPenalty?: number;
 }
-export const DEFAULT_GRADING: GradingConfig = { formula: 'none', penalty: 0.25, scale: 10, decimals: 2, allowNegative: false };
+export const DEFAULT_GRADING: GradingConfig = { formula: 'none', penalty: 0.25, scale: 10, decimals: 2, allowNegative: false, blankPenalty: 0 };
+
+/** Valores por defecto de la organización para los exámenes nuevos. */
+export interface ExamDefaults {
+  logo?: string;
+  title?: string;
+  idLabel?: string;
+  idDigits?: number;
+  grading?: GradingConfig;
+}
 
 /** Correspondencia entre modelos: modelo → (pregunta del modelo → pregunta del modelo A). */
 export type ModelMap = Record<string, Record<string, number>>;

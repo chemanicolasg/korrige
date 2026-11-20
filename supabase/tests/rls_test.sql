@@ -169,6 +169,7 @@ select tests.eq(tests.n($$select 1 from public.profiles where email = 'pablo@a.t
 select tests.eq(tests.affected($$update public.memberships set role = 'admin' where user_id = auth.uid()$$), 0, 'un profesor no puede hacerse administrador');
 select tests.throws($$select public.share_exam('e1000000-0000-0000-0000-000000000000', 'paula@a.test')$$, 'Paula no puede compartirse el examen');
 select tests.eq(tests.affected($$update public.organizations set name = 'x'$$), 0, 'un profesor no puede renombrar la organización');
+select tests.eq(tests.affected($$update public.organizations set exam_defaults = '{"idLabel":"X"}'$$), 0, 'un profesor no puede cambiar los valores por defecto de la organización');
 
 select tests.login('a0000000-0000-0000-0000-000000000002'); -- Pablo comparte
 select tests.throws($$select public.share_exam('e1000000-0000-0000-0000-000000000000', 'bruno@b.test')$$, 'no se puede compartir con alguien de otra organización');
@@ -185,6 +186,7 @@ select tests.eq(tests.n('select 1 from public.exams'), 1, 'la admin ve todos los
 select tests.eq(tests.n('select 1 from public.exams where org_id <> ''0a000000-0000-0000-0000-000000000000'''), 0, 'la admin no ve exámenes de otras organizaciones');
 select tests.eq(tests.n($$select 1 from public.org_usage('0a000000-0000-0000-0000-000000000000')$$), 3, 'la admin ve el uso de su organización');
 select tests.eq(tests.affected($$update public.organizations set retention_months = 12 where id = '0a000000-0000-0000-0000-000000000000'$$), 1, 'la admin configura la retención');
+select tests.eq(tests.affected($$update public.organizations set exam_defaults = '{"idLabel":"NIUB","idDigits":8}' where id = '0a000000-0000-0000-0000-000000000000'$$), 1, 'la admin configura los valores por defecto de los exámenes');
 select tests.eq(tests.affected($$update public.organizations set retention_months = 1 where id = '0b000000-0000-0000-0000-000000000000'$$), 0, 'la admin no toca otra organización');
 select tests.throws($$update public.memberships set role = 'profesor' where user_id = auth.uid()$$, 'la organización no puede quedarse sin administradores');
 insert into public.invitations (org_id, email, invited_by) values

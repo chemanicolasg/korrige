@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Empty, ErrorBox, Field, Spinner, StatusBadge, fmtDate } from '../components/ui';
 import { createExam } from '../lib/service';
-import { Exam, Profile } from '../lib/types';
+import { DEFAULT_GRADING, Exam, Profile } from '../lib/types';
 import { DEFAULT_SHEET_CONFIG, SheetConfig } from '../omr/layout';
 import { useSession } from './AuthContext';
 import { SheetConfigForm } from './SheetConfigForm';
@@ -107,7 +107,18 @@ export function ExamNew() {
   const { db, org, user } = useSession();
   const nav = useNavigate();
   const [f, setF] = useState({ title: '', subject: '', group_name: '', session: '', exam_date: '' });
-  const [cfg, setCfg] = useState<SheetConfig>({ ...DEFAULT_SHEET_CONFIG, nQuestions: 40, nOptions: 4, nModels: 1, title: org.name });
+  // los valores por defecto de la organización (logotipo, identificador, fórmula) se aplican a cada examen nuevo
+  const def = org.exam_defaults ?? {};
+  const [cfg, setCfg] = useState<SheetConfig>({
+    ...DEFAULT_SHEET_CONFIG,
+    nQuestions: 40,
+    nOptions: 4,
+    nModels: 1,
+    title: def.title || org.name,
+    idLabel: def.idLabel || DEFAULT_SHEET_CONFIG.idLabel,
+    idDigits: def.idDigits || DEFAULT_SHEET_CONFIG.idDigits,
+    ...(def.logo ? { logo: def.logo } : {}),
+  });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -117,7 +128,7 @@ export function ExamNew() {
     setError('');
     try {
       const subtitle = cfg.subtitle && cfg.subtitle !== DEFAULT_SHEET_CONFIG.subtitle ? cfg.subtitle : [f.subject || f.title, f.session].filter(Boolean).join('  ·  ');
-      const exam = await createExam(db, org.id, user.id, { ...f, exam_date: f.exam_date || null }, { ...cfg, subtitle });
+      const exam = await createExam(db, org.id, user.id, { ...f, exam_date: f.exam_date || null }, { ...cfg, subtitle }, { ...DEFAULT_GRADING, ...(def.grading ?? {}) });
       nav(`/app/examenes/${exam.id}/hoja`);
     } catch (err) {
       setError((err as Error).message);
@@ -144,7 +155,10 @@ export function ExamNew() {
       </section>
       <section className="card mt-5 p-5">
         <h2 className="font-semibold">Hoja de respuestas</h2>
-        <p className="mb-4 mt-1 text-sm text-slate-600">Podrás cambiarla y ver la vista previa después, mientras no hayas subido hojas escaneadas.</p>
+        <p className="mb-4 mt-1 text-sm text-slate-600">
+          Podrás cambiarla y ver la vista previa después, mientras no hayas subido hojas escaneadas.
+          {(def.logo || def.idLabel || def.grading) && ' Se han aplicado los valores por defecto de tu organización (logotipo, identificador y fórmula de corrección).'}
+        </p>
         <SheetConfigForm value={cfg} onChange={setCfg} />
       </section>
       <div className="mt-5 space-y-3">

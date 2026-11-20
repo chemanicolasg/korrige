@@ -1,12 +1,12 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ErrorBox, Field, Modal, Notice, fmtDateTime } from '../../components/ui';
-import { penaltyPerError } from '../../lib/grading';
 import { currentKeys, deleteExam, duplicateExam, isStudentSheet, logAudit, setExamClosed, updateExamFields, updateGrading } from '../../lib/service';
-import { Formula, GradingConfig, Profile } from '../../lib/types';
+import { GradingConfig, Profile } from '../../lib/types';
 import { modelLetters } from '../../omr/layout';
 import { useSession } from '../AuthContext';
 import { useExam } from '../ExamPage';
+import { GradingFields } from '../GradingFields';
 
 function Steps() {
   const { data } = useExam();
@@ -53,48 +53,12 @@ function GradingForm() {
   const [g, setG] = useState<GradingConfig>(data.exam.grading_config);
   useEffect(() => setG(data.exam.grading_config), [data.exam.grading_config]);
   const dirty = JSON.stringify(g) !== JSON.stringify(data.exam.grading_config);
-  const k = data.exam.sheet_config.nOptions;
-  const pen = penaltyPerError(g, k);
   return (
     <section className="card p-5">
       <h2 className="font-semibold">Corrección</h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Field label="Fórmula">
-          <select className="input" disabled={readOnly} value={g.formula} onChange={(e) => setG({ ...g, formula: e.target.value as Formula })}>
-            <option value="none">Sin penalización (solo cuentan los aciertos)</option>
-            <option value="classic">Penalización clásica: aciertos − errores/(k−1)</option>
-            <option value="custom">Penalización personalizada por error</option>
-          </select>
-        </Field>
-        {g.formula === 'custom' ? (
-          <Field label="Puntos que resta cada error" hint="Por ejemplo 0,25 = cada 4 errores restan un acierto.">
-            <input className="input" type="number" step="0.01" min={0} max={5} disabled={readOnly} value={g.penalty} onChange={(e) => setG({ ...g, penalty: Number(e.target.value) })} />
-          </Field>
-        ) : (
-          <div className="self-end pb-2 text-sm text-slate-600">
-            {g.formula === 'classic' ? `Con ${k} opciones, cada error resta 1/${k - 1} de acierto.` : 'Los errores no restan.'} En blanco = 0.
-          </div>
-        )}
-        <Field label="Nota máxima">
-          <input className="input" type="number" min={1} max={1000} step="0.5" disabled={readOnly} value={g.scale} onChange={(e) => setG({ ...g, scale: Number(e.target.value) || 10 })} />
-        </Field>
-        <Field label="Decimales">
-          <select className="input" disabled={readOnly} value={g.decimals} onChange={(e) => setG({ ...g, decimals: Number(e.target.value) })}>
-            {[0, 1, 2, 3].map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <label className="flex items-center gap-2 text-sm sm:col-span-2">
-          <input type="checkbox" disabled={readOnly} checked={g.allowNegative} onChange={(e) => setG({ ...g, allowNegative: e.target.checked })} />
-          Permitir notas negativas (por defecto la nota mínima es 0)
-        </label>
+      <div className="mt-4">
+        <GradingFields value={g} onChange={setG} disabled={readOnly} nOptions={data.exam.sheet_config.nOptions} />
       </div>
-      <p className="mt-3 text-xs text-slate-500">
-        Nota = (aciertos − {pen ? pen.toLocaleString('es-ES', { maximumFractionDigits: 3 }) : '0'} × errores) ÷ preguntas válidas × {g.scale}. Las preguntas anuladas no cuentan.
-      </p>
       {!readOnly && (
         <button className="btn-primary mt-4" disabled={!dirty || busy} onClick={() => run((d) => updateGrading(db, d, g))}>
           Guardar y recalcular notas

@@ -103,6 +103,9 @@ export function examImagePaths(sheets: Sheet[]): string[] {
 // ---------------------------------------------------------------------------
 export const ACTION_LABEL: Record<string, string> = {
   organizacion_creada: 'Organización creada',
+  organizacion_editada: 'Organización editada',
+  valores_por_defecto: 'Valores por defecto de los exámenes cambiados',
+  invitacion_enviada: 'Invitación creada',
   invitacion_aceptada: 'Invitación aceptada',
   examen_creado: 'Examen creado',
   examen_editado: 'Examen editado',

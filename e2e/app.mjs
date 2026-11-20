@@ -97,12 +97,28 @@ export async function testApp(baseUrl, outDir) {
     await page.getByRole('link', { name: /Anatomía I/ }).waitFor();
     await shot('13-examenes');
 
-    // 8) crear un examen nuevo desde cero
+    // 7b) valores por defecto de la organización: identificador, logotipo y fórmula para los exámenes nuevos
+    await page.getByRole('link', { name: 'Organización' }).click();
+    const defaults = page.getByTestId('org-defaults');
+    await defaults.getByLabel('Identificador del alumno').fill('NIUB');
+    await defaults.getByTestId('org-logo-input').setInputFiles('public/icon-512.png');
+    await defaults.getByAltText('Logotipo por defecto').waitFor();
+    await defaults.getByLabel('Si falla una pregunta…').selectOption('classic');
+    await defaults.getByLabel('Si la deja en blanco…').selectOption('resta');
+    await defaults.getByRole('button', { name: 'Guardar valores por defecto' }).click();
+    await page.getByText('Valores por defecto guardados').waitFor();
+    await page.getByRole('link', { name: 'Exámenes' }).first().click();
+
+    // 8) crear un examen nuevo desde cero: hereda los valores por defecto
     await page.getByRole('link', { name: 'Nuevo examen' }).click();
+    assert.equal(await page.locator('input[list=korrige-id-labels]').inputValue(), 'NIUB');
+    await page.getByAltText('Logotipo de la hoja').waitFor();
     await page.getByLabel('Nombre del examen').fill('Bioquímica · Final');
     await page.getByRole('button', { name: 'Crear examen' }).click();
     await page.waitForURL(/\/hoja$/);
     await page.locator('[data-testid=pdf-preview] canvas').first().waitFor({ timeout: 30_000 });
+    await page.getByRole('link', { name: 'Resumen' }).click();
+    assert.match(await page.getByTestId('grading-formula').innerText(), /0,333 × errores − 0,1 × en blanco/);
 
     // 9) reiniciar la demo desde el aviso superior vuelve a crear el examen de ejemplo
     page.once('dialog', (d) => d.accept());

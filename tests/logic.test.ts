@@ -34,6 +34,19 @@ describe('corrección', () => {
     expect(roundTo(6.666666, 2)).toBe(6.67);
   });
 
+  it('las preguntas en blanco no restan por defecto, pero se puede configurar que resten', () => {
+    const a = ans('ABCDABCD--'); // 8 aciertos, 2 en blanco
+    expect(gradeSheet(a, k, 10, 4, DEFAULT_GRADING).raw).toBe(8);
+    const g = gradeSheet(a, k, 10, 4, { ...DEFAULT_GRADING, blankPenalty: 0.5 });
+    expect(g.raw).toBe(7); // 8 − 2·0,5
+    expect(g.grade).toBe(7);
+    // errores y blancos a la vez: 7 aciertos, 2 errores (clásica: −2/3) y 1 blanco (−0,1)
+    const mix = gradeSheet(ans('ABCDABDDB-'), k, 10, 4, { ...DEFAULT_GRADING, formula: 'classic', blankPenalty: 0.1 });
+    expect(mix.raw).toBe(roundTo(7 - 2 / 3 - 0.1, 4));
+    // una configuración antigua sin el campo se comporta como siempre
+    expect(gradeSheet(a, k, 10, 4, { formula: 'none', penalty: 0, scale: 10, decimals: 2, allowNegative: false }).grade).toBe(8);
+  });
+
   it('nota mínima 0 salvo que se permitan negativas', () => {
     const todoMal = ans('BBBBBBBBBA');
     const cfg = { ...DEFAULT_GRADING, formula: 'classic' as const };

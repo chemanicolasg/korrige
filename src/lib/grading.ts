@@ -29,6 +29,12 @@ export function penaltyPerError(cfg: GradingConfig, nOptions: number): number {
   return 0;
 }
 
+/** Puntos que resta cada pregunta en blanco (0 si no se ha configurado). */
+export function blankPenalty(cfg: GradingConfig): number {
+  const v = Number(cfg.blankPenalty);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}
+
 export function outcomeOf(answer: string | undefined, entry: KeyAnswers[string] | undefined): QuestionOutcome {
   if (entry?.v) return 'anulada';
   if (!entry || !entry.c.length) return 'sin_clave';
@@ -54,7 +60,7 @@ export function gradeSheet(answers: Record<string, string>, key: KeyAnswers, nQu
       else g.n_blank++;
     }
   }
-  const raw = g.n_correct - penaltyPerError(cfg, nOptions) * g.n_wrong;
+  const raw = g.n_correct - penaltyPerError(cfg, nOptions) * g.n_wrong - blankPenalty(cfg) * g.n_blank;
   let grade = g.n_valid ? (raw / g.n_valid) * cfg.scale : 0;
   if (!cfg.allowNegative) grade = Math.max(0, grade);
   g.raw = roundTo(raw, 4);

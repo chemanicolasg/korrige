@@ -3,6 +3,9 @@ import { Field } from '../components/ui';
 import { fileToLogo } from '../lib/logoImage';
 import { DEFAULT_FIELDS, SheetConfig, pageCount } from '../omr/layout';
 
+/** Nombres habituales del identificador del alumno según el centro. */
+export const ID_LABELS = ['NIA', 'NIUB', 'NIU', 'NIUBA', 'DNI', 'NIE', 'Expediente', 'Matrícula', 'Código'];
+
 /** Formulario de configuración de la hoja de respuestas. */
 export function SheetConfigForm({ value, onChange, disabled }: { value: SheetConfig; onChange: (c: SheetConfig) => void; disabled?: boolean }) {
   const set = <K extends keyof SheetConfig>(k: K, v: SheetConfig[K]) => onChange({ ...value, [k]: v });
@@ -54,8 +57,13 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
         </select>
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Identificador" hint="NIA, DNI, expediente…">
-          <input className="input" disabled={disabled} maxLength={12} value={value.idLabel} onChange={(e) => set('idLabel', e.target.value)} />
+        <Field label="Identificador" hint="El de tu centro: NIA, NIUB, NIU, DNI…">
+          <input className="input" list="korrige-id-labels" disabled={disabled} maxLength={12} value={value.idLabel} onChange={(e) => set('idLabel', e.target.value)} />
+          <datalist id="korrige-id-labels">
+            {ID_LABELS.map((l) => (
+              <option key={l} value={l} />
+            ))}
+          </datalist>
         </Field>
         <Field label="Nº de dígitos" hint="Entre 6 y 10.">
           {num('idDigits', 6, 10)}

@@ -45,6 +45,10 @@ Donde el encargo era ambiguo se ha elegido la opción más simple que cumple el 
 
 29. **Personalización de la hoja.** Se puede añadir un logotipo en la cabecera, cambiar las etiquetas de los tres campos manuscritos y poner una nota junto al título «Respuestas», además del título y el subtítulo. El logotipo se reduce en el navegador (máx. 600 px) y se guarda dentro de la configuración de la hoja. No se pueden cambiar el color ni la posición de las burbujas, las marcas de esquina ni el QR: de ellos depende la lectura validada. Hay un test con el peor caso (un logotipo cuadrado negro, parecido a una marca de esquina) que comprueba que la lectura no cambia, tampoco con la hoja girada. Como el resto de la configuración, queda bloqueada al subir hojas.
 
+30. **Valores por defecto de la organización.** El administrador define en Organización el logotipo, el título de la hoja, el identificador (NIA, NIUB, NIU, DNI… y su nº de dígitos) y la fórmula de corrección. Se aplican a cada examen nuevo y el profesor puede cambiarlos en el suyo; no modifican exámenes ya creados. Se guardan en `organizations.exam_defaults`.
+31. **Preguntas en blanco.** Por defecto no restan. Se puede configurar que cada blanco reste una cantidad fija, además de lo que resten los errores (nada, 1/(k−1) o una cantidad fija). Nota = (aciertos − a × errores − b × blancos) ÷ preguntas válidas × escala.
+32. **Lectura de los KPIs.** Dificultad: fácil ≥ 80 % de acierto, media 50–80 %, difícil < 50 %, muy difícil < 20 %. Discriminación: buena ≥ 0,30, aceptable 0,20–0,30, baja < 0,20, negativa < 0. Son los umbrales habituales en análisis de ítems; están en `src/lib/stats.ts`.
+
 ## Verificado contra el proyecto real de Supabase
 
 Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado el 20/11/2026:

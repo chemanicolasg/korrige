@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Empty, Stat, fmtNum } from '../../components/ui';
-import { FLAG_LABEL, ItemStats, examStats, itemStats } from '../../lib/stats';
+import { FLAG_LABEL, ItemStats, Level, difficultyLabel, discriminationLabel, examStats, itemStats, qualitySummary } from '../../lib/stats';
 import { currentKeys, isStudentSheet, sheetModel } from '../../lib/service';
 import { INVALID } from '../../lib/types';
 import { optionLetters } from '../../omr/layout';
@@ -111,6 +111,37 @@ function OptionBars({ it, options }: { it: ItemStats; options: string[] }) {
   );
 }
 
+const LEVEL_CLS: Record<Level, string> = {
+  bien: 'bg-emerald-100 text-emerald-800',
+  neutro: 'bg-slate-100 text-slate-700',
+  aviso: 'bg-amber-100 text-amber-800',
+  mal: 'bg-red-100 text-red-800',
+};
+function Tag({ label }: { label: { text: string; level: Level } | null }) {
+  return label ? <span className={`badge ${LEVEL_CLS[label.level]}`}>{label.text}</span> : null;
+}
+
+/** Reparto de las preguntas en tres grupos, como una barra apilada con su leyenda. */
+function Split({ title, parts }: { title: string; parts: [string, number, string][] }) {
+  const total = parts.reduce((a, p) => a + p[1], 0) || 1;
+  return (
+    <div className="card px-4 py-3">
+      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{title}</div>
+      <div className="mt-2 flex h-2.5 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={`${title}: ${parts.map(([l, n]) => `${n} ${l}`).join(', ')}`}>
+        {parts.map(([l, n, c]) => n > 0 && <span key={l} style={{ width: `${(n / total) * 100}%`, background: c }} />)}
+      </div>
+      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-700">
+        {parts.map(([l, n, c]) => (
+          <li key={l} className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: c }} aria-hidden />
+            <b className="tabular-nums text-slate-900">{n}</b> {l}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function TabStats() {
   const { data } = useExam();
   const [onlyFlagged, setOnlyFlagged] = useState(false);
@@ -142,17 +173,91 @@ export default function TabStats() {
     );
   }
   const flagged = items.filter((i) => i.flags.length);
+  const q = qualitySummary(items);
+  const roster = data.students.length;
+  const delivered = new Set(data.sheets.filter(isStudentSheet).map((s) => s.identifier));
+  const absent = roster ? data.students.filter((s) => !delivered.has(s.identifier)).length : 0;
+  const pending = data.items.filter((i) => i.status === 'pendiente').length;
   const shown = onlyFlagged ? flagged : items;
   const mapped = Object.keys(data.exam.model_map).length > 0;
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stat label="Presentados" value={stats.n} />
-        <Stat label="Media" value={fmtNum(stats.mean)} hint={`sobre ${fmtNum(g.scale, 0)}`} />
-        <Stat label="Mediana" value={fmtNum(stats.median)} hint={`mín. ${fmtNum(stats.min)} · máx. ${fmtNum(stats.max)}`} />
-        <Stat label="Desviación típica" value={fmtNum(stats.sd)} />
-        <Stat label="Aprobados" value={`${Math.round(stats.passRate * 100)} %`} hint={`nota ≥ ${fmtNum(g.scale / 2, 1)}`} />
-      </div>
+      {pending > 0 && (
+        <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+          Hay {pending} incidencias sin revisar: los indicadores pueden cambiar cuando las resuelvas.{' '}
+          <Link className="font-medium underline" to="../revision">
+            Ir a Revisión
+          </Link>
+        </p>
+      )}
+
+      <section aria-labelledby="kpi-examen">
+        <h2 id="kpi-examen" className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Resultado del examen
+        </h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <Stat label="Presentados" value={stats.n} hint={roster ? `de ${roster} en la lista · ${absent} sin entregar` : 'hojas corregidas'} />
+          <Stat label="Aprobados" value={`${Math.round(stats.passRate * 100)} %`} hint={`${Math.round(stats.passRate * stats.n)} de ${stats.n} con nota ≥ ${fmtNum(g.scale / 2, 1)}`} />
+          <Stat label="Nota media" value={fmtNum(stats.mean)} hint={`sobre ${fmtNum(g.scale, 0)}`} />
+          <Stat label="Mediana" value={fmtNum(stats.median)} hint="la mitad de la clase saca más y la otra mitad menos" />
+          <Stat label="Dispersión" value={fmtNum(stats.sd)} hint={`desviación típica · notas entre ${fmtNum(stats.min)} y ${fmtNum(stats.max)}`} />
+        </div>
+      </section>
+
+      <section aria-labelledby="kpi-preguntas">
+        <h2 id="kpi-preguntas" className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Calidad de las preguntas
+        </h2>
+        <div className="grid gap-3 md:grid-cols-3">
+          <Split
+            title={`Dificultad · acierto medio ${q.meanDifficulty == null ? '—' : `${Math.round(q.meanDifficulty * 100)} %`}`}
+            parts={[
+              ['fáciles', q.easy, '#b9b4a8'],
+              ['medias', q.medium, '#2439b0'],
+              ['difíciles', q.hard, '#d6336c'],
+            ]}
+          />
+          <Split
+            title="Discriminación"
+            parts={[
+              ['distinguen bien', q.goodDiscrimination, '#2439b0'],
+              ['distinguen poco', q.lowDiscrimination, '#b9b4a8'],
+              ['al revés', q.negativeDiscrimination, '#d6336c'],
+            ]}
+          />
+          <Stat
+            label="Preguntas a revisar"
+            value={q.flagged}
+            hint={q.flagged ? `de ${q.scored + q.voided}: ${flagged.map((f) => f.q).slice(0, 8).join(', ')}${flagged.length > 8 ? '…' : ''}` : `de ${q.scored + q.voided} · ninguna da problemas${q.voided ? ` · ${q.voided} anuladas` : ''}`}
+          />
+        </div>
+      </section>
+
+      <details className="card px-5 py-3 text-sm text-slate-700" data-testid="kpi-help">
+        <summary className="cursor-pointer font-semibold text-brand-800">Cómo leer estos indicadores</summary>
+        <dl className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">
+          <div>
+            <dt className="font-semibold text-slate-900">Dificultad</dt>
+            <dd>Porcentaje de alumnos que aciertan la pregunta. Fácil: 80 % o más. Media: entre 50 y 80 %. Difícil: menos del 50 %. Muy difícil: menos del 20 %.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-900">Discriminación</dt>
+            <dd>
+              Acierto del 27 % de alumnos con mejor nota menos el del 27 % con peor nota. Buena: 0,30 o más. Aceptable: 0,20–0,30. Baja: menos de 0,20. Negativa: la
+              aciertan más los que peor nota sacan; suele indicar un enunciado confuso o una clave equivocada.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-900">Opciones elegidas (distractores)</dt>
+            <dd>Qué porcentaje marcó cada opción; la correcta lleva ✓. Si una incorrecta supera a la correcta, revisa la clave y el enunciado.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-900">Mediana y dispersión</dt>
+            <dd>La mediana no se ve afectada por unas pocas notas muy altas o muy bajas. La desviación típica indica lo repartidas que están las notas: cuanto mayor, más diferencia entre alumnos.</dd>
+          </div>
+        </dl>
+      </details>
+
       <section className="card p-5">
         <h2 className="mb-3 font-semibold">Distribución de notas</h2>
         <div className="max-w-2xl">
@@ -167,8 +272,7 @@ export default function TabStats() {
           </label>
         </div>
         <p className="mt-1 text-xs text-slate-500">
-          Dificultad = % de alumnos que la aciertan. Discriminación = % de acierto del 27 % con mejor nota menos el del 27 % con peor nota (cuanto más alta, mejor
-          distingue; negativa es mala señal).{' '}
+          Una fila por pregunta, con su dificultad, su discriminación y qué opción eligió cada alumno.{' '}
           {cfg.nModels > 1 && (mapped ? 'Las preguntas se agregan entre modelos con la correspondencia definida (numeración del modelo A).' : 'Sin correspondencia entre modelos definida: se agrega por número de pregunta.')}
         </p>
         {flagged.length > 0 && (
@@ -197,8 +301,12 @@ export default function TabStats() {
                 <tr key={it.q} className={it.flags.length ? 'bg-amber-50/60' : ''}>
                   <td className="td font-semibold tabular-nums">{it.q}</td>
                   <td className="td">{it.voided ? <span className="badge bg-slate-200 text-slate-600">Anulada</span> : it.correct.join(', ') || '—'}</td>
-                  <td className="td text-right tabular-nums">{it.p == null ? '—' : `${Math.round(it.p * 100)} %`}</td>
-                  <td className={`td text-right tabular-nums ${it.d != null && it.d < 0 ? 'font-semibold text-red-700' : ''}`}>{it.d == null ? '—' : fmtNum(it.d)}</td>
+                  <td className="td whitespace-nowrap text-right tabular-nums">
+                    {it.p == null ? '—' : `${Math.round(it.p * 100)} %`} <Tag label={difficultyLabel(it.p)} />
+                  </td>
+                  <td className="td whitespace-nowrap text-right tabular-nums">
+                    {it.d == null ? '—' : fmtNum(it.d)} <Tag label={discriminationLabel(it.d)} />
+                  </td>
                   <td className="td">{!it.voided && it.n > 0 && <OptionBars it={it} options={options} />}</td>
                   <td className="td text-xs text-amber-900">
                     {it.flags.map((f) => (

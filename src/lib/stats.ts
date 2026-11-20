@@ -132,3 +132,58 @@ export function itemStats(sheets: GradedSheet[], keys: Record<string, KeyAnswers
       return it;
     });
 }
+
+// ---------------------------------------------------------------------------
+// Interpretación en lenguaje llano (para que los KPIs se entiendan sin manual)
+// ---------------------------------------------------------------------------
+export type Level = 'bien' | 'neutro' | 'aviso' | 'mal';
+
+/** Dificultad según el % de acierto. */
+export function difficultyLabel(p: number | null): { text: string; level: Level } | null {
+  if (p == null) return null;
+  if (p >= 0.8) return { text: 'Fácil', level: 'neutro' };
+  if (p >= 0.5) return { text: 'Media', level: 'bien' };
+  if (p >= 0.2) return { text: 'Difícil', level: 'aviso' };
+  return { text: 'Muy difícil', level: 'mal' };
+}
+
+/** Discriminación: cuánto distingue la pregunta a quien sabe de quien no. */
+export function discriminationLabel(d: number | null): { text: string; level: Level } | null {
+  if (d == null) return null;
+  if (d < 0) return { text: 'Negativa', level: 'mal' };
+  if (d < 0.2) return { text: 'Baja', level: 'aviso' };
+  if (d < 0.3) return { text: 'Aceptable', level: 'neutro' };
+  return { text: 'Buena', level: 'bien' };
+}
+
+export interface QualitySummary {
+  /** Preguntas que puntúan (ni anuladas ni sin datos). */
+  scored: number;
+  voided: number;
+  easy: number;
+  medium: number;
+  hard: number;
+  goodDiscrimination: number;
+  lowDiscrimination: number;
+  negativeDiscrimination: number;
+  flagged: number;
+  /** % de acierto medio de todas las preguntas. */
+  meanDifficulty: number | null;
+}
+
+export function qualitySummary(items: ItemStats[]): QualitySummary {
+  const scored = items.filter((i) => !i.voided && i.p != null);
+  const ps = scored.map((i) => i.p!);
+  return {
+    scored: scored.length,
+    voided: items.filter((i) => i.voided).length,
+    easy: ps.filter((p) => p >= 0.8).length,
+    medium: ps.filter((p) => p >= 0.5 && p < 0.8).length,
+    hard: ps.filter((p) => p < 0.5).length,
+    goodDiscrimination: scored.filter((i) => i.d != null && i.d >= 0.2).length,
+    lowDiscrimination: scored.filter((i) => i.d != null && i.d >= 0 && i.d < 0.2).length,
+    negativeDiscrimination: scored.filter((i) => i.d != null && i.d < 0).length,
+    flagged: items.filter((i) => i.flags.length).length,
+    meanDifficulty: ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null,
+  };
+}
