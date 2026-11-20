@@ -34,7 +34,10 @@ const DOCS: Record<string, { title: string; body: ReactNode }> = {
           profesorado.
         </p>
         <h2>6. Legislación aplicable</h2>
-        <p>Este aviso se rige por la legislación española. [JURISDICCIÓN].</p>
+        <p>
+          Este aviso se rige por la legislación española. Para cualquier controversia, las partes se someten a los juzgados y tribunales de la ciudad de Barcelona, salvo que
+          la normativa aplicable establezca otro fuero.
+        </p>
       </>
     ),
   },
@@ -65,7 +68,7 @@ const DOCS: Record<string, { title: string; body: ReactNode }> = {
         <h2>4. Conservación</h2>
         <p>
           Cada organización configura el plazo de conservación de las imágenes de las hojas tras cerrar un examen y puede borrar por completo cualquier examen. Los datos
-          de contacto comercial se conservan mientras dure la relación y, como máximo, [PLAZO].
+          de contacto comercial se conservan mientras dure la relación y, como máximo, 24 meses desde el último contacto.
         </p>
         <h2>5. Derechos</h2>
         <p>
@@ -121,7 +124,7 @@ export default function Legal() {
         <article className="mt-8">
           <h1 className="text-3xl font-semibold text-slate-900">{d.title}</h1>
           <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <b>Texto plantilla pendiente de revisión legal.</b> Los datos entre corchetes deben completarse antes de publicar.
+            <b>Texto plantilla pendiente de revisión legal.</b>
           </p>
           <div className="mt-6 space-y-3 text-[15px] leading-relaxed text-slate-700 [&_h2]:mt-7 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-900 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-6">{d.body}</div>
         </article>
