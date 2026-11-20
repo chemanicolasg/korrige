@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+.local-stack
+e2e/out
+.DS_Store
+public/pdfjs-wasm
