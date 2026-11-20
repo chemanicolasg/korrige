@@ -7,3 +7,4 @@ dist
 e2e/out
 .DS_Store
 public/pdfjs-wasm
+.netlify
