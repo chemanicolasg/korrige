@@ -23,7 +23,17 @@ export interface SheetConfig {
   title: string;
   /** Segunda línea de la cabecera (asignatura, convocatoria…). */
   subtitle: string;
+  /** Logotipo de la cabecera, como data URL PNG o JPEG (opcional). */
+  logo?: string;
+  /** Etiquetas de los tres campos manuscritos (opcional). */
+  fields?: string[];
+  /** Nota breve impresa junto al título «Respuestas» (duración, penalización…). */
+  note?: string;
 }
+
+export const DEFAULT_FIELDS = ['Apellidos y nombre', 'Asignatura', 'Fecha'];
+/** Tamaño máximo del logotipo guardado (caracteres del data URL ≈ 220 kB). */
+export const MAX_LOGO_CHARS = 300_000;
 
 export const DEFAULT_SHEET_CONFIG: SheetConfig = {
   nQuestions: 100,
@@ -92,7 +102,7 @@ export function clampConfig(c: Partial<SheetConfig>): SheetConfig {
     const x = Math.round(Number(v));
     return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : def;
   };
-  return {
+  const out: SheetConfig = {
     nQuestions: n(c.nQuestions, 100, 10, MAX_QUESTIONS),
     nOptions: n(c.nOptions, 5, 3, 5),
     nModels: n(c.nModels, 1, 1, 4),
@@ -101,6 +111,15 @@ export function clampConfig(c: Partial<SheetConfig>): SheetConfig {
     title: (c.title ?? '').toString().slice(0, 60),
     subtitle: (c.subtitle ?? '').toString().slice(0, 80),
   };
+  // personalización opcional (solo se guarda lo que se ha rellenado)
+  if (typeof c.logo === 'string' && /^data:image\/(png|jpeg);base64,/.test(c.logo) && c.logo.length <= MAX_LOGO_CHARS) out.logo = c.logo;
+  if (Array.isArray(c.fields)) {
+    const fields = DEFAULT_FIELDS.map((def, i) => (c.fields?.[i] ?? def).toString().trim().slice(0, 22));
+    if (fields.some((f, i) => f !== DEFAULT_FIELDS[i])) out.fields = fields;
+  }
+  const note = (c.note ?? '').toString().trim().slice(0, 90);
+  if (note) out.note = note;
+  return out;
 }
 
 export function qrText(examCode: string, page: number, pages: number): string {

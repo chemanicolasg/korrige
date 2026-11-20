@@ -43,6 +43,8 @@ Donde el encargo era ambiguo se ha elegido la opción más simple que cumple el 
 
 28. **Identidad visual.** El diseño parte del propio producto en lugar de una plantilla genérica: papel blanco, azul de bolígrafo, el rosa de las burbujas de la hoja y las marcas negras de esquina como marco. Titulares en serif (Fraunces), etiquetas en monoespaciada (IBM Plex Mono) y texto en Archivo, todas servidas desde el propio sitio. En el logotipo la «o» es una burbuja rellenada. La landing usa capturas reales de la aplicación (`public/shots`, se regeneran con `node scripts/capture-shots.mjs` tras `npm run build`) en vez de ilustraciones. Sustituye a una primera versión inspirada en el branding «Concept C». Paleta y tipografías están en `tailwind.config.js` y `src/index.css`.
 
+29. **Personalización de la hoja.** Se puede añadir un logotipo en la cabecera, cambiar las etiquetas de los tres campos manuscritos y poner una nota junto al título «Respuestas», además del título y el subtítulo. El logotipo se reduce en el navegador (máx. 600 px) y se guarda dentro de la configuración de la hoja. No se pueden cambiar el color ni la posición de las burbujas, las marcas de esquina ni el QR: de ellos depende la lectura validada. Hay un test con el peor caso (un logotipo cuadrado negro, parecido a una marca de esquina) que comprueba que la lectura no cambia, tampoco con la hoja girada. Como el resto de la configuración, queda bloqueada al subir hojas.
+
 ## Verificado contra el proyecto real de Supabase
 
 Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado el 20/11/2026:

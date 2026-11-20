@@ -1,9 +1,25 @@
+import { useRef, useState } from 'react';
 import { Field } from '../components/ui';
-import { SheetConfig, pageCount } from '../omr/layout';
+import { fileToLogo } from '../lib/logoImage';
+import { DEFAULT_FIELDS, SheetConfig, pageCount } from '../omr/layout';
 
 /** Formulario de configuración de la hoja de respuestas. */
 export function SheetConfigForm({ value, onChange, disabled }: { value: SheetConfig; onChange: (c: SheetConfig) => void; disabled?: boolean }) {
   const set = <K extends keyof SheetConfig>(k: K, v: SheetConfig[K]) => onChange({ ...value, [k]: v });
+  const file = useRef<HTMLInputElement>(null);
+  const [logoError, setLogoError] = useState('');
+  const fields = value.fields ?? DEFAULT_FIELDS;
+  async function onLogo(f: File | undefined) {
+    if (!f) return;
+    setLogoError('');
+    try {
+      set('logo', await fileToLogo(f));
+    } catch (e) {
+      setLogoError((e as Error).message);
+    } finally {
+      if (file.current) file.current.value = '';
+    }
+  }
   const num = (k: 'nQuestions' | 'idDigits', min: number, max: number) => (
     <input
       className="input"
@@ -17,6 +33,7 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
     />
   );
   return (
+    <div className="space-y-6">
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="Nº de preguntas" hint={`Entre 10 y 200. ${pageCount(value.nQuestions) > 1 ? 'Más de 100: la hoja tendrá 2 páginas.' : 'Hasta 100 caben en una página.'}`}>
         {num('nQuestions', 10, 200)}
@@ -50,6 +67,56 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
       <Field label="Subtítulo" hint="Asignatura, convocatoria…">
         <input className="input" disabled={disabled} maxLength={80} value={value.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
       </Field>
+    </div>
+
+    <fieldset className="border-t border-slate-200 pt-5">
+      <legend className="pr-3 text-sm font-semibold text-slate-800">Personalización</legend>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <span className="label">Logotipo en la cabecera</span>
+          <div className="flex items-center gap-3">
+            <div className="flex h-16 w-32 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white p-1.5">
+              {value.logo ? <img src={value.logo} alt="Logotipo de la hoja" className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-slate-400">Sin logotipo</span>}
+            </div>
+            {!disabled && (
+              <div className="flex flex-col items-start gap-1.5">
+                <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="hidden" data-testid="logo-input" onChange={(e) => void onLogo(e.target.files?.[0])} />
+                <button type="button" className="btn btn-sm" onClick={() => file.current?.click()}>
+                  {value.logo ? 'Cambiar logotipo' : 'Subir logotipo'}
+                </button>
+                {value.logo && (
+                  <button type="button" className="text-xs text-red-700 hover:underline" onClick={() => onChange({ ...value, logo: undefined })}>
+                    Quitar
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          <span className="mt-1 block text-xs text-slate-500">PNG, JPG o SVG. Se imprime arriba a la izquierda, junto al título. Mejor en negro o colores oscuros sobre fondo claro.</span>
+          {logoError && <span className="mt-1 block text-xs text-red-700">{logoError}</span>}
+        </div>
+        <Field label="Nota junto a «Respuestas»" hint="Opcional. Por ejemplo: «Duración: 90 min · Cada error resta 1/3».">
+          <input className="input" disabled={disabled} maxLength={90} value={value.note ?? ''} onChange={(e) => set('note', e.target.value)} />
+        </Field>
+        <div className="sm:col-span-2">
+          <span className="label">Campos que el alumno rellena a mano</span>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {fields.map((f, i) => (
+              <input
+                key={i}
+                className="input"
+                aria-label={`Campo manuscrito ${i + 1}`}
+                disabled={disabled}
+                maxLength={22}
+                value={f}
+                onChange={(e) => set('fields', fields.map((x, j) => (j === i ? e.target.value : x)))}
+              />
+            ))}
+          </div>
+          <span className="mt-1 block text-xs text-slate-500">Son las tres líneas de la cabecera. La zona de burbujas, las marcas de esquina y el QR no se pueden cambiar: de ellas depende la lectura.</span>
+        </div>
+      </div>
+    </fieldset>
     </div>
   );
 }

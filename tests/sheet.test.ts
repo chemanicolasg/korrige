@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { DEFAULT_SHEET_CONFIG, PageLayout, computeLayout, parseQr } from '../src/omr/layout';
+import { DEFAULT_FIELDS, DEFAULT_SHEET_CONFIG, PageLayout, computeLayout, parseQr } from '../src/omr/layout';
 import { readPage } from '../src/omr/reader';
 import { generateSheetCopiesPdf, generateSheetPdf } from '../src/omr/sheetPdf';
 import { REF, loadCv, paintBubble, renderPdf, rotateGray } from './helpers';
@@ -106,6 +106,40 @@ describe('hoja generada → lector (ida y vuelta)', () => {
     expect(r2.respuestas!['150']).toBe('C');
     expect(r2.es_plantilla).toBe(true);
     expect(r2.nia).toBe('??????');
+  });
+
+  it('hoja personalizada (logotipo oscuro, campos y nota): la lectura no cambia, tampoco girada', async () => {
+    // el peor logotipo posible para el lector: un cuadrado negro macizo, parecido a una marca de esquina
+    const { createCanvas } = await import('@napi-rs/canvas');
+    const c = createCanvas(200, 200);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 200, 200);
+    const logo = `data:image/png;base64,${c.toBuffer('image/png').toString('base64')}`;
+    const doc = computeLayout('LOGO0001', { ...DEFAULT_SHEET_CONFIG, nQuestions: 60, nOptions: 4, nModels: 2, logo, fields: ['Nombre', 'Grupo', 'DNI'], note: 'Duración: 90 min · Cada error resta 1/3', title: 'Facultad de Ciencias de la Salud y de la Vida' });
+    expect(doc.config.logo).toBe(logo);
+    expect(doc.config.fields).toEqual(['Nombre', 'Grupo', 'DNI']);
+    // la geometría de lectura es idéntica a la de la hoja sin personalizar
+    const plain = computeLayout('LOGO0001', { ...DEFAULT_SHEET_CONFIG, nQuestions: 60, nOptions: 4, nModels: 2 });
+    expect(doc.pages[0].preguntas).toEqual(plain.pages[0].preguntas);
+    expect(doc.pages[0].markers).toEqual(plain.pages[0].markers);
+
+    const [g] = await renderPdf(await generateSheetPdf(doc));
+    const lay = doc.pages[0];
+    [...'87654321'].forEach((d, col) => paintBubble(g, ...lay.nia[col][Number(d)]));
+    paintBubble(g, ...lay.modelo.B);
+    for (let q = 1; q <= 60; q++) paintBubble(g, ...lay.preguntas[String(q)]['ABCD'[q % 4]]);
+    for (const img of [g, rotateGray(cv, g, 181)]) {
+      const r = readPage(cv, img, doc, { pagina: 1 }).result;
+      expect(r.qr).toBe('UICOMR|LOGO0001|v1');
+      expect(r.nia).toBe('87654321');
+      expect(r.modelo).toBe('B');
+      expect(r.revisar).toEqual({});
+      for (let q = 1; q <= 60; q++) expect(r.respuestas![String(q)], `pregunta ${q}`).toBe('ABCD'[q % 4]);
+    }
+    // datos no válidos se descartan sin romper la hoja
+    expect(computeLayout('X', { ...DEFAULT_SHEET_CONFIG, logo: 'javascript:alert(1)', fields: DEFAULT_FIELDS, note: '  ' }).config).not.toHaveProperty('logo');
+    expect(computeLayout('X', { ...DEFAULT_SHEET_CONFIG, fields: DEFAULT_FIELDS }).config).not.toHaveProperty('fields');
   });
 
   it('N copias en un solo PDF', async () => {

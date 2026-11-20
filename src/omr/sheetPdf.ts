@@ -2,10 +2,10 @@
  * Genera el PDF de la hoja de respuestas con pdf-lib, replicando el diseño de
  * referencia/hoja.py (mismas medidas en mm).
  */
-import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import qrcode from 'qrcode-generator';
 import { APP_NAME } from '../config';
-import { BUBBLE_R, GEO, LayoutDoc, MARGIN, MARK, PAGE_H, PAGE_W, PageLayout, QUESTIONS_PER_COLUMN } from './layout';
+import { BUBBLE_R, DEFAULT_FIELDS, GEO, LayoutDoc, MARGIN, MARK, PAGE_H, PAGE_W, PageLayout, QUESTIONS_PER_COLUMN } from './layout';
 
 const MM = 72 / 25.4;
 const GRIS = rgb(0.35, 0.35, 0.35);
@@ -98,7 +98,23 @@ function drawQr(pen: Pen, text: string, x: number, y: number, size: number) {
   }
 }
 
-function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc, lay: PageLayout) {
+/** Caja reservada al logotipo en la cabecera (mm). Lejos del QR, de las marcas y de las burbujas. */
+const LOGO_BOX = { x: 24, top: PAGE_H - 12.3, maxW: 34, maxH: 14.2 };
+
+/** Incrusta el logotipo (data URL PNG/JPEG). Si no se puede leer, la hoja sale sin él. */
+async function embedLogo(pdf: PDFDocument, dataUrl: string | undefined): Promise<PDFImage | null> {
+  if (!dataUrl) return null;
+  try {
+    const [head, b64] = dataUrl.split(',');
+    const bin = atob(b64);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    return head.includes('image/png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+  } catch {
+    return null;
+  }
+}
+
+function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc, lay: PageLayout, logo: PDFImage | null) {
   const pen = new Pen(page, regular, bold);
   const cfg = doc.config;
   const W = PAGE_W;
@@ -111,18 +127,35 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
     pen.rect(cx - MARK / 2, cy - MARK / 2, MARK, MARK, { fill: NEGRO });
   }
 
-  // Cabecera
-  pen.text(24, H - 16, (cfg.title || APP_NAME).toUpperCase(), 12, { bold: true });
-  pen.text(24, H - 21.5, cfg.subtitle || 'Hoja de respuestas  ·  Examen tipo test', 10);
+  // Cabecera (con logotipo opcional a la izquierda; el texto se desplaza y se encoge si hace falta)
+  let hx = 24;
+  if (logo) {
+    const k = Math.min(LOGO_BOX.maxW / logo.width, LOGO_BOX.maxH / logo.height);
+    const w = logo.width * k;
+    const h = logo.height * k;
+    page.drawImage(logo, { x: LOGO_BOX.x * MM, y: (LOGO_BOX.top - LOGO_BOX.maxH + (LOGO_BOX.maxH - h) / 2) * MM, width: w * MM, height: h * MM });
+    hx = LOGO_BOX.x + w + 4;
+  }
+  const maxW = (lay.qr[0] - 4 - hx) * MM; // hasta el QR
+  const fit = (s: string, size: number, font: PDFFont, min: number) => {
+    let z = size;
+    while (z > min && font.widthOfTextAtSize(safe(font, s), z) > maxW) z -= 0.25;
+    return z;
+  };
+  const title = (cfg.title || APP_NAME).toUpperCase();
+  const subtitle = cfg.subtitle || 'Hoja de respuestas  ·  Examen tipo test';
   const pag = nPages > 1 ? `   ·   Página ${pageNo} de ${nPages}` : '';
-  pen.text(24, H - 26, `Examen: ${doc.exam_id}${pag}   (no escribir en las marcas negras ni en el código QR)`, 7.5, { color: GRIS });
+  const aviso = `Examen: ${doc.exam_id}${pag}   (no escribir en las marcas negras ni en el código QR)`;
+  pen.text(hx, H - 16, title, fit(title, 12, bold, 7), { bold: true });
+  pen.text(hx, H - 21.5, subtitle, fit(subtitle, 10, regular, 6.5));
+  pen.text(hx, H - 26, aviso, fit(aviso, 7.5, regular, 5.5), { color: GRIS });
 
   // QR
   const [qx, qy, qs] = lay.qr;
   drawQr(pen, lay.qr_text ?? `UICOMR|${doc.exam_id}|v1`, qx, qy, qs);
 
   // Campos manuscritos
-  ['Apellidos y nombre', 'Asignatura', 'Fecha'].forEach((campo, i) => {
+  (cfg.fields ?? DEFAULT_FIELDS).forEach((campo, i) => {
     const y = H - 35 - i * 7;
     pen.text(24, y, `${campo}:`, 8.5);
     pen.line(56, y - 0.8, W - 58, y - 0.8, 0.4);
@@ -179,6 +212,7 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
   const sepY = GEO.sepY;
   pen.line(22, sepY, W - 22, sepY, 0.5);
   pen.text(24, sepY - 4.5, 'RESPUESTAS', 8, { bold: true });
+  if (cfg.note) pen.text(W - 24, sepY - 4.5, cfg.note, 7, { color: GRIS, align: 'right' });
   const qs_ = Object.keys(lay.preguntas).map(Number).sort((a, b) => a - b);
   const first = qs_[0] ?? 1;
   for (const q of qs_) {
@@ -209,9 +243,10 @@ export async function generateSheetPdf(doc: LayoutDoc): Promise<Uint8Array> {
   pdf.setCreator(APP_NAME);
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const logo = await embedLogo(pdf, doc.config.logo);
   for (const lay of doc.pages) {
     const page = pdf.addPage([PAGE_W * MM, PAGE_H * MM]);
-    drawPage(page, regular, bold, doc, lay);
+    drawPage(page, regular, bold, doc, lay, logo);
   }
   return pdf.save();
 }
