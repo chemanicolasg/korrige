@@ -47,6 +47,8 @@ function seedTables(): Tables {
 
 // --- imágenes en IndexedDB (con respaldo en memoria si no está disponible) ---
 const memImages = new Map<string, Blob>();
+/** true tras resetLocalDemo(): las instancias vivas dejan de guardar. */
+let wiped = false;
 function idb(): Promise<IDBDatabase | null> {
   return new Promise((resolve) => {
     if (typeof indexedDB === 'undefined') return resolve(null);
@@ -67,6 +69,7 @@ async function idbOp<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDB
 }
 
 export function createLocalDb(opts: { persist?: boolean } = {}): Db {
+  wiped = false;
   const persist = opts.persist ?? typeof localStorage !== 'undefined';
   let tables: Tables;
   try {
@@ -90,6 +93,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
   const flush = () => {
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = null;
+    if (wiped) return;
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(tables));
     } catch {
@@ -102,7 +106,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     saveTimer = setTimeout(flush, 150);
   };
   // que no se pierda la última escritura si se recarga o se cierra la pestaña
-  if (persist && typeof addEventListener === 'function') addEventListener('pagehide', () => saveTimer && flush());
+  if (persist && typeof addEventListener === 'function') addEventListener('pagehide', () => saveTimer && !wiped && flush());
   const setUser = (u: SessionUser | null) => {
     user = u;
     try {
@@ -334,9 +338,30 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
   return db;
 }
 
+const SEEDED_KEY = 'korrige-demo-ready';
+
+/** Id del examen de ejemplo si la demo terminó de crearse; null si nunca se creó o quedó a medias. */
+export function demoReadyExam(): string | null {
+  try {
+    return localStorage.getItem(SEEDED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function markDemoReady(examId: string) {
+  try {
+    localStorage.setItem(SEEDED_KEY, examId);
+  } catch {
+    /* nada */
+  }
+}
+
 /** Borra todos los datos del modo demo de este navegador. */
 export async function resetLocalDemo() {
+  wiped = true;
   try {
+    localStorage.removeItem(SEEDED_KEY);
     localStorage.removeItem(STORE_KEY);
   } catch {
     /* nada */

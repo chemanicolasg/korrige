@@ -16,8 +16,12 @@ export async function testApp(baseUrl, outDir) {
   };
   try {
     // 1) la demo crea el examen de ejemplo leyendo 34 hojas "escaneadas" en el worker
+    //    (antes se interrumpe la carga a medias: la demo incompleta debe descartarse y rehacerse)
+    await page.goto(`${baseUrl}/demo`);
+    await page.waitForTimeout(2500);
     await page.goto(`${baseUrl}/demo`);
     await page.waitForURL(/\/app\/examenes\/.+\/resumen/, { timeout: 180_000 });
+    await page.getByText('Con resultados').first().waitFor();
     await page.getByRole('heading', { name: 'Siguientes pasos' }).waitFor();
     await shot('01-resumen');
 
@@ -99,6 +103,15 @@ export async function testApp(baseUrl, outDir) {
     await page.getByRole('button', { name: 'Crear examen' }).click();
     await page.waitForURL(/\/hoja$/);
     await page.locator('[data-testid=pdf-preview] canvas').first().waitFor({ timeout: 30_000 });
+
+    // 9) reiniciar la demo desde el aviso superior vuelve a crear el examen de ejemplo
+    page.once('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: 'Reiniciar demo' }).click();
+    await page.waitForURL(/\/app\/examenes\/.+\/resumen/, { timeout: 180_000 });
+    await page.getByText('Con resultados').first().waitFor();
+    await page.getByRole('link', { name: 'Exámenes' }).first().click();
+    await page.getByRole('link', { name: /Anatomía I/ }).waitFor();
+    assert.equal(await page.getByRole('link', { name: /Bioquímica/ }).count(), 0, 'el reinicio borra lo anterior');
 
     assert.deepEqual(errors, [], 'errores de consola');
     return `${filas} notas, ${inicial} incidencias`;

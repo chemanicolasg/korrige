@@ -110,7 +110,18 @@ export default function AppShell() {
       {db.kind === 'local' && (
         <div className="border-b border-amber-200 bg-amber-50">
           <div className="mx-auto max-w-7xl px-4 py-2 text-sm text-amber-900">
-            <b>Modo demo.</b> Todo se guarda únicamente en este navegador; no hay servidor ni cuentas reales.
+            <b>Modo demo.</b> Todo se guarda únicamente en este navegador; no hay servidor ni cuentas reales.{' '}
+            <button
+              className="font-semibold underline underline-offset-2"
+              onClick={async () => {
+                if (!confirm('¿Reiniciar la demo? Se borrará lo que hayas hecho en ella y se volverá a crear el examen de ejemplo.')) return;
+                const { resetLocalDemo } = await import('../lib/dbLocal');
+                await resetLocalDemo();
+                location.href = '/demo';
+              }}
+            >
+              Reiniciar demo
+            </button>
           </div>
         </div>
       )}
