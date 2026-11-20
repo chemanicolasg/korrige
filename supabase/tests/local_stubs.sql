@@ -45,3 +45,6 @@ create table if not exists storage.objects (
 alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated, service_role;
 grant all on storage.objects, storage.buckets to anon, authenticated, service_role;
+
+-- Como en Supabase: las funciones nuevas de public nacen ejecutables por anon/authenticated
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;

@@ -6,7 +6,7 @@ import { SalesForm } from './SalesForm';
 
 const Mark = () => (
   <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-    <rect width="32" height="32" rx="7" fill="#1d36bd" />
+    <rect width="32" height="32" rx="7" fill="#111111" />
     <circle cx="10" cy="16" r="4" fill="none" stroke="#fff" strokeWidth="2" />
     <circle cx="22" cy="16" r="5" fill="#fff" />
   </svg>
@@ -69,29 +69,29 @@ function HeroArt() {
               {r + 1}
             </text>
             {[0, 1, 2, 3].map((c) => (
-              <circle key={c} cx={24 + c * 20} cy="2" r="7" fill={marks[r] === c ? '#1e3a8a' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
+              <circle key={c} cx={24 + c * 20} cy="2" r="7" fill={marks[r] === c ? '#2b3542' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
             ))}
             {[0, 1, 2, 3].map((c) => (
-              <circle key={c} cx={128 + c * 20} cy="2" r="7" fill={marks[(r + 4) % 9] === c ? '#1e3a8a' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
+              <circle key={c} cx={128 + c * 20} cy="2" r="7" fill={marks[(r + 4) % 9] === c ? '#2b3542' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
             ))}
           </g>
         ))}
       </g>
-      <path d="M286 200 h44" stroke="#2546e0" strokeWidth="3" strokeLinecap="round" />
-      <path d="m322 190 12 10-12 10" fill="none" stroke="#2546e0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M286 200 h44" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
+      <path d="m322 190 12 10-12 10" fill="none" stroke="#111111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       <g filter="url(#sh)">
         <rect x="346" y="70" width="160" height="250" rx="12" fill="#fff" />
-        <rect x="346" y="70" width="160" height="38" rx="12" fill="#1d36bd" />
-        <rect x="346" y="96" width="160" height="12" fill="#1d36bd" />
+        <rect x="346" y="70" width="160" height="38" rx="12" fill="#111111" />
+        <rect x="346" y="96" width="160" height="12" fill="#111111" />
         <text x="360" y="94" fontSize="12" fontWeight="700" fill="#fff">
           Notas · 148 alumnos
         </text>
         {[
-          ['García, L.', '8,75', '#16a34a'],
-          ['Martí, P.', '6,50', '#16a34a'],
-          ['Roca, A.', '4,25', '#94a3b8'],
-          ['Soler, M.', '9,25', '#16a34a'],
-          ['Vidal, J.', '7,00', '#16a34a'],
+          ['García, L.', '8,75', '#6b8093'],
+          ['Martí, P.', '6,50', '#6b8093'],
+          ['Roca, A.', '4,25', '#d8ccc2'],
+          ['Soler, M.', '9,25', '#6b8093'],
+          ['Vidal, J.', '7,00', '#6b8093'],
         ].map(([n, g, c], i) => (
           <g key={n} transform={`translate(360 ${130 + i * 26})`}>
             <text fontSize="11" fill="#334155">
@@ -106,13 +106,13 @@ function HeroArt() {
         ))}
         <g transform="translate(360 268)">
           {[10, 16, 24, 34, 28, 18, 9].map((h, i) => (
-            <rect key={i} x={i * 19} y={36 - h} width="15" height={h} rx="2" fill={i < 2 ? '#94a3b8' : '#2546e0'} />
+            <rect key={i} x={i * 19} y={36 - h} width="15" height={h} rx="2" fill={i < 2 ? '#bdb8b0' : '#3f5062'} />
           ))}
         </g>
       </g>
       <g transform="translate(268 300)">
-        <rect width="150" height="34" rx="17" fill="#fef3c7" stroke="#f59e0b" />
-        <text x="75" y="21" textAnchor="middle" fontSize="11" fontWeight="600" fill="#92400e">
+        <rect width="150" height="34" rx="17" fill="#f3f1ee" stroke="#d8ccc2" />
+        <text x="75" y="21" textAnchor="middle" fontSize="11" fontWeight="600" fill="#5b2a3a">
           3 marcas por revisar
         </text>
       </g>
@@ -122,9 +122,9 @@ function HeroArt() {
 
 function Section({ id, title, subtitle, children, tone = 'white' }: { id?: string; title: string; subtitle?: string; children: ReactNode; tone?: 'white' | 'soft' }) {
   return (
-    <section id={id} className={`scroll-mt-20 py-16 sm:py-20 ${tone === 'soft' ? 'bg-slate-50' : 'bg-white'}`}>
+    <section id={id} className={`scroll-mt-20 py-16 sm:py-20 ${tone === 'soft' ? 'bg-bone-100' : 'bg-bone-50'}`}>
       <div className="mx-auto max-w-6xl px-5">
-        <h2 className="max-w-3xl text-3xl font-semibold text-slate-900 sm:text-4xl">{title}</h2>
+        <h2 className="display max-w-3xl text-3xl font-medium text-ink sm:text-4xl">{title}</h2>
         {subtitle && <p className="mt-3 max-w-2xl text-lg text-slate-600">{subtitle}</p>}
         <div className="mt-10">{children}</div>
       </div>
@@ -150,17 +150,17 @@ export default function Landing() {
     ['#privacidad', t.nav.privacy],
     ['#faq', t.nav.faq],
   ];
-  const primary = 'inline-flex items-center justify-center rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800';
-  const secondary = 'inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50';
+  const primary = 'inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-800';
+  const secondary = 'inline-flex items-center justify-center rounded-full border border-ink/25 bg-transparent px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white';
 
   return (
-    <div className="bg-white text-slate-800">
+    <div className="bg-bone-50 text-slate-800">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
         Saltar al contenido
       </a>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-bone-200 bg-bone-50/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-5 py-3">
-          <a href="#top" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
+          <a href="#top" className="wordmark flex items-center gap-2 text-xl text-ink">
             <Mark /> {APP_NAME}
           </a>
           <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 lg:flex" aria-label="Secciones">
@@ -191,7 +191,7 @@ export default function Landing() {
             <Link to="/acceso" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:inline-flex">
               {t.nav.login}
             </Link>
-            <a href="#ventas" className="inline-flex rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-800">
+            <a href="#ventas" className="inline-flex rounded-full bg-ink px-5 py-2 text-sm font-semibold text-white hover:bg-brand-800">
               {t.nav.sales}
             </a>
             <button className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Menú" aria-expanded={menu} onClick={() => setMenu(!menu)}>
@@ -214,11 +214,11 @@ export default function Landing() {
 
       <main id="contenido">
         {/* 1. Hero */}
-        <section id="top" className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
+        <section id="top" className="relative overflow-hidden bg-bone-100">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-14 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-20">
             <div>
-              <p className="inline-flex rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-800">{t.hero.kicker}</p>
-              <h1 className="mt-5 text-4xl font-semibold leading-[1.1] text-slate-900 sm:text-5xl">{t.hero.title}</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">{t.hero.kicker}</p>
+              <h1 className="display mt-5 text-4xl font-medium leading-[1.08] text-ink sm:text-[3.25rem]">{t.hero.title}</h1>
               <p className="mt-5 max-w-xl text-lg text-slate-600">{t.hero.subtitle}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a href="#ventas" className={primary}>
@@ -236,7 +236,7 @@ export default function Landing() {
                 {t.hero.stats.map(([v, l]) => (
                   <div key={l}>
                     <dt className="sr-only">{l}</dt>
-                    <dd className="text-2xl font-semibold text-slate-900">{v}</dd>
+                    <dd className="display text-2xl font-medium text-ink">{v}</dd>
                     <dd className="text-xs text-slate-500">{l}</dd>
                   </div>
                 ))}
@@ -250,23 +250,23 @@ export default function Landing() {
         <Section title={t.problem.title} subtitle={t.problem.intro} tone="soft">
           <div className="grid gap-5 md:grid-cols-3">
             {t.problem.cards.map(([title, text]) => (
-              <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6">
+              <div key={title} className="rounded-2xl border border-bone-200 bg-white p-6">
                 <h3 className="font-semibold text-slate-900">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{text}</p>
               </div>
             ))}
           </div>
-          <p className="mt-8 max-w-3xl border-l-4 border-brand-600 pl-4 text-lg font-medium text-slate-800">{t.problem.after}</p>
+          <p className="mt-8 max-w-3xl border-l-2 border-ink pl-5 text-lg font-medium text-ink">{t.problem.after}</p>
         </Section>
 
         {/* 3. Cómo funciona */}
         <Section id="como-funciona" title={t.how.title} subtitle={t.how.subtitle}>
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {t.how.steps.map(([title, text], i) => (
-              <li key={title} className="relative rounded-2xl border border-slate-200 p-6">
+              <li key={title} className="relative rounded-2xl border border-bone-200 bg-white p-6">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">{stepIcons[i]}</span>
-                  <span className="text-sm font-semibold text-brand-700">Paso {i + 1}</span>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-bone-200 text-ink">{stepIcons[i]}</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Paso {i + 1}</span>
                 </div>
                 <h3 className="mt-4 font-semibold text-slate-900">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{text}</p>
@@ -280,7 +280,7 @@ export default function Landing() {
           <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
             {t.features.items.map(([title, text], i) => (
               <div key={title}>
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-brand-700 shadow-sm ring-1 ring-slate-200">{featureIcons[i]}</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink ring-1 ring-bone-300">{featureIcons[i]}</span>
                 <h3 className="mt-3 font-semibold text-slate-900">{title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{text}</p>
               </div>
@@ -292,8 +292,8 @@ export default function Landing() {
         <Section id="privacidad" title={t.privacy.title} subtitle={t.privacy.subtitle}>
           <div className="grid gap-5 sm:grid-cols-2">
             {t.privacy.items.map(([title, text], i) => (
-              <div key={title} className="flex gap-4 rounded-2xl border border-slate-200 p-6">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">{privacyIcons[i]}</span>
+              <div key={title} className="flex gap-4 rounded-2xl border border-bone-200 bg-white p-6">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-800">{privacyIcons[i]}</span>
                 <div>
                   <h3 className="font-semibold text-slate-900">{title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{text}</p>
@@ -305,7 +305,7 @@ export default function Landing() {
 
         {/* 6. FAQ */}
         <Section id="faq" title={t.faq.title} tone="soft">
-          <div className="max-w-3xl divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+          <div className="max-w-3xl divide-y divide-bone-200 rounded-2xl border border-bone-200 bg-white">
             {t.faq.items.map(([q, a]) => (
               <details key={q} className="group px-6 py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-slate-900">
@@ -321,22 +321,22 @@ export default function Landing() {
         </Section>
 
         {/* 7. Hablar con ventas */}
-        <section id="ventas" className="scroll-mt-16 bg-brand-950 py-16 text-white sm:py-20">
+        <section id="ventas" className="scroll-mt-16 bg-ink py-16 text-white sm:py-20">
           <div className="mx-auto grid max-w-6xl gap-10 px-5 lg:grid-cols-[1fr_1.2fr]">
             <div>
-              <h2 className="text-3xl font-semibold sm:text-4xl">{t.sales.title}</h2>
-              <p className="mt-4 text-lg text-brand-100">{t.sales.subtitle}</p>
+              <h2 className="display text-3xl font-medium sm:text-4xl">{t.sales.title}</h2>
+              <p className="mt-4 text-lg text-bone-200">{t.sales.subtitle}</p>
               <ul className="mt-6 space-y-3">
                 {t.sales.bullets.map((b) => (
-                  <li key={b} className="flex items-center gap-3 text-brand-50">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-sm" aria-hidden>
+                  <li key={b} className="flex items-center gap-3 text-bone-100">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-sm" aria-hidden>
                       ✓
                     </span>
                     {b}
                   </li>
                 ))}
               </ul>
-              <p className="mt-8 text-sm text-brand-200">
+              <p className="mt-8 text-sm text-bone-400">
                 ¿Prefieres escribirnos?{' '}
                 <a className="font-semibold text-white underline" href={`mailto:${SALES_EMAIL}`}>
                   {SALES_EMAIL}
@@ -347,10 +347,10 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="bg-white py-14">
+        <section className="bg-bone-50 py-14">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">{t.cta.title}</h2>
+              <h2 className="display text-2xl font-medium text-ink">{t.cta.title}</h2>
               <p className="mt-1 text-slate-600">{t.cta.text}</p>
             </div>
             <div className="flex gap-3">
@@ -366,10 +366,10 @@ export default function Landing() {
       </main>
 
       {/* 8. Pie */}
-      <footer className="border-t border-slate-200 bg-slate-50">
+      <footer className="border-t border-bone-200 bg-bone-100">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <div className="wordmark flex items-center gap-2 text-xl text-ink">
               <Mark /> {APP_NAME}
             </div>
             <p className="mt-2 text-sm text-slate-600">{t.footer.tagline}</p>

@@ -69,7 +69,7 @@ export function SheetOverlay({
           width={hlPts[hlPts.length - 1][0] - hlPts[0][0] + 12.5}
           height={5.6}
           fill="none"
-          stroke="#2546e0"
+          stroke="#3f5062"
           strokeWidth={0.4}
           rx={1}
         />

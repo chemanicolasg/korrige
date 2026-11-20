@@ -66,7 +66,7 @@ export default function Login() {
   const needsPassword = mode === 'entrar' || mode === 'crear' || mode === 'nueva';
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-10">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-bone-100 px-4 py-10">
       <Link to="/" className="mb-6 text-xl">
         <Logo />
       </Link>

@@ -4,14 +4,17 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Identidad visual: neutros cálidos (hueso/piedra), negro y azul empolvado
         brand: {
-          50: '#eef4ff', 100: '#dbe6ff', 200: '#bfd2ff', 300: '#93b2ff', 400: '#6088fb',
-          500: '#3b63f3', 600: '#2546e0', 700: '#1d36bd', 800: '#1c3096', 900: '#1b2d75', 950: '#131c47',
+          50: '#f2f5f7', 100: '#e3e9ee', 200: '#c9d4dd', 300: '#a5b6c4', 400: '#879bad',
+          500: '#6b8093', 600: '#556879', 700: '#3f5062', 800: '#2b3542', 900: '#1f2731', 950: '#14191f',
         },
-        ink: '#0f172a',
+        bone: { 50: '#faf9f7', 100: '#f3f1ee', 200: '#e7e3de', 300: '#d8ccc2', 400: '#afadab' },
+        ink: '#111111',
+        wine: '#5b2a3a',
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: ['"Archivo Variable"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },

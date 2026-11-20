@@ -37,7 +37,7 @@ export default function Demo() {
     })();
   }, []);
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 p-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bone-100 p-6 text-center">
       <Logo className="text-xl" />
       {error ? (
         <p className="max-w-md text-sm text-red-700">No se pudo preparar la demo: {error}</p>

@@ -41,6 +41,16 @@ Donde el encargo era ambiguo se ha elegido la opción más simple que cumple el 
 26. **Sin cookies de analítica**, así que no hay banner de cookies; la página de cookies describe el almacenamiento técnico.
 27. **Textos comerciales por validar:** «≈ 1 s por hoja», «100 hojas por minuto», «respondemos en un día laborable», «piloto gratuito» y «formación incluida» son propuestas de redacción en `src/i18n/es.ts`; ajustadlas a vuestra oferta real. Los textos legales son plantillas marcadas como pendientes de revisión legal.
 
-## Pendiente de verificar contra un proyecto real
+28. **Identidad visual.** Se ha tomado como referencia el lenguaje visual del branding «Concept C» que aportaste: neutros cálidos (hueso y piedra), negro, azul empolvado como acento, titulares en una grotesca extendida y botones en píldora. Solo se ha adoptado el estilo (paleta y tipografía, definidas en `tailwind.config.js` y `src/index.css`); no se usan su logotipo, su nombre ni sus fotografías. La tipografía es Archivo (variable, licencia OFL) servida desde el propio sitio, sin llamadas a Google Fonts.
 
-El esquema, las políticas RLS y las funciones SQL están probados contra PostgreSQL 16 con una imitación de `auth`/`storage`; la aplicación completa está probada en Chromium contra la capa local. **No se ha ejecutado todavía contra un proyecto de Supabase real** (ni las Edge Functions en Deno, ni el envío con Resend). La primera prueba recomendada tras desplegar es `npm run seed:demo`, que recorre todo el flujo con un usuario real y RLS.
+## Verificado contra el proyecto real de Supabase
+
+Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado el 20/11/2026:
+
+- Las 5 migraciones están aplicadas y las dos Edge Functions desplegadas.
+- `npm run seed:demo` se ejecutó con la sesión del profesor demo (RLS real): organización, examen, 34 imágenes en Storage, 31 notas y 7 incidencias.
+- En Chromium contra ese proyecto: acceso con contraseña, imágenes con URL firmada, corrección en la cola de revisión, registro de actividad y página de organización, sin errores de consola.
+- `sales-lead` guarda el lead (200), rechaza un email inválido (422) y `retention-purge` responde 403 sin secreto.
+- El linter de seguridad de Supabase detectó que los usuarios autenticados podían ejecutar por RPC funciones internas (p. ej. `mark_images_purged`), porque Supabase concede EXECUTE por defecto. Se corrigió con la migración `20261120100400_harden_functions.sql` y hay tests que lo cubren.
+
+**Sigue sin probar:** el envío real con Resend (falta `RESEND_API_KEY`), el enlace mágico y los correos de confirmación (dependen de la configuración de Auth/SMTP), la ejecución programada de `retention-purge` y el despliegue en Netlify.

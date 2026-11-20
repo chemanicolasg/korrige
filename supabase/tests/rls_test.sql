@@ -154,6 +154,9 @@ select tests.throws($$select * from public.org_usage('0a000000-0000-0000-0000-00
 select tests.throws($$insert into public.memberships (org_id, user_id, role) values ('0a000000-0000-0000-0000-000000000000', 'b0000000-0000-0000-0000-000000000002', 'admin')$$, 'nadie puede darse de alta en otra organización');
 select tests.throws($$insert into public.invitations (org_id, email, invited_by) values ('0a000000-0000-0000-0000-000000000000', 'bruno@b.test', 'b0000000-0000-0000-0000-000000000002')$$, 'Bruno no puede invitar en A');
 select tests.throws('select * from public.sales_leads', 'un profesor no ve los leads de ventas');
+select tests.throws($$select public.mark_images_purged('e1000000-0000-0000-0000-000000000000')$$, 'las funciones internas no se pueden llamar por RPC (purga de imágenes)');
+select tests.throws($$select * from public.exams_due_for_purge()$$, 'las funciones internas no se pueden llamar por RPC (retención)');
+select tests.throws($$select public.gen_exam_code()$$, 'las funciones internas no se pueden llamar por RPC (utilidades)');
 
 -- ---------------------------------------------------------------------------
 -- 3. Dentro de la organización: profesor ≠ propietario

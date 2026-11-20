@@ -2,8 +2,6 @@
 -- Multi-organización: todo cuelga de organizations; los datos de un examen
 -- (hojas, notas, alumnos…) llevan org_id y exam_id para las políticas RLS.
 
-create extension if not exists pgcrypto;
-
 create type public.org_role as enum ('admin', 'profesor');
 create type public.exam_status as enum ('borrador', 'hojas_descargadas', 'con_resultados', 'cerrado');
 
@@ -283,7 +281,7 @@ begin
   loop
     candidate := '';
     for i in 1..8 loop
-      candidate := candidate || substr(alphabet, 1 + (get_byte(gen_random_bytes(1), 0) % 32), 1);
+      candidate := candidate || substr(alphabet, 1 + floor(random() * 32)::int, 1);
     end loop;
     exit when not exists (select 1 from public.exams where code = candidate);
   end loop;

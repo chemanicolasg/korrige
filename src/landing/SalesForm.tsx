@@ -143,7 +143,7 @@ export function SalesForm({ t, locale }: { t: Dict['sales']; locale: string }) {
         </p>
       )}
       <button
-        className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
+        className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
         disabled={state === 'sending'}
       >
         {state === 'sending' ? t.sending : t.submit}

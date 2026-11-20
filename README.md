@@ -47,7 +47,7 @@ Abre http://localhost:5173.
 | Comando | Qué comprueba |
 |---|---|
 | `npm test` | Motor OMR (**test de aceptación** contra `referencia/salida_referencia.json`, generado con `lector.py`), generador de hoja, corrección, estadísticas, cola de revisión, flujo completo del profesor y formulario de ventas |
-| `npm run test:rls` | Aplica las migraciones a un PostgreSQL local desechable y ejecuta ~90 comprobaciones de RLS (`supabase/tests/rls_test.sql`) |
+| `npm run test:rls` | Aplica las migraciones a un PostgreSQL local desechable y ejecuta ~95 comprobaciones de RLS (`supabase/tests/rls_test.sql`) |
 | `npm run test:e2e` | Chromium real (Playwright): lector en Web Worker con el escaneo de la Xerox, app completa en modo demo y landing |
 | `npm run typecheck` | TypeScript |
 
@@ -82,6 +82,17 @@ supabase db push
 5. Copia `Project URL` y la clave `anon` (Project Settings → API) a `.env` como `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
 
 El bucket privado `sheets` (imágenes JPEG de las hojas) y sus políticas se crean con las migraciones. Las rutas son `<org_id>/<exam_id>/<subida>/<n>.jpg`.
+
+### Proyecto ya creado
+
+El proyecto de producción ya existe: **Korrige** (`cjjwxnotywppigmdrkyq`, eu-west-3), con las migraciones aplicadas y las funciones `sales-lead` y `retention-purge` desplegadas. Sus valores públicos:
+
+```
+VITE_SUPABASE_URL=https://cjjwxnotywppigmdrkyq.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_65ji7I3-3JozVXaraFjbsQ_BSjOvVqw
+```
+
+Quedan por hacer a mano en el panel: la configuración de Auth del paso 4 (URLs, SMTP y, recomendado, *Leaked password protection*), los secretos de Resend y programar `retention-purge`. Tiene un profesor de demostración (`demo@korrige.es`) con un examen de ejemplo.
 
 ## 4. Resend: verificar korrige.es y secretos
 
@@ -139,7 +150,7 @@ Si cambias el nombre o el dominio: edita `src/config.ts`, los metadatos de `inde
 SUPABASE_URL=https://TU-PROYECTO.supabase.co SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... DEMO_PASSWORD='una-contraseña' npm run seed:demo
 ```
 
-El script crea el usuario con la clave `service_role` y hace todo lo demás con la sesión de ese profesor, es decir, a través de las políticas RLS: sirve también como prueba de humo del despliegue.
+Sin `SUPABASE_SERVICE_ROLE_KEY` el script usa un usuario que ya exista (`DEMO_EMAIL` + `DEMO_PASSWORD`). Con ella, crea el usuario con la clave `service_role` y hace todo lo demás con la sesión de ese profesor, es decir, a través de las políticas RLS: sirve también como prueba de humo del despliegue.
 
 ## 7. Estructura
 

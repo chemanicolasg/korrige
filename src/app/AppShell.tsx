@@ -55,7 +55,7 @@ export default function AppShell() {
 
   const nav = ({ isActive }: { isActive: boolean }) => `rounded-md px-3 py-1.5 text-sm font-medium ${isActive ? 'bg-brand-50 text-brand-800' : 'text-slate-600 hover:bg-slate-100'}`;
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-bone-50">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
         Saltar al contenido
       </a>
