@@ -15,12 +15,21 @@ export const es = {
   },
   problem: {
     title: 'Corregir tests no debería llevarte la tarde',
-    intro: 'Hoy un examen tipo test de 150 alumnos se corrige de una de estas dos formas. Ninguna es buena.',
+    intro: 'Hoy un examen tipo test de 150 alumnos se corrige de una de estas tres formas. Ninguna es buena.',
     cards: [
       ['A mano, con plantilla perforada', 'Horas de trabajo mecánico, errores al sumar y ninguna estadística de las preguntas. Y si hay que anular una, vuelta a empezar.'],
       ['Con apps de móvil, foto a foto', 'Una foto por hoja, con buena luz y buen pulso. Con 150 hojas son 150 fotos, y los datos acaban en el móvil personal de cada profesor.'],
       ['Con lectoras ópticas dedicadas', 'Máquinas caras, hojas preimpresas de proveedor y un único puesto en toda la facultad por el que hay que pasar.'],
     ],
+    table: {
+      head: ['', 'A mano', 'App de móvil', 'Lectora óptica', 'Korrige'],
+      rows: [
+        ['Cómo se leen 150 hojas', 'Una a una, con plantilla', 'Una foto por hoja', 'En la máquina dedicada', 'Un escaneo del taco entero'],
+        ['Qué hay que comprar', 'Nada', 'Nada', 'Lectora y hojas del proveedor', 'Nada: la fotocopiadora que ya hay'],
+        ['Dónde quedan los datos', 'En papel', 'En el móvil de cada profesor', 'En el puesto de la lectora', 'En la organización, con acceso por profesor'],
+        ['Si se anula una pregunta', 'Se vuelve a corregir', 'Depende de la app', 'Depende del equipo', 'Se recalcula todo al instante'],
+      ],
+    },
     after: 'La multifunción del pasillo ya escanea 100 hojas por minuto y te las envía por correo en un PDF. Solo faltaba quien las leyera.',
   },
   how: {

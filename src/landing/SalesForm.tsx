@@ -67,7 +67,7 @@ export function SalesForm({ t, locale }: { t: Dict['sales']; locale: string }) {
 
   if (state === 'ok') {
     return (
-      <div className="flex h-full min-h-72 flex-col items-center justify-center rounded-2xl bg-white p-8 text-center shadow-xl" role="status" data-testid="sales-ok">
+      <div className="flex h-full min-h-72 flex-col items-center justify-center bg-white p-8 text-center" role="status" data-testid="sales-ok">
         <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700" aria-hidden>
           ✓
         </span>
@@ -76,10 +76,10 @@ export function SalesForm({ t, locale }: { t: Dict['sales']; locale: string }) {
       </div>
     );
   }
-  const field = 'mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200';
+  const field = 'mt-1 block w-full rounded-md border border-bone-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200';
   const label = 'block text-sm font-medium text-slate-700';
   return (
-    <form onSubmit={submit} noValidate className="rounded-2xl bg-white p-6 shadow-xl sm:p-8" data-testid="sales-form">
+    <form onSubmit={submit} noValidate className="bg-white p-5 sm:p-7" data-testid="sales-form">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={label}>
           {t.name} *
@@ -143,7 +143,7 @@ export function SalesForm({ t, locale }: { t: Dict['sales']; locale: string }) {
         </p>
       )}
       <button
-        className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
+        className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
         disabled={state === 'sending'}
       >
         {state === 'sending' ? t.sending : t.submit}

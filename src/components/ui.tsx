@@ -102,15 +102,15 @@ export const fmtDateTime = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 export const fmtNum = (n: number, decimals = 2) => n.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
+/** Logotipo: la «o» es una burbuja de la hoja rellenada con boli azul. */
 export function Logo({ className = '' }: { className?: string }) {
   return (
-    <span className={`wordmark inline-flex items-center gap-2 ${className}`}>
-      <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden>
-        <rect width="32" height="32" rx="7" fill="#111111" />
-        <circle cx="10" cy="16" r="4" fill="none" stroke="#fff" strokeWidth="2" />
-        <circle cx="22" cy="16" r="5" fill="#fff" />
+    <span className={`wordmark inline-flex items-baseline text-ink ${className}`} role="img" aria-label="Korrige">
+      <span aria-hidden>k</span>
+      <svg viewBox="0 0 20 20" className="mx-[0.04em] h-[0.62em] w-[0.62em] translate-y-[0.02em]" aria-hidden>
+        <circle cx="10" cy="10" r="8.4" fill="#2439b0" stroke="#d6336c" strokeWidth="2.2" />
       </svg>
-      Korrige
+      <span aria-hidden>rrige</span>
     </span>
   );
 }

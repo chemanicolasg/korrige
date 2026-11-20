@@ -4,17 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Identidad visual: neutros cálidos (hueso/piedra), negro y azul empolvado
+        // Identidad visual: papel blanco, azul de bolígrafo y el rosa de las burbujas de la hoja
         brand: {
-          50: '#f2f5f7', 100: '#e3e9ee', 200: '#c9d4dd', 300: '#a5b6c4', 400: '#879bad',
-          500: '#6b8093', 600: '#556879', 700: '#3f5062', 800: '#2b3542', 900: '#1f2731', 950: '#14191f',
+          50: '#eff3ff', 100: '#dfe7ff', 200: '#c3d1ff', 300: '#9bb0fb', 400: '#6f88f1',
+          500: '#4a66e3', 600: '#314bd0', 700: '#2439b0', 800: '#1f318d', 900: '#1c2c70', 950: '#121a43',
         },
-        bone: { 50: '#faf9f7', 100: '#f3f1ee', 200: '#e7e3de', 300: '#d8ccc2', 400: '#afadab' },
-        ink: '#111111',
-        wine: '#5b2a3a',
+        bone: { 50: '#ffffff', 100: '#f8f7f3', 200: '#ece9e1', 300: '#dbd6ca', 400: '#a7a297' },
+        ink: '#14161b',
+        rose: { 100: '#fde8ef', 300: '#f3a3bd', 500: '#d6336c', 700: '#a8204f' },
       },
       fontFamily: {
         sans: ['"Archivo Variable"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        serif: ['"Fraunces Variable"', 'Georgia', 'Cambria', 'serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
   },

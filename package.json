@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "@supabase/supabase-js": "^2.119.2",
     "@techstark/opencv-js": "^5.0.0-release.1",
     "jsqr": "^1.4.0",

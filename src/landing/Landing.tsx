@@ -1,134 +1,62 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { APP_NAME, CONTACT_EMAIL, SALES_EMAIL } from '../config';
+import { CONTACT_EMAIL, SALES_EMAIL } from '../config';
+import { Logo } from '../components/ui';
 import { ENABLED_LOCALES, LOCALE_NAMES, Locale, detectLocale, getDict } from '../i18n';
 import { SalesForm } from './SalesForm';
 
-const Mark = () => (
-  <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-    <rect width="32" height="32" rx="7" fill="#111111" />
-    <circle cx="10" cy="16" r="4" fill="none" stroke="#fff" strokeWidth="2" />
-    <circle cx="22" cy="16" r="5" fill="#fff" />
-  </svg>
-);
+/**
+ * Landing. El lenguaje visual sale del propio producto: papel blanco, azul de
+ * bolígrafo, el rosa de las burbujas de la hoja y las marcas negras de esquina.
+ * Las imágenes son capturas reales de la aplicación (scripts/capture-shots.mjs).
+ */
 
-const icon = (d: string) => (
-  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d={d} />
-  </svg>
-);
-const ICONS = {
-  sheet: icon('M7 3h8l4 4v14H7zM15 3v4h4M10 12h.01M13 12h.01M16 12h.01M10 16h.01M13 16h.01M16 16h.01'),
-  print: icon('M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3M7 14h10v7H7z'),
-  scan: icon('M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16'),
-  chart: icon('M4 20V10M10 20V4M16 20v-7M21 20H3'),
-  models: icon('M8 4h11v13M5 7h11v13H5z'),
-  minus: icon('M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M8 12h8'),
-  eye: icon('M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6'),
-  export: icon('M12 3v12M8 11l4 4 4-4M5 21h14'),
-  log: icon('M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01'),
-  team: icon('M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M21 19v-1a3 3 0 0 0-3-3M3 19v-1a3 3 0 0 1 3-3'),
-  hash: icon('M5 9h14M5 15h14M10 4 8 20M16 4l-2 16'),
-  laptop: icon('M5 5h14v10H5zM3 19h18'),
-  eu: icon('M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'),
-  lock: icon('M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z'),
-  shield: icon('M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6zM9 12l2 2 4-4'),
-};
-
-/** Ilustración del hero: la hoja de respuestas y lo que sale de ella. */
-function HeroArt() {
-  const rows = Array.from({ length: 9 }, (_, r) => r);
-  const marks = [1, 2, 3, 0, 1, 3, 2, 1, 0];
+/** Las cuatro marcas negras de esquina de la hoja, como marco. */
+function CornerMarks({ size = 10, inset = 10 }: { size?: number; inset?: number }) {
+  const s = { width: size, height: size };
   return (
-    <svg viewBox="0 0 520 400" className="w-full" role="img" aria-label="Una hoja de respuestas escaneada se convierte en una tabla de notas">
-      <defs>
-        <filter id="sh" x="-10%" y="-10%" width="120%" height="130%">
-          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#0f172a" floodOpacity="0.14" />
-        </filter>
-      </defs>
-      <g filter="url(#sh)" transform="rotate(-4 150 200)">
-        <rect x="30" y="26" width="236" height="334" rx="6" fill="#fff" />
-        {[
-          [44, 40],
-          [240, 40],
-          [44, 334],
-          [240, 334],
-        ].map(([x, y]) => (
-          <rect key={`${x}-${y}`} x={x} y={y} width="12" height="12" fill="#0f172a" />
-        ))}
-        <rect x="66" y="42" width="96" height="7" rx="2" fill="#0f172a" />
-        <rect x="66" y="55" width="70" height="4" rx="2" fill="#cbd5e1" />
-        <g transform="translate(196 62)" fill="#0f172a">
-          <rect width="32" height="32" fill="#fff" />
-          {[0, 1, 2, 3, 4, 5, 6, 7].flatMap((i) => [0, 1, 2, 3, 4, 5, 6, 7].map((j) => ((i * 7 + j * 5 + i * j) % 3 === 0 ? <rect key={`${i}${j}`} x={i * 4} y={j * 4} width="4" height="4" /> : null)))}
-        </g>
-        <rect x="52" y="106" width="192" height="1" fill="#0f172a" />
-        {rows.map((r) => (
-          <g key={r} transform={`translate(58 ${124 + r * 22})`}>
-            <text x="0" y="5" fontSize="9" fontWeight="700" fill="#0f172a">
-              {r + 1}
-            </text>
-            {[0, 1, 2, 3].map((c) => (
-              <circle key={c} cx={24 + c * 20} cy="2" r="7" fill={marks[r] === c ? '#2b3542' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
-            ))}
-            {[0, 1, 2, 3].map((c) => (
-              <circle key={c} cx={128 + c * 20} cy="2" r="7" fill={marks[(r + 4) % 9] === c ? '#2b3542' : '#fff'} stroke="#cc3359" strokeWidth="1.2" />
-            ))}
-          </g>
-        ))}
-      </g>
-      <path d="M286 200 h44" stroke="#111111" strokeWidth="3" strokeLinecap="round" />
-      <path d="m322 190 12 10-12 10" fill="none" stroke="#111111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <g filter="url(#sh)">
-        <rect x="346" y="70" width="160" height="250" rx="12" fill="#fff" />
-        <rect x="346" y="70" width="160" height="38" rx="12" fill="#111111" />
-        <rect x="346" y="96" width="160" height="12" fill="#111111" />
-        <text x="360" y="94" fontSize="12" fontWeight="700" fill="#fff">
-          Notas · 148 alumnos
-        </text>
-        {[
-          ['García, L.', '8,75', '#6b8093'],
-          ['Martí, P.', '6,50', '#6b8093'],
-          ['Roca, A.', '4,25', '#d8ccc2'],
-          ['Soler, M.', '9,25', '#6b8093'],
-          ['Vidal, J.', '7,00', '#6b8093'],
-        ].map(([n, g, c], i) => (
-          <g key={n} transform={`translate(360 ${130 + i * 26})`}>
-            <text fontSize="11" fill="#334155">
-              {n}
-            </text>
-            <text x="132" textAnchor="end" fontSize="11" fontWeight="700" fill="#0f172a">
-              {g}
-            </text>
-            <rect y="7" width="132" height="1" fill="#e2e8f0" />
-            <circle cx="96" cy="-4" r="3" fill={c} />
-          </g>
-        ))}
-        <g transform="translate(360 268)">
-          {[10, 16, 24, 34, 28, 18, 9].map((h, i) => (
-            <rect key={i} x={i * 19} y={36 - h} width="15" height={h} rx="2" fill={i < 2 ? '#bdb8b0' : '#3f5062'} />
-          ))}
-        </g>
-      </g>
-      <g transform="translate(268 300)">
-        <rect width="150" height="34" rx="17" fill="#f3f1ee" stroke="#d8ccc2" />
-        <text x="75" y="21" textAnchor="middle" fontSize="11" fontWeight="600" fill="#5b2a3a">
-          3 marcas por revisar
-        </text>
-      </g>
-    </svg>
+    <span aria-hidden>
+      {[
+        { top: inset, left: inset },
+        { top: inset, right: inset },
+        { bottom: inset, left: inset },
+        { bottom: inset, right: inset },
+      ].map((pos, i) => (
+        <span key={i} className="absolute bg-ink" style={{ ...s, ...pos }} />
+      ))}
+    </span>
   );
 }
 
-function Section({ id, title, subtitle, children, tone = 'white' }: { id?: string; title: string; subtitle?: string; children: ReactNode; tone?: 'white' | 'soft' }) {
+/** Fila de burbujas A–D con una marcada, como en la hoja de respuestas. */
+function Bubbles({ marked, letters = 'ABCD' }: { marked: number; letters?: string }) {
   return (
-    <section id={id} className={`scroll-mt-20 py-16 sm:py-20 ${tone === 'soft' ? 'bg-bone-100' : 'bg-bone-50'}`}>
-      <div className="mx-auto max-w-6xl px-5">
-        <h2 className="display max-w-3xl text-3xl font-medium text-ink sm:text-4xl">{title}</h2>
-        {subtitle && <p className="mt-3 max-w-2xl text-lg text-slate-600">{subtitle}</p>}
-        <div className="mt-10">{children}</div>
-      </div>
-    </section>
+    <span className="inline-flex gap-1.5" aria-hidden>
+      {[...letters].map((l, i) => (
+        <span
+          key={l}
+          className={`flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] font-mono text-[10px] ${
+            i === marked ? 'border-brand-700 bg-brand-700 text-brand-700' : 'border-rose-500 text-rose-500'
+          }`}
+        >
+          {l}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function Shot({ src, alt, className = '', width, height }: { src: string; alt: string; className?: string; width: number; height: number }) {
+  return <img src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" className={`block h-auto w-full ${className}`} />;
+}
+
+function Eyebrow({ n, children }: { n: string; children: ReactNode }) {
+  return (
+    <p className="label-mono flex items-center gap-3 text-brand-700">
+      <span className="text-rose-500">{n}</span>
+      <span className="h-px w-8 bg-brand-700/40" aria-hidden />
+      {children}
+    </p>
   );
 }
 
@@ -141,31 +69,31 @@ export default function Landing() {
     document.documentElement.lang = locale;
   }, [locale]);
   const t = getDict(locale);
-  const featureIcons = [ICONS.models, ICONS.minus, ICONS.eye, ICONS.chart, ICONS.export, ICONS.log, ICONS.team, ICONS.hash];
-  const stepIcons = [ICONS.sheet, ICONS.print, ICONS.scan, ICONS.chart];
-  const privacyIcons = [ICONS.laptop, ICONS.eu, ICONS.lock, ICONS.shield];
   const links: [string, string][] = [
     ['#como-funciona', t.nav.how],
     ['#funcionalidades', t.nav.features],
     ['#privacidad', t.nav.privacy],
     ['#faq', t.nav.faq],
   ];
-  const primary = 'inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-800';
-  const secondary = 'inline-flex items-center justify-center rounded-full border border-ink/25 bg-transparent px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white';
+  const primary = 'inline-flex items-center justify-center rounded-md bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800';
+  const secondary = 'inline-flex items-center justify-center rounded-md border-[1.5px] border-ink px-5 py-3 text-sm font-semibold text-ink transition hover:bg-ink hover:text-white';
+  const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
+  const h2 = 'display mt-4 max-w-3xl text-[2rem] leading-[1.1] text-ink sm:text-[2.6rem]';
 
   return (
-    <div className="bg-bone-50 text-slate-800">
+    <div className="bg-white text-slate-700">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
         Saltar al contenido
       </a>
-      <header className="sticky top-0 z-40 border-b border-bone-200 bg-bone-50/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-5 py-3">
-          <a href="#top" className="wordmark flex items-center gap-2 text-xl text-ink">
-            <Mark /> {APP_NAME}
+
+      <header className="sticky top-0 z-40 border-b border-bone-200 bg-white/95 backdrop-blur">
+        <div className={`${wrap} flex items-center gap-8 py-3.5`}>
+          <a href="#top" className="text-[1.7rem] leading-none">
+            <Logo />
           </a>
-          <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 lg:flex" aria-label="Secciones">
+          <nav className="hidden items-center gap-6 text-sm text-slate-600 lg:flex" aria-label="Secciones">
             {links.map(([href, label]) => (
-              <a key={href} href={href} className="hover:text-slate-900">
+              <a key={href} href={href} className="underline-offset-4 hover:text-ink hover:underline">
                 {label}
               </a>
             ))}
@@ -174,7 +102,7 @@ export default function Landing() {
             {ENABLED_LOCALES.length > 1 && (
               <select
                 aria-label="Idioma"
-                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                className="rounded-md border border-bone-300 bg-white px-2 py-1.5 text-sm"
                 value={locale}
                 onChange={(e) => {
                   localStorage.setItem('korrige-lang', e.target.value);
@@ -188,13 +116,13 @@ export default function Landing() {
                 ))}
               </select>
             )}
-            <Link to="/acceso" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:inline-flex">
+            <Link to="/acceso" className="hidden px-3 py-2 text-sm font-semibold text-ink underline-offset-4 hover:underline sm:inline-flex">
               {t.nav.login}
             </Link>
-            <a href="#ventas" className="inline-flex rounded-full bg-ink px-5 py-2 text-sm font-semibold text-white hover:bg-brand-800">
+            <a href="#ventas" className="inline-flex rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
               {t.nav.sales}
             </a>
-            <button className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Menú" aria-expanded={menu} onClick={() => setMenu(!menu)}>
+            <button className="rounded-md p-2 text-ink hover:bg-bone-100 lg:hidden" aria-label="Menú" aria-expanded={menu} onClick={() => setMenu(!menu)}>
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                 <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
@@ -202,9 +130,9 @@ export default function Landing() {
           </div>
         </div>
         {menu && (
-          <nav className="border-t border-slate-200 bg-white px-5 py-3 lg:hidden" aria-label="Secciones (móvil)">
+          <nav className="border-t border-bone-200 bg-white px-5 py-3 lg:hidden" aria-label="Secciones (móvil)">
             {[...links, ['/acceso', t.nav.login] as [string, string]].map(([href, label]) => (
-              <a key={href} href={href} className="block py-2 text-sm font-medium text-slate-700" onClick={() => setMenu(false)}>
+              <a key={href} href={href} className="block py-2 text-sm font-medium text-ink" onClick={() => setMenu(false)}>
                 {label}
               </a>
             ))}
@@ -214,209 +142,272 @@ export default function Landing() {
 
       <main id="contenido">
         {/* 1. Hero */}
-        <section id="top" className="relative overflow-hidden bg-bone-100">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-14 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-20">
+        <section id="top" className="overflow-hidden border-b border-bone-200">
+          <div className={`${wrap} grid items-center gap-12 pb-16 pt-12 lg:grid-cols-[1fr_1.05fr] lg:pb-24 lg:pt-20`}>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">{t.hero.kicker}</p>
-              <h1 className="display mt-5 text-4xl font-medium leading-[1.08] text-ink sm:text-[3.25rem]">{t.hero.title}</h1>
-              <p className="mt-5 max-w-xl text-lg text-slate-600">{t.hero.subtitle}</p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <p className="label-mono text-slate-500">{t.hero.kicker}</p>
+              <h1 className="display mt-5 text-[2.6rem] leading-[1.04] text-ink sm:text-[3.6rem]">{t.hero.title}</h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">{t.hero.subtitle}</p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
                 <a href="#ventas" className={primary}>
                   {t.nav.sales}
                 </a>
                 <Link to="/acceso" className={secondary}>
                   {t.nav.login}
                 </Link>
-                <Link to="/demo" className="inline-flex items-center px-3 py-3 text-sm font-semibold text-brand-700 hover:underline">
-                  {t.nav.demo} →
+                <Link to="/demo" className="px-2 py-3 text-sm font-semibold text-brand-700 underline decoration-rose-500 decoration-2 underline-offset-4 hover:text-brand-900">
+                  {t.nav.demo}
                 </Link>
               </div>
-              <p className="mt-4 text-sm text-slate-500">{t.hero.note}</p>
-              <dl className="mt-10 grid max-w-md grid-cols-3 gap-6">
-                {t.hero.stats.map(([v, l]) => (
-                  <div key={l}>
-                    <dt className="sr-only">{l}</dt>
-                    <dd className="display text-2xl font-medium text-ink">{v}</dd>
-                    <dd className="text-xs text-slate-500">{l}</dd>
-                  </div>
-                ))}
-              </dl>
+              <p className="mt-5 text-sm text-slate-500">{t.hero.note}</p>
             </div>
-            <HeroArt />
+            <figure className="relative lg:-mr-24">
+              <div className="sheet-shadow relative border-[1.5px] border-ink bg-white p-7 sm:p-9">
+                <CornerMarks />
+                <Shot src="/shots/revision.jpg" width={1824} height={1104} alt="Pantalla de revisión de Korrige: la pregunta 8 de un alumno tiene dos burbujas marcadas y el profesor decide cuál cuenta con un clic" />
+              </div>
+              <figcaption className="label-mono mt-5 flex items-center gap-3 text-slate-500">
+                <Bubbles marked={0} />
+                Captura real · revisión de una doble marca
+              </figcaption>
+            </figure>
+          </div>
+          <dl className={`${wrap} grid grid-cols-3 border-t border-bone-200`}>
+            {t.hero.stats.map(([v, l], i) => (
+              <div key={l} className={`py-6 ${i ? 'border-l border-bone-200 pl-5 sm:pl-8' : ''}`}>
+                <dd className="display text-3xl text-ink sm:text-4xl">{v}</dd>
+                <dt className="label-mono mt-1 text-slate-500">{l}</dt>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        {/* 2. El problema: comparación */}
+        <section className="border-b border-bone-200 bg-bone-100 py-16 sm:py-24">
+          <div className={wrap}>
+            <Eyebrow n="01">El problema</Eyebrow>
+            <h2 className={h2}>{t.problem.title}</h2>
+            <p className="mt-4 max-w-2xl text-lg text-slate-600">{t.problem.intro}</p>
+            <div className="mt-10 overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                <thead>
+                  <tr>
+                    {t.problem.table.head.map((h, i) => (
+                      <th key={i} scope="col" className={`border-b-[1.5px] border-ink px-4 py-3 align-bottom ${i === 4 ? 'bg-white' : ''} ${i ? 'display text-lg text-ink' : ''}`}>
+                        {i === 4 ? <Logo className="text-xl" /> : h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {t.problem.table.rows.map((row) => (
+                    <tr key={row[0]}>
+                      {row.map((cell, i) =>
+                        i === 0 ? (
+                          <th key={i} scope="row" className="label-mono border-b border-bone-300 px-4 py-4 align-top font-medium text-slate-500">
+                            {cell}
+                          </th>
+                        ) : (
+                          <td key={i} className={`border-b border-bone-300 px-4 py-4 align-top ${i === 4 ? 'bg-white font-semibold text-brand-800' : 'text-slate-600'}`}>
+                            {cell}
+                          </td>
+                        ),
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="display mt-10 max-w-3xl text-2xl leading-snug text-ink">{t.problem.after}</p>
           </div>
         </section>
 
-        {/* 2. El problema */}
-        <Section title={t.problem.title} subtitle={t.problem.intro} tone="soft">
-          <div className="grid gap-5 md:grid-cols-3">
-            {t.problem.cards.map(([title, text]) => (
-              <div key={title} className="rounded-2xl border border-bone-200 bg-white p-6">
-                <h3 className="font-semibold text-slate-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{text}</p>
-              </div>
-            ))}
+        {/* 3. Cómo funciona: los pasos como preguntas de la hoja */}
+        <section id="como-funciona" className="scroll-mt-20 border-b border-bone-200 py-16 sm:py-24">
+          <div className={`${wrap} grid gap-12 lg:grid-cols-[0.8fr_1.2fr]`}>
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <Eyebrow n="02">{t.how.title}</Eyebrow>
+              <h2 className={h2}>{t.how.subtitle}</h2>
+              <figure className="relative mt-8 hidden max-w-sm rotate-[-1.5deg] border border-bone-300 bg-white shadow-[0_18px_40px_-18px_rgba(20,22,27,0.35)] lg:block">
+                <Shot src="/shots/hoja.jpg" width={1232} height={1742} alt="Hoja de respuestas generada por Korrige, con código QR, identificador, modelo y burbujas A–D" />
+              </figure>
+            </div>
+            <ol className="border-t-[1.5px] border-ink">
+              {t.how.steps.map(([title, text], i) => (
+                <li key={title} className="grid grid-cols-[2.5rem_1fr] gap-x-4 border-b border-bone-300 py-7 sm:grid-cols-[3rem_auto_1fr] sm:gap-x-6">
+                  <span className="display text-3xl leading-none text-ink">{i + 1}</span>
+                  <span className="hidden pt-1 sm:block">
+                    <Bubbles marked={i} />
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-ink">{title}</h3>
+                    <p className="mt-1.5 max-w-xl leading-relaxed text-slate-600">{text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
-          <p className="mt-8 max-w-3xl border-l-2 border-ink pl-5 text-lg font-medium text-ink">{t.problem.after}</p>
-        </Section>
-
-        {/* 3. Cómo funciona */}
-        <Section id="como-funciona" title={t.how.title} subtitle={t.how.subtitle}>
-          <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {t.how.steps.map(([title, text], i) => (
-              <li key={title} className="relative rounded-2xl border border-bone-200 bg-white p-6">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-bone-200 text-ink">{stepIcons[i]}</span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Paso {i + 1}</span>
-                </div>
-                <h3 className="mt-4 font-semibold text-slate-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{text}</p>
-              </li>
-            ))}
-          </ol>
-        </Section>
+        </section>
 
         {/* 4. Funcionalidades */}
-        <Section id="funcionalidades" title={t.features.title} tone="soft">
-          <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-            {t.features.items.map(([title, text], i) => (
-              <div key={title}>
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink ring-1 ring-bone-300">{featureIcons[i]}</span>
-                <h3 className="mt-3 font-semibold text-slate-900">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{text}</p>
+        <section id="funcionalidades" className="scroll-mt-20 border-b border-bone-200 py-16 sm:py-24">
+          <div className={wrap}>
+            <Eyebrow n="03">{t.nav.features}</Eyebrow>
+            <h2 className={h2}>{t.features.title}</h2>
+            <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_1fr]">
+              <dl className="grid content-start gap-x-8 sm:grid-cols-2">
+                {t.features.items.map(([title, text], i) => (
+                  <div key={title} className="border-t border-bone-300 py-5">
+                    <dt className="flex items-baseline gap-3 font-semibold text-ink">
+                      <span className="label-mono text-rose-500">{String(i + 1).padStart(2, '0')}</span>
+                      {title}
+                    </dt>
+                    <dd className="mt-1.5 pl-8 text-sm leading-relaxed text-slate-600">{text}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="space-y-6 lg:pl-6">
+                <figure className="border border-bone-300 bg-white p-2 shadow-[0_18px_40px_-22px_rgba(20,22,27,0.4)]">
+                  <Shot src="/shots/notas.jpg" width={2492} height={840} alt="Tabla de notas de Korrige con aciertos, errores, en blanco, nota y estado de revisión de cada alumno" />
+                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">Notas · ordenables, filtrables y exportables</figcaption>
+                </figure>
+                <figure className="border border-bone-300 bg-white p-2 shadow-[0_18px_40px_-22px_rgba(20,22,27,0.4)]">
+                  <Shot src="/shots/estadisticas.jpg" width={2496} height={724} alt="Histograma de la distribución de notas de un examen en Korrige" />
+                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">Estadísticas · distribución de notas</figcaption>
+                </figure>
               </div>
-            ))}
+            </div>
           </div>
-        </Section>
+        </section>
 
         {/* 5. Privacidad */}
-        <Section id="privacidad" title={t.privacy.title} subtitle={t.privacy.subtitle}>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {t.privacy.items.map(([title, text], i) => (
-              <div key={title} className="flex gap-4 rounded-2xl border border-bone-200 bg-white p-6">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-800">{privacyIcons[i]}</span>
-                <div>
-                  <h3 className="font-semibold text-slate-900">{title}</h3>
+        <section id="privacidad" className="scroll-mt-20 border-b border-bone-200 bg-brand-50 py-16 sm:py-24">
+          <div className={`${wrap} grid gap-10 lg:grid-cols-[0.8fr_1.2fr]`}>
+            <div>
+              <Eyebrow n="04">{t.nav.privacy}</Eyebrow>
+              <h2 className={h2}>{t.privacy.title}</h2>
+              <p className="mt-4 text-lg text-slate-600">{t.privacy.subtitle}</p>
+            </div>
+            <ul className="grid gap-x-10 sm:grid-cols-2">
+              {t.privacy.items.map(([title, text]) => (
+                <li key={title} className="border-t-[1.5px] border-brand-700 py-5">
+                  <h3 className="font-semibold text-ink">{title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{text}</p>
-                </div>
-              </div>
-            ))}
+                </li>
+              ))}
+            </ul>
           </div>
-        </Section>
+        </section>
 
-        {/* 6. FAQ */}
-        <Section id="faq" title={t.faq.title} tone="soft">
-          <div className="max-w-3xl divide-y divide-bone-200 rounded-2xl border border-bone-200 bg-white">
-            {t.faq.items.map(([q, a]) => (
-              <details key={q} className="group px-6 py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-slate-900">
-                  {q}
-                  <span className="text-xl font-normal text-slate-400 transition group-open:rotate-45" aria-hidden>
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{a}</p>
-              </details>
-            ))}
+        {/* 6. Preguntas frecuentes */}
+        <section id="faq" className="scroll-mt-20 border-b border-bone-200 py-16 sm:py-24">
+          <div className={`${wrap} grid gap-10 lg:grid-cols-[0.8fr_1.2fr]`}>
+            <div>
+              <Eyebrow n="05">{t.nav.faq}</Eyebrow>
+              <h2 className={h2}>{t.faq.title}</h2>
+            </div>
+            <div className="border-t-[1.5px] border-ink">
+              {t.faq.items.map(([q, a]) => (
+                <details key={q} className="group border-b border-bone-300 py-5">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                    {q}
+                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-rose-500 font-mono text-sm leading-none text-rose-500 transition group-open:border-brand-700 group-open:bg-brand-700 group-open:text-white" aria-hidden>
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 max-w-2xl leading-relaxed text-slate-600">{a}</p>
+                </details>
+              ))}
+            </div>
           </div>
-        </Section>
+        </section>
 
         {/* 7. Hablar con ventas */}
-        <section id="ventas" className="scroll-mt-16 bg-ink py-16 text-white sm:py-20">
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 lg:grid-cols-[1fr_1.2fr]">
+        <section id="ventas" className="scroll-mt-16 bg-bone-100 py-16 sm:py-24">
+          <div className={`${wrap} grid gap-12 lg:grid-cols-[0.85fr_1.15fr]`}>
             <div>
-              <h2 className="display text-3xl font-medium sm:text-4xl">{t.sales.title}</h2>
-              <p className="mt-4 text-lg text-bone-200">{t.sales.subtitle}</p>
-              <ul className="mt-6 space-y-3">
+              <Eyebrow n="06">{t.sales.title}</Eyebrow>
+              <h2 className={h2}>{t.cta.title}</h2>
+              <p className="mt-4 text-lg text-slate-600">{t.sales.subtitle}</p>
+              <ul className="mt-7 space-y-3">
                 {t.sales.bullets.map((b) => (
-                  <li key={b} className="flex items-center gap-3 text-bone-100">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-sm" aria-hidden>
-                      ✓
-                    </span>
+                  <li key={b} className="flex items-center gap-3 text-ink">
+                    <span className="h-4 w-4 shrink-0 rounded-full border-[1.5px] border-brand-700 bg-brand-700" aria-hidden />
                     {b}
                   </li>
                 ))}
               </ul>
-              <p className="mt-8 text-sm text-bone-400">
+              <p className="mt-8 text-sm text-slate-600">
                 ¿Prefieres escribirnos?{' '}
-                <a className="font-semibold text-white underline" href={`mailto:${SALES_EMAIL}`}>
+                <a className="font-semibold text-brand-700 underline underline-offset-4" href={`mailto:${SALES_EMAIL}`}>
                   {SALES_EMAIL}
                 </a>
               </p>
+              <p className="mt-2 text-sm text-slate-600">
+                {t.cta.text}{' '}
+                <Link className="font-semibold text-brand-700 underline decoration-rose-500 decoration-2 underline-offset-4" to="/demo">
+                  {t.nav.demo}
+                </Link>
+              </p>
             </div>
-            <SalesForm t={t.sales} locale={locale} />
-          </div>
-        </section>
-
-        <section className="bg-bone-50 py-14">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5">
-            <div>
-              <h2 className="display text-2xl font-medium text-ink">{t.cta.title}</h2>
-              <p className="mt-1 text-slate-600">{t.cta.text}</p>
-            </div>
-            <div className="flex gap-3">
-              <Link to="/demo" className={primary}>
-                {t.nav.demo}
-              </Link>
-              <Link to="/acceso" className={secondary}>
-                {t.nav.login}
-              </Link>
+            <div className="sheet-shadow relative border-[1.5px] border-ink bg-white p-3 sm:p-5">
+              <CornerMarks size={9} inset={8} />
+              <SalesForm t={t.sales} locale={locale} />
             </div>
           </div>
         </section>
       </main>
 
       {/* 8. Pie */}
-      <footer className="border-t border-bone-200 bg-bone-100">
-        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:grid-cols-3">
+      <footer className="border-t-[1.5px] border-ink bg-white">
+        <div className={`${wrap} grid gap-8 py-12 sm:grid-cols-[1.4fr_1fr_1fr]`}>
           <div>
-            <div className="wordmark flex items-center gap-2 text-xl text-ink">
-              <Mark /> {APP_NAME}
-            </div>
-            <p className="mt-2 text-sm text-slate-600">{t.footer.tagline}</p>
+            <Logo className="text-3xl" />
+            <p className="mt-3 max-w-xs text-sm text-slate-600">{t.footer.tagline}</p>
           </div>
           <div className="text-sm">
-            <h3 className="font-semibold text-slate-900">{t.footer.contact}</h3>
-            <ul className="mt-2 space-y-1.5 text-slate-600">
+            <h3 className="label-mono text-slate-500">{t.footer.contact}</h3>
+            <ul className="mt-3 space-y-2 text-ink">
               <li>
-                <a className="hover:underline" href={`mailto:${SALES_EMAIL}`}>
+                <a className="underline-offset-4 hover:underline" href={`mailto:${SALES_EMAIL}`}>
                   {SALES_EMAIL}
                 </a>
               </li>
               <li>
-                <a className="hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
+                <a className="underline-offset-4 hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
                   {CONTACT_EMAIL}
                 </a>
               </li>
               <li>
-                <Link className="hover:underline" to="/guia">
+                <Link className="underline-offset-4 hover:underline" to="/guia">
                   {t.footer.guide}
                 </Link>
               </li>
             </ul>
           </div>
           <div className="text-sm">
-            <h3 className="font-semibold text-slate-900">{t.footer.legal}</h3>
-            <ul className="mt-2 space-y-1.5 text-slate-600">
+            <h3 className="label-mono text-slate-500">{t.footer.legal}</h3>
+            <ul className="mt-3 space-y-2 text-ink">
               <li>
-                <Link className="hover:underline" to="/legal/aviso-legal">
+                <Link className="underline-offset-4 hover:underline" to="/legal/aviso-legal">
                   {t.footer.legalNotice}
                 </Link>
               </li>
               <li>
-                <Link className="hover:underline" to="/legal/privacidad">
+                <Link className="underline-offset-4 hover:underline" to="/legal/privacidad">
                   {t.footer.privacy}
                 </Link>
               </li>
               <li>
-                <Link className="hover:underline" to="/legal/cookies">
+                <Link className="underline-offset-4 hover:underline" to="/legal/cookies">
                   {t.footer.cookies}
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-          © {new Date().getFullYear()} {APP_NAME}. {t.footer.rights}
+        <div className={`${wrap} label-mono border-t border-bone-200 py-5 text-slate-500`}>
+          © {new Date().getFullYear()} Korrige · {t.footer.rights}
         </div>
       </footer>
     </div>

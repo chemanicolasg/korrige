@@ -7,8 +7,8 @@ import { INVALID } from '../../lib/types';
 import { optionLetters } from '../../omr/layout';
 import { useExam } from '../ExamPage';
 
-const BAR = '#3f5062'; // serie única: un solo tono
-const BAR_FAIL = '#bdb8b0';
+const BAR = '#2439b0'; // serie única: un solo tono
+const BAR_FAIL = '#b9b4a8';
 
 /** Histograma de notas: 10 tramos; los suspensos en gris neutro, los aprobados en el tono de marca. */
 function Histogram({ bins, scale, pass }: { bins: { from: number; to: number; count: number }[]; scale: number; pass: number }) {

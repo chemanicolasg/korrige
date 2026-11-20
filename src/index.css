@@ -1,4 +1,7 @@
-@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/archivo/index.css';
+@import '@fontsource-variable/fraunces/index.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +11,6 @@
   html { scroll-behavior: smooth; }
   :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2; }
   h1, h2, h3 { @apply tracking-tight; }
-  body { font-stretch: 100%; }
 }
 
 @layer components {
@@ -27,8 +29,11 @@
   .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
   .th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500; }
   .td { @apply px-3 py-2 text-sm text-slate-800; }
-  /* Titulares y marca: Archivo en su ancho extendido */
-  .display { font-stretch: 125%; letter-spacing: -0.02em; }
-  .wordmark { font-stretch: 125%; font-weight: 600; letter-spacing: -0.01em; text-transform: lowercase; }
+  /* Titulares y marca en serif; etiquetas en monoespaciada (como la numeración de un impreso) */
+  .display { @apply font-serif; font-weight: 500; letter-spacing: -0.015em; font-variation-settings: 'opsz' 96; }
+  .wordmark { @apply font-serif; font-weight: 600; letter-spacing: -0.02em; text-transform: lowercase; }
+  .label-mono { @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em]; }
+  /* Sombra dura y desplazada, como una hoja sobre otra */
+  .sheet-shadow { box-shadow: 10px 10px 0 0 theme('colors.brand.100'); }
   .kbd { @apply rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 font-mono text-[11px] text-slate-700; }
 }
