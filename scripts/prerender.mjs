@@ -10,23 +10,25 @@ const dist = path.resolve('dist');
 const ssrDir = path.resolve('node_modules/.korrige-ssr');
 execSync(`npx vite build --ssr src/landing/entry-server.tsx --outDir "${ssrDir}" --emptyOutDir --logLevel error`, { stdio: 'inherit' });
 const entry = fs.readdirSync(ssrDir).find((f) => /^entry-server\.m?js$/.test(f));
-const { render, faqJsonLd, site, pages } = await import(pathToFileURL(path.join(ssrDir, entry)).href);
+const { render, faqJsonLd, siteJsonLd, site, pages } = await import(pathToFileURL(path.join(ssrDir, entry)).href);
 
 const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 if (!shell.includes('<!--app-html-->')) throw new Error('index.html no contiene el marcador <!--app-html-->');
 // carcasa de la aplicación (rutas privadas): no se indexa
 fs.writeFileSync(path.join(dist, 'app.html'), shell.replace('<!--app-html-->', '').replace('<!--app-head-->', '<meta name="robots" content="noindex" />'));
 
+const INDEXABLE = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />';
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 for (const page of pages) {
   const url = `${site.APP_URL}${page.path}`;
   let html = shell.replace('<!--app-html-->', render(page.path));
   if (page.path === '/') {
-    html = html.replace('<!--app-head-->', `<script type="application/ld+json">${faqJsonLd().replace(/</g, '\\u003c')}</script>`);
+    const ld = (json) => `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}</script>`;
+    html = html.replace('<!--app-head-->', `${INDEXABLE}\n    ${ld(siteJsonLd())}\n    ${ld(faqJsonLd())}`);
   } else {
     // cada página pública lleva su propio título, descripción y URL canónica
     html = html
-      .replace('<!--app-head-->', '')
+      .replace('<!--app-head-->', INDEXABLE)
       .replace(/<title>[^<]*<\/title>/, `<title>${esc(page.title)}</title>`)
       .replace(/(<meta name="description" content=")[^"]*"/, `$1${esc(page.description)}"`)
       .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)

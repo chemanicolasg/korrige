@@ -47,3 +47,27 @@ export function faqJsonLd(): string {
     mainEntity: t.faq.items.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
   });
 }
+
+/** Datos estructurados del sitio: organización, web y aplicación. */
+export function siteJsonLd(): string {
+  const t = getDict('es');
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'Organization', '@id': `${APP_URL}/#org`, name: APP_NAME, url: APP_URL, logo: `${APP_URL}/og.png`, email: `ventas@${APP_DOMAIN}` },
+      { '@type': 'WebSite', '@id': `${APP_URL}/#web`, name: APP_NAME, url: APP_URL, inLanguage: 'es', publisher: { '@id': `${APP_URL}/#org` } },
+      {
+        '@type': 'SoftwareApplication',
+        name: APP_NAME,
+        url: APP_URL,
+        applicationCategory: 'EducationalApplication',
+        operatingSystem: 'Web',
+        inLanguage: 'es',
+        description: t.hero.subtitle,
+        featureList: t.features.items.map(([title]) => title),
+        screenshot: `${APP_URL}/shots/revision.jpg`,
+        publisher: { '@id': `${APP_URL}/#org` },
+      },
+    ],
+  });
+}
