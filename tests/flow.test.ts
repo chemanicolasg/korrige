@@ -187,8 +187,9 @@ describe('flujo completo del profesor', () => {
     const first = rows.find((r) => r.identifier === '10000003')!;
     expect(first).toMatchObject({ last_name: 'Apellido2', model: 'A', n_correct: 39, grade: 10 });
     const csv = toMoodleCsv(data);
-    const lines = csv.trim().split('\r\n');
-    expect(lines[0]).toBe('﻿"Número de ID","Dirección de correo","Apellido(s)","Nombre","Fisiología"');
+    expect(csv.charCodeAt(0)).toBe(0xfeff); // BOM para que Excel y Moodle detecten UTF-8
+    const lines = csv.slice(1).trim().split('\r\n');
+    expect(lines[0]).toBe('"Número de ID","Dirección de correo","Apellido(s)","Nombre","Fisiología"');
     expect(lines).toContain('"10000003","a2@uni.es","Apellido2","Nombre",10');
   });
 

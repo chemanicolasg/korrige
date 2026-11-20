@@ -56,7 +56,7 @@ export function toMoodleCsv(data: ExamData): string {
   const header = ['Número de ID', 'Dirección de correo', 'Apellido(s)', 'Nombre', data.exam.title];
   const lines = [header.map(csvCell).join(',')];
   for (const r of exportRows(data)) lines.push([r.identifier, r.email, r.last_name, r.first_name, r.grade].map(csvCell).join(','));
-  return `﻿${lines.join('\r\n')}\r\n`;
+  return `${String.fromCharCode(0xfeff)}${lines.join('\r\n')}\r\n`;
 }
 
 /** Libro Excel con las notas y, en una segunda hoja, las respuestas de cada alumno. */
