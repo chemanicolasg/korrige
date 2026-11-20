@@ -12,6 +12,16 @@ export async function testLanding(baseUrl, outDir) {
   assert.match(await (await fetch(`${baseUrl}/sitemap.xml`)).text(), /https:\/\/korrige\.es\/legal\/privacidad/);
   assert.match(await (await fetch(`${baseUrl}/robots.txt`)).text(), /Sitemap: https:\/\/korrige\.es\/sitemap\.xml/);
 
+  // las páginas públicas del sitemap son indexables y tienen su propia URL canónica
+  for (const [p, re] of [['/guia', /imprimir y escanear/], ['/legal/privacidad', /Política de privacidad/]]) {
+    // (Netlify sirve /guia desde guia/index.html; el servidor de pruebas necesita la ruta completa)
+    const h = await (await fetch(`${baseUrl}${p}/index.html`)).text();
+    assert.match(h, re, `${p} prerenderizada`);
+    assert.ok(!/name="robots" content="noindex"/.test(h), `${p} no debe llevar noindex`);
+    assert.ok(h.includes(`<link rel="canonical" href="https://korrige.es${p}"`), `${p} canónica propia`);
+  }
+  assert.match(await (await fetch(`${baseUrl}/app`)).text(), /noindex|<h1/, 'la app no es una página de contenido');
+
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
