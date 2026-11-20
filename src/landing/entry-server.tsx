@@ -5,20 +5,46 @@ import { Route, Routes } from 'react-router-dom';
 import { StaticRouter } from 'react-router-dom/server';
 import { APP_DOMAIN, APP_NAME, APP_URL } from '../config';
 import { getDict } from '../i18n';
+import { ARTICLES } from './articles';
 import Landing from './Landing';
 import Legal from './Legal';
 import PublicGuide from './PublicGuide';
+import ResourcePage from './Resources';
 
 export const site = { APP_NAME, APP_DOMAIN, APP_URL };
 
 /** Páginas públicas indexables, con sus metadatos. La portada conserva los de index.html. */
-export const pages: { path: string; title?: string; description?: string }[] = [
+export const pages: { path: string; title?: string; description?: string; jsonLd?: string; priority?: string }[] = [
   { path: '/' },
   {
     path: '/guia',
     title: `Guía de impresión y escaneo de hojas de respuestas — ${APP_NAME}`,
     description: 'Cómo imprimir las hojas de respuestas y escanear el taco en la fotocopiadora (Xerox y similares) para corregir exámenes tipo test con Korrige.',
   },
+  {
+    path: '/recursos',
+    title: `Guías para corregir exámenes tipo test — ${APP_NAME}`,
+    description: 'Métodos de corrección, fórmulas de penalización y consejos prácticos para corregir exámenes tipo test en universidades y academias.',
+    priority: '0.7',
+  },
+  ...ARTICLES.map((a) => ({
+    path: `/recursos/${a.slug}`,
+    title: a.title,
+    description: a.description,
+    priority: '0.8',
+    jsonLd: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: a.h1,
+      description: a.description,
+      inLanguage: 'es',
+      dateModified: a.updated,
+      datePublished: a.updated,
+      mainEntityOfPage: `${APP_URL}/recursos/${a.slug}`,
+      author: { '@type': 'Organization', name: APP_NAME, url: APP_URL },
+      publisher: { '@type': 'Organization', name: APP_NAME, logo: { '@type': 'ImageObject', url: `${APP_URL}/icon-512.png` } },
+    }),
+  })),
   { path: '/legal/aviso-legal', title: `Aviso legal — ${APP_NAME}`, description: `Aviso legal y condiciones de uso de ${APP_NAME}.` },
   { path: '/legal/privacidad', title: `Política de privacidad — ${APP_NAME}`, description: `Cómo trata ${APP_NAME} los datos personales de profesores y alumnos.` },
   { path: '/legal/cookies', title: `Política de cookies — ${APP_NAME}`, description: `${APP_NAME} solo usa almacenamiento técnico del navegador, sin cookies publicitarias.` },
@@ -32,6 +58,8 @@ export function render(path = '/'): string {
           <Route path="/" element={<Landing />} />
           <Route path="/guia" element={<PublicGuide />} />
           <Route path="/legal/:doc" element={<Legal />} />
+          <Route path="/recursos" element={<ResourcePage />} />
+          <Route path="/recursos/:slug" element={<ResourcePage />} />
         </Routes>
       </StaticRouter>
     </StrictMode>,
@@ -54,7 +82,7 @@ export function siteJsonLd(): string {
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'Organization', '@id': `${APP_URL}/#org`, name: APP_NAME, url: APP_URL, logo: `${APP_URL}/og.png`, email: `ventas@${APP_DOMAIN}` },
+      { '@type': 'Organization', '@id': `${APP_URL}/#org`, name: APP_NAME, url: APP_URL, logo: `${APP_URL}/icon-512.png`, email: `ventas@${APP_DOMAIN}` },
       { '@type': 'WebSite', '@id': `${APP_URL}/#web`, name: APP_NAME, url: APP_URL, inLanguage: 'es', publisher: { '@id': `${APP_URL}/#org` } },
       {
         '@type': 'SoftwareApplication',

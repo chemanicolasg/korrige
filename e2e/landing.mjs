@@ -13,7 +13,7 @@ export async function testLanding(baseUrl, outDir) {
   assert.match(await (await fetch(`${baseUrl}/robots.txt`)).text(), /Sitemap: https:\/\/korrige\.es\/sitemap\.xml/);
 
   // las páginas públicas del sitemap son indexables y tienen su propia URL canónica
-  for (const [p, re] of [['/guia', /imprimir y escanear/], ['/legal/privacidad', /Política de privacidad/]]) {
+  for (const [p, re] of [['/guia', /imprimir y escanear/], ['/legal/privacidad', /Política de privacidad/], ['/recursos', /Guías para corregir/], ['/recursos/formula-penalizacion-examen-tipo-test', /errores ÷ \(k − 1\)/], ['/recursos/alternativa-zipgrade-fotocopiadora', /"@type":"Article"/]]) {
     // (Netlify sirve /guia desde guia/index.html; el servidor de pruebas necesita la ruta completa)
     const h = await (await fetch(`${baseUrl}${p}/index.html`)).text();
     assert.match(h, re, `${p} prerenderizada`);
@@ -61,6 +61,14 @@ export async function testLanding(baseUrl, outDir) {
     await page.getByRole('heading', { name: 'Política de privacidad' }).waitFor();
     await page.goto(`${baseUrl}/guia`);
     await page.getByRole('heading', { name: /imprimir y escanear/ }).waitFor();
+
+    // 3b) las guías se navegan desde la portada y cargan sin errores
+    await page.goto(baseUrl);
+    await page.getByRole('link', { name: 'Cómo corregir exámenes tipo test con hoja de respuestas' }).click();
+    await page.getByRole('heading', { level: 1, name: /Cómo corregir exámenes tipo test/ }).waitFor();
+    if (outDir) await page.screenshot({ path: `${outDir}/25-recurso.png` });
+    await page.getByRole('link', { name: 'Fórmula de penalización en exámenes tipo test' }).click();
+    await page.getByText('6,25').first().waitFor();
 
     // 4) móvil
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });

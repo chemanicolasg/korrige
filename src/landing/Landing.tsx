@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CONTACT_EMAIL, SALES_EMAIL } from '../config';
 import { Logo } from '../components/ui';
 import { ENABLED_LOCALES, LOCALE_NAMES, Locale, detectLocale, getDict } from '../i18n';
+import { ARTICLES } from './articles';
 import { SalesForm } from './SalesForm';
 
 /**
@@ -322,6 +323,28 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Recursos (enlaces internos a las guías) */}
+        <section className="border-b border-bone-200 py-14">
+          <div className={wrap}>
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h2 className="display text-2xl text-ink">Guías para profesores</h2>
+              <Link to="/recursos" className="text-sm font-semibold text-brand-700 underline underline-offset-4">
+                Ver todas
+              </Link>
+            </div>
+            <ul className="mt-6 grid gap-x-8 border-t-[1.5px] border-ink md:grid-cols-3">
+              {ARTICLES.map((a) => (
+                <li key={a.slug} className="border-b border-bone-300 py-5 md:border-b-0">
+                  <Link to={`/recursos/${a.slug}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    {a.h1}
+                  </Link>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{a.intro}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         {/* 7. Hablar con ventas */}
         <section id="ventas" className="scroll-mt-16 bg-bone-100 py-16 sm:py-24">
           <div className={`${wrap} grid gap-12 lg:grid-cols-[0.85fr_1.15fr]`}>
@@ -381,6 +404,11 @@ export default function Landing() {
               <li>
                 <Link className="underline-offset-4 hover:underline" to="/guia">
                   {t.footer.guide}
+                </Link>
+              </li>
+              <li>
+                <Link className="underline-offset-4 hover:underline" to="/recursos">
+                  Recursos para profesores
                 </Link>
               </li>
             </ul>
