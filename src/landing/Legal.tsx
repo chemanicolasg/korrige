@@ -3,7 +3,9 @@ import { Link, useParams } from 'react-router-dom';
 import { APP_DOMAIN, APP_NAME, CONTACT_EMAIL } from '../config';
 import { Logo } from '../components/ui';
 
-const HOLDER = '[RAZÓN SOCIAL DEL TITULAR]';
+// La titular solo se nombra una vez (aviso legal); en el resto se habla de «la titular de Korrige».
+const HOLDER = 'Carlota M.';
+const HOLDER_REF = `la titular de ${APP_NAME}`;
 
 const DOCS: Record<string, { title: string; body: ReactNode }> = {
   'aviso-legal': {
@@ -13,7 +15,7 @@ const DOCS: Record<string, { title: string; body: ReactNode }> = {
         <h2>1. Titular del sitio</h2>
         <p>
           En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de que el sitio web{' '}
-          {APP_DOMAIN} es titularidad de {HOLDER}, con NIF [NIF] y domicilio en [DOMICILIO]. Contacto: {CONTACT_EMAIL}.
+          {APP_DOMAIN} es titularidad de {HOLDER}. Contacto: {CONTACT_EMAIL}.
         </p>
         <h2>2. Objeto</h2>
         <p>
@@ -42,11 +44,11 @@ const DOCS: Record<string, { title: string; body: ReactNode }> = {
       <>
         <h2>1. Quién trata los datos</h2>
         <p>
-          <b>Formulario de contacto y cuentas de profesores:</b> el responsable del tratamiento es {HOLDER} ({CONTACT_EMAIL}).
+          <b>Formulario de contacto y cuentas de profesores:</b> el responsable del tratamiento es {HOLDER_REF} ({CONTACT_EMAIL}).
         </p>
         <p>
           <b>Datos de alumnos (identificadores, hojas escaneadas, respuestas y notas):</b> el responsable es la universidad, facultad o academia que usa {APP_NAME};{' '}
-          {HOLDER} actúa como <b>encargado del tratamiento</b> conforme al contrato de encargo (art. 28 RGPD) firmado con cada organización.
+          {HOLDER_REF} actúa como <b>encargado del tratamiento</b> conforme al contrato de encargo (art. 28 RGPD) firmado con cada organización.
         </p>
         <h2>2. Qué datos se tratan y para qué</h2>
         <ul>
