@@ -31,6 +31,16 @@ function applyFilter(q: any, filter: Filter = {}) {
   return q;
 }
 
+/**
+ * Los filtros `in (...)` viajan en la URL: con cientos de UUID se pasaría del
+ * límite, así que una lista larga se parte en varias peticiones.
+ */
+function splitFilter(filter: Filter = {}, size = 80): Filter[] {
+  const big = Object.entries(filter).find(([, v]) => Array.isArray(v) && v.length > size);
+  if (!big) return [filter];
+  return chunk(big[1] as (string | number)[], size).map((part) => ({ ...filter, [big[0]]: part }));
+}
+
 export function createSupabaseDb(client?: SupabaseClient): Db {
   const sb =
     client ??
@@ -80,14 +90,16 @@ export function createSupabaseDb(client?: SupabaseClient): Db {
     async select<T>(table: string, filter?: Filter, opts: SelectOptions = {}) {
       const out: T[] = [];
       const max = opts.limit ?? Infinity;
-      for (let from = 0; out.length < max; from += PAGE) {
-        let q = applyFilter(sb.from(table).select(opts.columns ?? '*'), filter);
-        if (opts.order) q = q.order(opts.order, { ascending: opts.asc ?? true });
-        const to = Math.min(from + PAGE, max) - 1;
-        const { data, error } = await q.range(from, to);
-        if (error) fail(error, `No se pudo leer ${table}`);
-        out.push(...(data as T[]));
-        if (!data || data.length < to - from + 1) break;
+      for (const f of splitFilter(filter)) {
+        for (let from = 0; out.length < max; from += PAGE) {
+          let q = applyFilter(sb.from(table).select(opts.columns ?? '*'), f);
+          if (opts.order) q = q.order(opts.order, { ascending: opts.asc ?? true });
+          const to = Math.min(from + PAGE, max) - 1;
+          const { data, error } = await q.range(from, to);
+          if (error) fail(error, `No se pudo leer ${table}`);
+          out.push(...(data as T[]));
+          if (!data || data.length < to - from + 1) break;
+        }
       }
       return out;
     },
@@ -102,9 +114,13 @@ export function createSupabaseDb(client?: SupabaseClient): Db {
       return out;
     },
     async update<T>(table: string, filter: Filter, patch: object) {
-      const { data, error } = await applyFilter(sb.from(table).update(patch), filter).select();
-      if (error) fail(error, `No se pudo actualizar ${table}`);
-      return data as T[];
+      const out: T[] = [];
+      for (const f of splitFilter(filter)) {
+        const { data, error } = await applyFilter(sb.from(table).update(patch), f).select();
+        if (error) fail(error, `No se pudo actualizar ${table}`);
+        out.push(...(data as T[]));
+      }
+      return out;
     },
     async upsert<T>(table: string, rows: object | object[], onConflict: string) {
       const list = Array.isArray(rows) ? rows : [rows];
@@ -118,8 +134,10 @@ export function createSupabaseDb(client?: SupabaseClient): Db {
     },
     async remove(table: string, filter: Filter) {
       if (!Object.keys(filter).length) throw new Error('remove() necesita un filtro');
-      const { error } = await applyFilter(sb.from(table).delete(), filter);
-      if (error) fail(error, `No se pudo borrar de ${table}`);
+      for (const f of splitFilter(filter)) {
+        const { error } = await applyFilter(sb.from(table).delete(), f);
+        if (error) fail(error, `No se pudo borrar de ${table}`);
+      }
     },
     async rpc<T>(fn: string, args?: Record<string, unknown>) {
       const { data, error } = await sb.rpc(fn, args);

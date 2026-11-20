@@ -1,5 +1,5 @@
 import { StrictMode, Suspense, lazy } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import './index.css';
 import Landing from './landing/Landing';
@@ -11,7 +11,7 @@ const PublicGuide = lazy(() => import('./landing/PublicGuide'));
 
 const Loading = () => <div className="p-8 text-sm text-slate-500">Cargando…</div>;
 
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
     <BrowserRouter>
       <Routes>
@@ -29,5 +29,10 @@ createRoot(document.getElementById('root')!).render(
         </Route>
       </Routes>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );
+
+const root = document.getElementById('root')!;
+// La landing llega prerenderizada (scripts/prerender.mjs): se hidrata; el resto se monta de cero.
+if (location.pathname === '/' && root.firstElementChild) hydrateRoot(root, app);
+else createRoot(root).render(app);

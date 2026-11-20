@@ -1,5 +1,7 @@
-// Ejecuta los tests E2E contra el build de producción: npm run build && npm run test:e2e
-import { spawn } from 'node:child_process';
+// Tests E2E en Chromium contra el build de producción (en modo demo, sin servidor):
+//   npm run test:e2e            → compila y ejecuta todos
+//   npm run test:e2e -- app     → solo uno (omr | app | landing)
+import { execSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { testApp } from './app.mjs';
 import { testLanding } from './landing.mjs';
@@ -10,6 +12,9 @@ const base = `http://localhost:${PORT}`;
 const out = 'e2e/out';
 fs.mkdirSync(out, { recursive: true });
 const only = process.argv[2];
+
+// build propio: sin Supabase (modo demo) y con un endpoint de ventas que el test intercepta
+execSync('npm run -s build', { stdio: 'inherit', env: { ...process.env, VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '', VITE_SALES_ENDPOINT: '/sales-lead-test' } });
 
 const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
 const stop = () => server.kill();

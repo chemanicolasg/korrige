@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:rls": "bash supabase/tests/run-local.sh",
     "test:e2e": "node e2e/run.mjs",
-    "seed:demo": "node scripts/seed-demo.mjs"
+    "seed:demo": "vite-node scripts/seed-demo.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",
@@ -36,6 +36,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
+    "vite-node": "^6.0.0",
     "vitest": "^5.1.1"
   }
 }
