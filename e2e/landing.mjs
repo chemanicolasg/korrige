@@ -48,7 +48,7 @@ export async function testLanding(baseUrl, outDir) {
 
     // 3) páginas legales y guía
     await page.goto(`${baseUrl}/legal/privacidad`);
-    await page.getByText('pendiente de revisión legal').waitFor();
+    await page.getByRole('heading', { name: 'Política de privacidad' }).waitFor();
     await page.goto(`${baseUrl}/guia`);
     await page.getByRole('heading', { name: /imprimir y escanear/ }).waitFor();
 

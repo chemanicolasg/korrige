@@ -123,9 +123,6 @@ export default function Legal() {
       ) : (
         <article className="mt-8">
           <h1 className="text-3xl font-semibold text-slate-900">{d.title}</h1>
-          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <b>Texto plantilla pendiente de revisión legal.</b>
-          </p>
           <div className="mt-6 space-y-3 text-[15px] leading-relaxed text-slate-700 [&_h2]:mt-7 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-900 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-6">{d.body}</div>
         </article>
       )}
