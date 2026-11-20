@@ -1,41 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore — build "legacy" para Node
-import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { createRequire } from 'node:module';
 import { Gray } from '../src/omr/reader';
-import { renderPageGray } from '../src/omr/render';
+import { ROOT, loadCv, processPdfsNode, renderPdf } from '../scripts/node-omr';
 
-export const ROOT = path.resolve(__dirname, '..');
+export { ROOT, loadCv, processPdfsNode, renderPdf };
 export const REF = path.join(ROOT, 'referencia');
-const WASM = path.join(ROOT, 'node_modules/pdfjs-dist/wasm/');
-
-/** OpenCV.js en Node (CommonJS; en el navegador se carga con src/omr/cvLoader.ts). */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function loadCv(): Promise<any> {
-  const require = createRequire(import.meta.url);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let cv: any = require('@techstark/opencv-js');
-  if (cv instanceof Promise) cv = await cv;
-  else if (!cv.Mat) await new Promise<void>((r) => (cv.onRuntimeInitialized = () => r()));
-  return { cv }.cv;
-}
-
-/** Renderiza todas las páginas de un PDF a gris (150 ppp) en Node. */
-export async function renderPdf(data: Uint8Array): Promise<Gray[]> {
-  const task = getDocument({ data: new Uint8Array(data), wasmUrl: WASM, verbosity: 0 });
-  const doc = await task.promise;
-  const out: Gray[] = [];
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    out.push(await renderPageGray(page, (w, h) => (doc as any).canvasFactory.create(w, h)));
-    page.cleanup();
-  }
-  await task.destroy();
-  return out;
-}
 
 export function readFile(p: string): Uint8Array {
   return new Uint8Array(fs.readFileSync(p));
