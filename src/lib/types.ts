@@ -1,14 +1,15 @@
 import type { LayoutDoc, SheetConfig } from '../omr/layout';
 import type { Mark } from '../omr/group';
+import { tr } from '../i18n/app';
 
 export type OrgRole = 'admin' | 'profesor';
 export type ExamStatus = 'borrador' | 'hojas_descargadas' | 'con_resultados' | 'cerrado';
 
 export const STATUS_LABEL: Record<ExamStatus, string> = {
-  borrador: 'Borrador',
-  hojas_descargadas: 'Hojas descargadas',
-  con_resultados: 'Con resultados',
-  cerrado: 'Cerrado',
+  borrador: tr('Borrador'),
+  hojas_descargadas: tr('Hojas descargadas'),
+  con_resultados: tr('Con resultados'),
+  cerrado: tr('Cerrado'),
 };
 
 export interface Organization {
@@ -250,16 +251,16 @@ export type ReviewKind =
   | 'ilegible';
 
 export const KIND_LABEL: Record<ReviewKind, string> = {
-  doble: 'Doble marca',
-  floja: 'Marca floja',
-  id_dudoso: 'Identificador incompleto o dudoso',
-  modelo: 'Modelo no marcado',
-  qr: 'QR no leído',
-  id_no_en_lista: 'Identificador que no está en la lista',
-  en_blanco: 'Hoja en blanco',
-  id_duplicado: 'Identificador duplicado',
-  pagina_faltante: 'Falta una página',
-  ilegible: 'Hoja ilegible',
+  doble: tr('Doble marca'),
+  floja: tr('Marca floja'),
+  id_dudoso: tr('Identificador incompleto o dudoso'),
+  modelo: tr('Modelo no marcado'),
+  qr: tr('QR no leído'),
+  id_no_en_lista: tr('Identificador que no está en la lista'),
+  en_blanco: tr('Hoja en blanco'),
+  id_duplicado: tr('Identificador duplicado'),
+  pagina_faltante: tr('Falta una página'),
+  ilegible: tr('Hoja ilegible'),
 };
 
 export interface ReviewItem {

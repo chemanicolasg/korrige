@@ -4,6 +4,7 @@
  * del servidor (código de examen, examen cerrado, layout bloqueado, cascadas).
  */
 import { Db, Filter, SelectOptions, SessionUser } from './db';
+import { tr } from '../i18n/app';
 
 type Row = Record<string, unknown>;
 type Tables = Record<string, Row[]>;
@@ -121,7 +122,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
   const guardOpen = (table: string, row: Row) => {
     if (!EXAM_CHILDREN.includes(table) || table === 'exam_collaborators') return;
     const e = exam(row.exam_id);
-    if (!e) throw new Error('Examen inexistente');
+    if (!e) throw new Error(tr('Examen inexistente'));
     if (e.status === 'cerrado') throw new Error('El examen está cerrado: reábrelo para modificarlo');
   };
   // Plan de la demo: sin límite salvo que se fuerce con localStorage (para probar el muro de pago)
@@ -153,8 +154,8 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     if (table === 'exam_folders' || table === 'exam_folder_items') row.user_id ??= user?.id;
     if (table === 'exam_folders') {
       row.name = String(row.name ?? '').trim();
-      if (!row.name) throw new Error('La carpeta necesita un nombre');
-      if (T(table).some((f) => f.user_id === row.user_id && String(f.name).toLowerCase() === String(row.name).toLowerCase())) throw new Error('Ya tienes una carpeta con ese nombre');
+      if (!row.name) throw new Error(tr('La carpeta necesita un nombre'));
+      if (T(table).some((f) => f.user_id === row.user_id && String(f.name).toLowerCase() === String(row.name).toLowerCase())) throw new Error(tr('Ya tienes una carpeta con ese nombre'));
     }
     if (table === 'exams') {
       const plan = demoPlan();
@@ -252,10 +253,10 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
           if (closed && (p.status ?? 'cerrado') === 'cerrado' && !onlyPublication) throw new Error('El examen está cerrado: reábrelo para modificarlo');
           if (p.answers_code) {
             if (p.answers_code === row.code) p.answers_code = null;
-            else if (T('exams').some((x) => x.id !== row.id && (x.code === p.answers_code || x.answers_code === p.answers_code))) throw new Error('Ese código ya está en uso: elige otro');
+            else if (T('exams').some((x) => x.id !== row.id && (x.code === p.answers_code || x.answers_code === p.answers_code))) throw new Error(tr('Ese código ya está en uso: elige otro'));
           }
           if (p.sheet_config && JSON.stringify(p.sheet_config) !== JSON.stringify(row.sheet_config) && T('sheets').some((s) => s.exam_id === row.id)) {
-            throw new Error('La hoja de respuestas queda bloqueada al subir hojas: crea un examen nuevo');
+            throw new Error(tr('La hoja de respuestas queda bloqueada al subir hojas: crea un examen nuevo'));
           }
           if (p.status === 'cerrado' && !closed) p.closed_at = now();
           if (p.status && p.status !== 'cerrado' && closed) p.closed_at = null;
@@ -263,7 +264,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
         } else {
           guardOpen(table, row);
           if (table === 'exam_layouts' && T('sheets').some((s) => s.exam_id === row.exam_id)) {
-            throw new Error('El layout queda bloqueado al subir hojas: crea un examen nuevo');
+            throw new Error(tr('El layout queda bloqueado al subir hojas: crea un examen nuevo'));
           }
         }
         Object.assign(row, p);
@@ -338,7 +339,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
           grading: e.answers_calculator ? e.grading_config : null,
         }) as T;
       }
-      if (!user) throw new Error('No autenticado');
+      if (!user) throw new Error(tr('No autenticado'));
       if (fn === 'create_organization') {
         const id = uuid();
         T('organizations').push({ id, name: String(args.p_name).trim(), retention_months: null, created_at: now() });
@@ -365,7 +366,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
         const e = exam(args.p_exam);
         const email = String(args.p_email).trim().toLowerCase();
         const p = T('profiles').find((x) => x.email === email && T('memberships').some((m) => m.user_id === x.id && m.org_id === e?.org_id));
-        if (!e || !p) throw new Error('No hay ningún profesor con ese email en tu organización');
+        if (!e || !p) throw new Error(tr('No hay ningún profesor con ese email en tu organización'));
         if (!T('exam_collaborators').some((c) => c.exam_id === e.id && c.user_id === p.id)) {
           T('exam_collaborators').push({ exam_id: e.id, user_id: p.id, added_by: user.id, created_at: now() });
         }
@@ -391,11 +392,11 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
             };
           }) as T;
       }
-      throw new Error(`Función no disponible en modo demo: ${fn}`);
+      throw new Error(tr('Función no disponible en modo demo: {fn}', { fn }));
     },
 
     async invoke<T>() {
-      throw new Error('No disponible en modo demo');
+      throw new Error(tr('No disponible en modo demo'));
       return undefined as T;
     },
 

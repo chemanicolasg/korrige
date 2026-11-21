@@ -4,6 +4,7 @@
  */
 import { Excluded, Submission, hasDoubt } from '../omr/group';
 import { LayoutDoc, SheetConfig, clampConfig, computeLayout } from '../omr/layout';
+import { tr } from '../i18n/app';
 import { Db } from './db';
 import { gradeSheet } from './grading';
 import { buildReviewItems, findDuplicates, NewReviewItem } from './review';
@@ -102,32 +103,32 @@ export function examImagePaths(sheets: Sheet[]): string[] {
 // Auditoría
 // ---------------------------------------------------------------------------
 export const ACTION_LABEL: Record<string, string> = {
-  organizacion_creada: 'Organización creada',
-  organizacion_editada: 'Organización editada',
-  valores_por_defecto: 'Valores por defecto de los exámenes cambiados',
-  invitacion_enviada: 'Invitación creada',
-  invitacion_aceptada: 'Invitación aceptada',
-  examen_creado: 'Examen creado',
-  examen_editado: 'Examen editado',
-  examen_duplicado: 'Examen duplicado',
-  examen_compartido: 'Examen compartido',
-  examen_dejado_de_compartir: 'Se dejó de compartir',
-  hoja_configurada: 'Hoja de respuestas configurada',
-  hojas_descargadas: 'Hojas descargadas',
-  correccion_configurada: 'Fórmula de corrección cambiada',
-  plantilla_modificada: 'Plantilla de respuestas modificada',
-  correspondencia_modificada: 'Correspondencia entre modelos modificada',
-  alumnos_importados: 'Lista de alumnos importada',
-  subida_pdf: 'PDF de hojas subido',
-  subida_eliminada: 'Subida eliminada',
-  correccion_manual: 'Corrección manual',
-  incidencia_resuelta: 'Incidencia resuelta',
-  recalculo: 'Notas recalculadas',
-  exportacion: 'Exportación',
-  examen_cerrado: 'Examen cerrado',
-  examen_reabierto: 'Examen reabierto',
-  examen_eliminado: 'Examen eliminado',
-  imagenes_borradas: 'Imágenes borradas (retención)',
+  organizacion_creada: tr('Organización creada'),
+  organizacion_editada: tr('Organización editada'),
+  valores_por_defecto: tr('Valores por defecto de los exámenes cambiados'),
+  invitacion_enviada: tr('Invitación creada'),
+  invitacion_aceptada: tr('Invitación aceptada'),
+  examen_creado: tr('Examen creado'),
+  examen_editado: tr('Examen editado'),
+  examen_duplicado: tr('Examen duplicado'),
+  examen_compartido: tr('Examen compartido'),
+  examen_dejado_de_compartir: tr('Se dejó de compartir'),
+  hoja_configurada: tr('Hoja de respuestas configurada'),
+  hojas_descargadas: tr('Hojas descargadas'),
+  correccion_configurada: tr('Fórmula de corrección cambiada'),
+  plantilla_modificada: tr('Plantilla de respuestas modificada'),
+  correspondencia_modificada: tr('Correspondencia entre modelos modificada'),
+  alumnos_importados: tr('Lista de alumnos importada'),
+  subida_pdf: tr('PDF de hojas subido'),
+  subida_eliminada: tr('Subida eliminada'),
+  correccion_manual: tr('Corrección manual'),
+  incidencia_resuelta: tr('Incidencia resuelta'),
+  recalculo: tr('Notas recalculadas'),
+  exportacion: tr('Exportación'),
+  examen_cerrado: tr('Examen cerrado'),
+  examen_reabierto: tr('Examen reabierto'),
+  examen_eliminado: tr('Examen eliminado'),
+  imagenes_borradas: tr('Imágenes borradas (retención)'),
 };
 
 export async function logAudit(db: Db, orgId: string, examId: string | null, action: string, details: Record<string, unknown> = {}) {
@@ -542,7 +543,7 @@ async function syncDuplicateItems(db: Db, data: ExamData, userId: string): Promi
 /** Aplica una corrección manual a una hoja, la registra y recalcula su nota. */
 export async function correctSheet(db: Db, data: ExamData, userId: string, sheetId: string, patch: SheetPatch, motivo = 'corrección manual'): Promise<ExamData> {
   const sheet = data.sheets.find((s) => s.id === sheetId);
-  if (!sheet) throw new Error('Hoja no encontrada');
+  if (!sheet) throw new Error(tr('Hoja no encontrada'));
   const cambios: { campo: string; pregunta?: number; antes: unknown; ahora: unknown }[] = [];
   const dbPatch: Record<string, unknown> = {};
   if (patch.answers) {
@@ -593,19 +594,19 @@ export type Resolution =
 /** Resuelve una incidencia de la cola de revisión. */
 export async function resolveItem(db: Db, data: ExamData, userId: string, itemId: string, res: Resolution): Promise<ExamData> {
   const item = data.items.find((it) => it.id === itemId);
-  if (!item) throw new Error('Incidencia no encontrada');
+  if (!item) throw new Error(tr('Incidencia no encontrada'));
   const sheet = data.sheets.find((s) => s.id === item.sheet_id);
-  if (!sheet) throw new Error('Hoja no encontrada');
+  if (!sheet) throw new Error(tr('Hoja no encontrada'));
   let next = data;
   const motivo = `revisión: ${item.kind}`;
   let related: string[] = [item.id];
 
   if (res.type === 'respuesta') {
-    if (item.question == null) throw new Error('Esta incidencia no es de una pregunta');
+    if (item.question == null) throw new Error(tr('Esta incidencia no es de una pregunta'));
     next = await correctSheet(db, next, userId, sheet.id, { answers: { [String(item.question)]: res.value } }, motivo);
   } else if (res.type === 'identificador') {
     const value = res.value.trim();
-    if (!/^\d+$/.test(value)) throw new Error('El identificador solo puede contener dígitos');
+    if (!/^\d+$/.test(value)) throw new Error(tr('El identificador solo puede contener dígitos'));
     next = await correctSheet(db, next, userId, sheet.id, { identifier: value }, motivo);
     // corregir el identificador resuelve todas las incidencias de identificador de la hoja
     related = next.items
