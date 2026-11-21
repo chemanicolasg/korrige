@@ -211,6 +211,38 @@ select tests.eq(tests.n($$select 1 from public.invitations where email = 'falsa@
 delete from public.invitations where email = 'falsa@uni-a.test';
 
 -- ---------------------------------------------------------------------------
+-- 3a. Publicación de respuestas para los alumnos (sin sesión)
+-- ---------------------------------------------------------------------------
+select tests.anon();
+select tests.eq(tests.n($$select 1 where public.public_answer_key((select 'X')) ->> 'status' = 'not_found'$$), 1, 'código inexistente: no encontrado');
+select tests.su();
+select set_config('tests.code', (select code from public.exams where id = 'e1000000-0000-0000-0000-000000000000'), false);
+select tests.anon();
+select tests.eq(tests.n($$select 1 where public.public_answer_key(current_setting('tests.code')) ->> 'status' = 'not_found'$$), 1, 'un examen sin publicar responde como si no existiera');
+select tests.login('a0000000-0000-0000-0000-000000000002'); -- Pablo publica para mañana
+update public.exams set answers_published = true, answers_publish_at = now() + interval '1 day' where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.anon();
+select tests.eq(tests.n($$select 1 where public.public_answer_key(current_setting('tests.code')) ->> 'status' = 'scheduled'$$), 1, 'publicación programada: se anuncia la fecha');
+select tests.eq(tests.n($$select 1 where public.public_answer_key(current_setting('tests.code')) ? 'models'$$), 0, 'antes de la hora no se entrega la plantilla');
+select tests.login('a0000000-0000-0000-0000-000000000002');
+update public.exams set answers_publish_at = now() - interval '1 minute', answers_code = 'ANATOMIA26' where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.anon();
+select tests.eq(tests.n($$select 1 where public.public_answer_key(current_setting('tests.code')) ->> 'status' = 'not_found'$$), 1, 'con código propio, el código del examen deja de valer');
+select tests.eq(tests.n($$select 1 where public.public_answer_key(' anatomia26 ') ->> 'status' = 'published'$$), 1, 'a la hora, el código elegido entrega la plantilla (sin distinguir mayúsculas)');
+select tests.eq(tests.n($$select 1 where jsonb_array_length(public.public_answer_key('ANATOMIA26') -> 'models') = 1$$), 1, 'una plantilla por modelo');
+select tests.eq(tests.n($$select 1 where public.public_answer_key('ANATOMIA26') -> 'grading' = 'null'::jsonb$$), 1, 'sin calculadora no se entrega la fórmula');
+select tests.eq(tests.n($$select 1 where public.public_answer_key('ANATOMIA26')::text ~ '12456790|García'$$), 0, 'nunca salen datos de alumnos');
+select tests.throws('select * from public.exams', 'anon sigue sin poder leer exams');
+select tests.login('b0000000-0000-0000-0000-000000000002'); -- Bruno, otra organización
+select tests.throws($$update public.exams set answers_code = 'ANATOMIA26' where id = 'e2000000-0000-0000-0000-000000000000'$$, 'dos exámenes no comparten código de publicación');
+select tests.throws($$update public.exams set answers_code = current_setting('tests.code') where id = 'e2000000-0000-0000-0000-000000000000'$$, 'ni se puede usar el código de otro examen');
+select tests.throws($$update public.exams set answers_code = 'abc' where id = 'e2000000-0000-0000-0000-000000000000'$$, 'el código elegido tiene un formato mínimo');
+select tests.login('a0000000-0000-0000-0000-000000000002');
+update public.exams set answers_published = false, answers_code = null, answers_calculator = true where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.anon();
+select tests.eq(tests.n($$select 1 where public.public_answer_key('ANATOMIA26') ->> 'status' = 'not_found'$$), 1, 'al retirar la publicación deja de verse');
+
+-- ---------------------------------------------------------------------------
 -- 3b. Carpetas personales de exámenes y varias organizaciones por profesor
 -- ---------------------------------------------------------------------------
 select tests.login('a0000000-0000-0000-0000-000000000002'); -- Pablo
@@ -283,6 +315,10 @@ select tests.throws($$insert into public.answer_keys (exam_id, org_id, model, ve
 select tests.throws($$update public.exams set title = 'cambio' where id = 'e1000000-0000-0000-0000-000000000000'$$, 'examen cerrado: no se edita la ficha');
 select tests.throws($$insert into storage.objects (bucket_id, name) values ('sheets', '0a000000-0000-0000-0000-000000000000/e1000000-0000-0000-0000-000000000000/x/2.jpg')$$, 'examen cerrado: no se suben imágenes');
 select tests.eq(tests.n('select 1 from public.sheets'), 1, 'examen cerrado: se sigue pudiendo leer');
+-- Con el examen cerrado se pueden publicar las respuestas (es lo habitual), pero nada más
+select tests.eq(tests.affected($$update public.exams set answers_published = true, answers_publish_at = now() where id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'examen cerrado: se pueden publicar las respuestas');
+select tests.throws($$update public.exams set answers_published = false, title = 'otro' where id = 'e1000000-0000-0000-0000-000000000000'$$, 'examen cerrado: no se cuela otro cambio junto a la publicación');
+select tests.eq(tests.affected($$update public.exams set answers_published = false where id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'examen cerrado: se puede retirar la publicación');
 select tests.eq(tests.affected($$update public.exams set status = 'con_resultados' where id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'Pablo reabre el examen');
 select tests.eq(tests.affected($$update public.sheets set identifier = '12456790'$$), 1, 'reabierto: vuelve a ser editable');
 

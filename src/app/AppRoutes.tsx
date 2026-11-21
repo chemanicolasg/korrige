@@ -11,6 +11,7 @@ const ExamPage = lazy(() => import('./ExamPage'));
 const OrgPage = lazy(() => import('./OrgPage'));
 const AccountPage = lazy(() => import('./AccountPage'));
 const PlanPage = lazy(() => import('./PlanPage'));
+const CheckAnswers = lazy(() => import('./CheckAnswers'));
 const Demo = lazy(() => import('./Demo'));
 const DevOmr = lazy(() => import('./DevOmr'));
 
@@ -51,6 +52,9 @@ export default function AppRoutes() {
     <Suspense fallback={<Spinner />}>
       <Routes>
         <Route path="/demo" element={<Demo />} />
+        {/* pública, sin sesión: respuestas correctas de un examen publicado */}
+        <Route path="/comprobar" element={<CheckAnswers />} />
+        <Route path="/comprobar/:code" element={<CheckAnswers />} />
         <Route path="/dev/omr" element={<DevOmr />} />
         <Route path="*" element={<Private />} />
       </Routes>

@@ -16,6 +16,11 @@ const only = process.argv[2];
 // build propio: sin Supabase (modo demo) y con un endpoint de ventas que el test intercepta
 execSync('npm run -s build', { stdio: 'inherit', env: { ...process.env, VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '', VITE_SALES_ENDPOINT: '/sales-lead-test' } });
 
+// si quedó un servidor de una ejecución anterior, los tests probarían un build (y unas cabeceras) antiguos
+if (await fetch(base).then(() => true, () => false)) {
+  console.error(`Ya hay un servidor en ${base}: ciérralo (pkill -f "vite preview") y vuelve a lanzar los tests.`);
+  process.exit(1);
+}
 const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
 const stop = () => server.kill();
 process.on('exit', stop);

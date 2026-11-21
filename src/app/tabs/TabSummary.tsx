@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ErrorBox, Field, Modal, Notice, fmtDateTime } from '../../components/ui';
-import { currentKeys, deleteExam, duplicateExam, isStudentSheet, logAudit, setExamClosed, updateExamFields, updateGrading } from '../../lib/service';
+import { keyIsComplete } from '../../lib/grading';
+import { currentKeys, deleteExam, duplicateExam, isStudentSheet, logAudit, setExamClosed, updateExamFields, updateGrading, updatePublication } from '../../lib/service';
 import { GradingConfig, Profile } from '../../lib/types';
 import { modelLetters } from '../../omr/layout';
+import { APP_URL } from '../../config';
 import { useSession } from '../AuthContext';
 import { useExam } from '../ExamPage';
 import { GradingFields } from '../GradingFields';
@@ -137,6 +139,137 @@ function Sharing() {
   );
 }
 
+/** Fecha ISO → valor de <input type="datetime-local"> en hora local. */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** Publicar las respuestas correctas para que los alumnos se comprueben en /comprobar. */
+function PublishAnswers() {
+  const { data, db, run, busy } = useExam();
+  const { exam } = data;
+  const future = !!exam.answers_publish_at && new Date(exam.answers_publish_at) > new Date();
+  const [on, setOn] = useState(!!exam.answers_published);
+  const [when, setWhen] = useState<'now' | 'at'>(future ? 'at' : 'now');
+  const [at, setAt] = useState(future ? toLocalInput(exam.answers_publish_at) : '');
+  const [own, setOwn] = useState(!!exam.answers_code);
+  const [custom, setCustom] = useState(exam.answers_code ?? '');
+  const [calc, setCalc] = useState(!!exam.answers_calculator);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const keys = currentKeys(data.keys);
+  const missing = modelLetters(exam.sheet_config).filter((m) => !keys[m] || !keyIsComplete(keys[m].answers, exam.sheet_config.nQuestions));
+  const code = exam.answers_code || exam.code;
+  const link = `${APP_URL}/comprobar/${code}`;
+  const dirty =
+    on !== !!exam.answers_published ||
+    calc !== !!exam.answers_calculator ||
+    (own ? custom : '') !== (exam.answers_code ?? '') ||
+    (on && (when === 'at' ? at !== toLocalInput(exam.answers_publish_at) : future || !exam.answers_publish_at));
+
+  async function save() {
+    setError('');
+    const answers_code = own ? custom.trim().toUpperCase() : null;
+    if (answers_code && !/^[A-Z0-9]{5,16}$/.test(answers_code)) return setError('El código debe tener entre 5 y 16 letras o números, sin espacios ni acentos.');
+    if (on && when === 'at' && !at) return setError('Indica la fecha y la hora de publicación.');
+    // «ahora»: si ya estaban publicadas se conserva la fecha original
+    const answers_publish_at = !on ? (exam.answers_publish_at ?? null) : when === 'at' ? new Date(at).toISOString() : !future && exam.answers_publish_at ? exam.answers_publish_at : new Date().toISOString();
+    const ok = await run((d) => updatePublication(db, d, { answers_published: on, answers_publish_at, answers_code, answers_calculator: calc }));
+    if (!ok) setError('No se ha podido guardar. Si has elegido un código propio, puede que ya esté en uso: prueba con otro.');
+  }
+
+  return (
+    <section className="card p-5" data-testid="publish-answers">
+      <h2 className="font-semibold">Respuestas para los alumnos</h2>
+      <p className="mt-1 text-sm text-slate-600">
+        Publica las respuestas correctas para que cada alumno se compruebe en <span className="font-mono text-xs">korrige.es/comprobar</span> con un código. No se muestran notas ni datos de ningún alumno.
+      </p>
+      <label className="mt-4 flex items-center gap-2 text-sm font-medium">
+        <input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} />
+        Publicar las respuestas correctas
+      </label>
+      {on && (
+        <div className="mt-3 space-y-4 border-l-2 border-slate-200 pl-4">
+          {missing.length > 0 && <Notice tone="warn">Falta completar la plantilla{missing.length > 1 ? ` de los modelos ${missing.join(', ')}` : exam.sheet_config.nModels > 1 ? ` del modelo ${missing[0]}` : ''}: los alumnos solo verán lo que esté introducido.</Notice>}
+          <fieldset>
+            <legend className="label">¿Cuándo se ven?</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="pub-when" checked={when === 'now'} onChange={() => setWhen('now')} />
+              Desde ahora
+            </label>
+            <label className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
+              <input type="radio" name="pub-when" checked={when === 'at'} onChange={() => setWhen('at')} />
+              A partir de
+              <input className="input w-auto py-1" type="datetime-local" aria-label="Fecha y hora de publicación" value={at} onFocus={() => setWhen('at')} onChange={(e) => setAt(e.target.value)} />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend className="label">Código para los alumnos</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="pub-code" checked={!own} onChange={() => setOwn(false)} />
+              El del examen: <span className="font-mono font-semibold">{exam.code}</span>
+            </label>
+            <label className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
+              <input type="radio" name="pub-code" checked={own} onChange={() => setOwn(true)} />
+              Elegir uno:
+              <input
+                className="input w-44 py-1 font-mono uppercase"
+                aria-label="Código elegido"
+                placeholder="ANATOMIA26"
+                maxLength={16}
+                value={custom}
+                onFocus={() => setOwn(true)}
+                onChange={(e) => setCustom(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+              />
+            </label>
+            <p className="mt-1 text-xs text-slate-500">Entre 5 y 16 letras o números. Si eliges uno, el código del examen deja de servir para esto.</p>
+          </fieldset>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-0.5" checked={calc} onChange={(e) => setCalc(e.target.checked)} />
+            <span>
+              Ofrecer la calculadora de nota
+              <span className="block text-xs text-slate-500">El alumno marca lo que contestó y ve su nota estimada con la fórmula de este examen. No se guarda nada.</span>
+            </span>
+          </label>
+        </div>
+      )}
+      <div className="mt-3">
+        <ErrorBox error={error} />
+      </div>
+      <button className="btn-primary mt-3" disabled={!dirty || busy} onClick={() => void save()}>
+        {on ? (exam.answers_published ? 'Guardar cambios' : 'Publicar') : 'Retirar la publicación'}
+      </button>
+      {exam.answers_published && (
+        <div className="mt-4 rounded-lg bg-brand-50 p-3 text-sm" data-testid="publish-status">
+          <p className="font-medium text-brand-800">
+            {future ? `Programadas para el ${fmtDateTime(exam.answers_publish_at ?? '')}` : 'Publicadas'} · código <span className="font-mono">{code}</span>
+          </p>
+          <p className="mt-1 break-all font-mono text-xs text-slate-600">{link}</p>
+          <div className="mt-2 flex gap-2">
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                void navigator.clipboard?.writeText(link);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+            >
+              {copied ? 'Copiado' : 'Copiar enlace'}
+            </button>
+            <a className="btn btn-sm" href={`/comprobar/${code}`} target="_blank" rel="noreferrer">
+              Ver como alumno
+            </a>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function TabSummary() {
   const { data, db, run, readOnly, busy, userId } = useExam();
   const { user, role } = useSession();
@@ -193,6 +326,7 @@ export default function TabSummary() {
       </div>
       <div className="space-y-4">
         <Steps />
+        <PublishAnswers />
         <Sharing />
         <section className="card space-y-3 p-5">
           <h2 className="font-semibold">Acciones</h2>

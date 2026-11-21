@@ -460,6 +460,11 @@ export default function Landing() {
                 </Link>
               </li>
               <li>
+                <a className="underline-offset-4 hover:underline" href="/comprobar">
+                  Soy alumno: comprobar respuestas
+                </a>
+              </li>
+              <li>
                 <Link className="underline-offset-4 hover:underline" to="/academias">
                   Para academias de oposiciones
                 </Link>

@@ -112,9 +112,36 @@ export interface Exam {
   model_map: ModelMap;
   closed_at: string | null;
   images_purged_at: string | null;
+  /** Respuestas correctas visibles para los alumnos en /comprobar. */
+  answers_published?: boolean;
+  /** Desde cuándo se ven (null = todavía no se han publicado nunca). */
+  answers_publish_at?: string | null;
+  /** Código elegido por el profesor; null = vale el código del examen. */
+  answers_code?: string | null;
+  /** Ofrecer a los alumnos la calculadora de nota. */
+  answers_calculator?: boolean;
   created_at: string;
   updated_at: string;
 }
+
+/** Lo que recibe la página pública /comprobar (función public_answer_key). */
+export type PublicKey =
+  | { status: 'not_found' }
+  | { status: 'scheduled'; title: string; subject: string; publish_at: string }
+  | {
+      status: 'published';
+      title: string;
+      subject: string;
+      session: string;
+      exam_date: string | null;
+      n_questions: number;
+      n_options: number;
+      models: { model: string; answers: KeyAnswers }[];
+      published_at: string | null;
+      updated_at: string | null;
+      /** Solo si el profesor activó la calculadora de nota. */
+      grading: GradingConfig | null;
+    };
 
 export interface ExamLayoutRow {
   exam_id: string;

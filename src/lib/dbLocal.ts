@@ -12,6 +12,7 @@ const STORE_KEY = 'korrige-demo-v1';
 const SESSION_KEY = 'korrige-demo-session';
 const IDB_NAME = 'korrige-demo';
 const NO_ID = new Set(['memberships', 'exam_collaborators', 'results', 'exam_layouts', 'exam_folder_items']);
+const PUBLICATION_FIELDS = ['answers_published', 'answers_publish_at', 'answers_code', 'answers_calculator'];
 const EXAM_CHILDREN = ['exam_layouts', 'exam_collaborators', 'answer_keys', 'students', 'uploads', 'sheets', 'results', 'review_items'];
 
 export const DEMO_USER: SessionUser = { id: '00000000-0000-4000-8000-000000000001', email: 'demo@korrige.es' };
@@ -246,7 +247,13 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
         const p = structuredClone(patch) as Row;
         if (table === 'exams') {
           const closed = row.status === 'cerrado';
-          if (closed && (p.status ?? 'cerrado') === 'cerrado') throw new Error('El examen está cerrado: reábrelo para modificarlo');
+          // con el examen cerrado solo se puede publicar o retirar las respuestas
+          const onlyPublication = Object.keys(p).every((k) => PUBLICATION_FIELDS.includes(k));
+          if (closed && (p.status ?? 'cerrado') === 'cerrado' && !onlyPublication) throw new Error('El examen está cerrado: reábrelo para modificarlo');
+          if (p.answers_code) {
+            if (p.answers_code === row.code) p.answers_code = null;
+            else if (T('exams').some((x) => x.id !== row.id && (x.code === p.answers_code || x.answers_code === p.answers_code))) throw new Error('Ese código ya está en uso: elige otro');
+          }
           if (p.sheet_config && JSON.stringify(p.sheet_config) !== JSON.stringify(row.sheet_config) && T('sheets').some((s) => s.exam_id === row.id)) {
             throw new Error('La hoja de respuestas queda bloqueada al subir hojas: crea un examen nuevo');
           }
@@ -307,6 +314,30 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
       save();
     },
     async rpc<T>(fn: string, args: Record<string, unknown> = {}) {
+      // lo único público: la plantilla de un examen publicado (página /comprobar)
+      if (fn === 'public_answer_key') {
+        const code = String(args.p_code ?? '').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+        const e = T('exams').find((x) => x.answers_published && (x.answers_code === code || (!x.answers_code && x.code === code)));
+        if (!e || code.length < 4) return { status: 'not_found' } as T;
+        if (e.answers_publish_at && new Date(String(e.answers_publish_at)) > new Date()) return { status: 'scheduled', title: e.title, subject: e.subject, publish_at: e.answers_publish_at } as T;
+        const latest: Record<string, Row> = {};
+        for (const k of T('answer_keys').filter((k) => k.exam_id === e.id)) if (!latest[String(k.model)] || Number(latest[String(k.model)].version) < Number(k.version)) latest[String(k.model)] = k;
+        const models = Object.values(latest).sort((a, b) => String(a.model).localeCompare(String(b.model)));
+        const cfg = e.sheet_config as { nQuestions: number; nOptions: number };
+        return structuredClone({
+          status: 'published',
+          title: e.title,
+          subject: e.subject,
+          session: e.session,
+          exam_date: e.exam_date,
+          n_questions: cfg.nQuestions,
+          n_options: cfg.nOptions,
+          models: models.map((k) => ({ model: k.model, answers: k.answers })),
+          published_at: e.answers_publish_at ?? null,
+          updated_at: models.map((k) => String(k.created_at)).sort().pop() ?? null,
+          grading: e.answers_calculator ? e.grading_config : null,
+        }) as T;
+      }
       if (!user) throw new Error('No autenticado');
       if (fn === 'create_organization') {
         const id = uuid();

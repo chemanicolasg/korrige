@@ -256,6 +256,24 @@ export async function updateGrading(db: Db, data: ExamData, grading: GradingConf
   return syncResults(db, { ...data, exam: { ...data.exam, ...exam, grading_config: grading } }, 'cambio de fórmula');
 }
 
+export interface Publication {
+  answers_published: boolean;
+  answers_publish_at: string | null;
+  answers_code: string | null;
+  answers_calculator: boolean;
+}
+
+/** Publica (o retira) las respuestas correctas para los alumnos. Se puede hacer con el examen cerrado. */
+export async function updatePublication(db: Db, data: ExamData, pub: Publication): Promise<ExamData> {
+  const [exam] = await db.update<Exam>('exams', { id: data.exam.id }, pub);
+  await logAudit(db, data.exam.org_id, data.exam.id, pub.answers_published ? 'respuestas_publicadas' : 'respuestas_retiradas', {
+    desde: pub.answers_publish_at,
+    codigo: pub.answers_code ?? data.exam.code,
+    calculadora: pub.answers_calculator,
+  }).catch(() => undefined); // con el examen cerrado el registro puede estar bloqueado: la publicación no depende de él
+  return { ...data, exam: { ...data.exam, ...exam, ...pub } };
+}
+
 export async function updateModelMap(db: Db, data: ExamData, map: ModelMap): Promise<ExamData> {
   const [exam] = await db.update<Exam>('exams', { id: data.exam.id }, { model_map: map });
   await logAudit(db, exam.org_id, exam.id, 'correspondencia_modificada', { modelos: Object.keys(map) });
