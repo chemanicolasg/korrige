@@ -75,8 +75,9 @@ describe('flujo completo del profesor', () => {
   });
 
   it('lee el PDF escaneado, excluye hojas ajenas y guarda todo con sus incidencias', async () => {
+    // plantilla del modelo B, introducida en pantalla (P10 con dos respuestas válidas)
+    data = await saveKey(db, data, uid, 'B', Object.fromEntries(keyBLetters.map((l, i) => [String(i + 1), { c: i === 9 ? ['C', 'D'] : [l] }])));
     const pdf = await generateFilledPdf(data.layout, [
-      { identifier: '', model: 'B', answers: Object.fromEntries(keyBLetters.map((l, i) => [String(i + 1), i === 9 ? 'CD' : l])), isKey: true }, // plantilla B (P10 con 2 correctas)
       { identifier: '10000001', model: 'A', answers: allRight('A') }, // 10
       { identifier: '10000002', model: 'B', answers: { ...allRight('B'), '1': 'A', '2': '' }, upsideDown: true }, // 1 error, 1 blanco, al revés
       { identifier: '10000003', model: 'A', answers: { ...allRight('A'), '3': 'AB' } }, // doble marca
@@ -95,23 +96,22 @@ describe('flujo completo del profesor', () => {
       data.layout,
       { images: true },
     );
-    expect(pages).toHaveLength(10);
+    expect(pages).toHaveLength(9);
     const { submissions, excluded } = groupPages(pages, data.layout, data.exam.code);
     expect(excluded.map((e) => e.reason)).toEqual(['Hoja de otro examen (OTROEXAM)']);
-    expect(submissions).toHaveLength(9);
-    expect(submissions[0].isKey).toBe(true);
-    expect(submissions[2].incidents).toContain('Hoja escaneada al revés (corregido)');
+    expect(submissions).toHaveLength(8);
+    expect(submissions.some((s) => s.isKey)).toBe(false);
+    expect(submissions[1].incidents).toContain('Hoja escaneada al revés (corregido)');
 
     data = await saveUpload(db, data, uid, { submissions, excluded, duplicatePolicy: 'conservar' });
     await reload();
     expect(data.exam.status).toBe('con_resultados');
-    expect(data.sheets).toHaveLength(9);
+    expect(data.sheets).toHaveLength(8);
     expect(data.sheets.every((s) => s.pages[0].image_path?.startsWith(`${data.exam.org_id}/${data.exam.id}/`))).toBe(true);
     expect(await db.imageUrl(data.sheets[1].pages[0].image_path!)).toBeTruthy();
 
-    // plantilla B detectada en el PDF (burbuja P), con dos respuestas válidas en la 10
     const kb = currentKeys(data.keys).B;
-    expect(kb.source).toBe('escaneo');
+    expect(kb.source).toBe('manual');
     expect(kb.answers['10'].c).toEqual(['C', 'D']);
     expect(kb.answers['1'].c).toEqual([keyBLetters[0]]);
 

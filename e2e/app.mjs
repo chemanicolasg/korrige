@@ -15,7 +15,7 @@ export async function testApp(baseUrl, outDir) {
     await page.waitForLoadState('networkidle');
   };
   try {
-    // 1) la demo crea el examen de ejemplo leyendo 34 hojas "escaneadas" en el worker
+    // 1) la demo crea el examen de ejemplo leyendo 33 hojas "escaneadas" en el worker
     //    (antes se interrumpe la carga a medias: la demo incompleta debe descartarse y rehacerse)
     await page.goto(`${baseUrl}/demo`);
     await page.waitForTimeout(2500);

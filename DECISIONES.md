@@ -68,3 +68,5 @@ Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado
 - El linter de seguridad de Supabase detectó que los usuarios autenticados podían ejecutar por RPC funciones internas (p. ej. `mark_images_purged`), porque Supabase concede EXECUTE por defecto. Se corrigió con la migración `20261120100400_harden_functions.sql` y hay tests que lo cubren.
 
 **Sigue sin probar:** el envío real con Resend (falta `RESEND_API_KEY`), el enlace mágico y los correos de confirmación (dependen de la configuración de Auth/SMTP), la ejecución programada de `retention-purge` y el despliegue en Netlify.
+
+39. **Sin burbuja «P» en las hojas nuevas:** la hoja ya no imprime el recuadro «Solo profesorado»; la plantilla se introduce en la plataforma. El lector no cambia: los exámenes creados antes conservan su layout guardado (con la burbuja) y sus hojas-plantilla se siguen detectando. `computeLayout(…, { keyBubble: true })` reproduce la hoja de referencia para los tests.

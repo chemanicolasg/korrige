@@ -19,7 +19,7 @@ beforeAll(async () => {
 describe('layout', () => {
   it('reproduce exactamente el layout de referencia (100 preguntas, A–E, 4 modelos, NIA de 8)', () => {
     const ref: PageLayout = JSON.parse(fs.readFileSync(path.join(REF, 'hoja_respuestas_prueba_layout.json'), 'utf8'));
-    const lay = computeLayout('PRUEBA-01', { ...DEFAULT_SHEET_CONFIG, nModels: 4 }).pages[0];
+    const lay = computeLayout('PRUEBA-01', { ...DEFAULT_SHEET_CONFIG, nModels: 4 }, { keyBubble: true }).pages[0];
     for (const k of ['exam_id', 'page_mm', 'markers', 'nia', 'modelo', 'plantilla', 'preguntas', 'radius_mm', 'opciones', 'qr'] as const) {
       // la referencia arrastra ruido de coma flotante (24.200000000000017): se compara a 1e-6
       expect(JSON.parse(JSON.stringify(ref[k], (_, v) => (typeof v === 'number' ? Math.round(v * 1e6) / 1e6 : v))), k).toEqual(lay[k]);
@@ -88,8 +88,18 @@ describe('hoja generada → lector (ida y vuelta)', () => {
     }
   });
 
+  it('las hojas nuevas no llevan la burbuja de plantilla (se introduce en la plataforma)', async () => {
+    const doc = computeLayout('SINPLANT', { ...DEFAULT_SHEET_CONFIG, nQuestions: 40, nOptions: 4, nModels: 2 });
+    expect(doc.pages[0].plantilla).toBeNull();
+    const pages = await renderPdf(await generateSheetPdf(doc));
+    // donde iba la burbuja «P» ya no hay nada impreso que el lector pueda tomar por una marca
+    const r = readPage(cv, pages[0], doc, { pagina: 1 }).result;
+    expect(r.es_plantilla).toBe(false);
+    expect(r.qr).toBe('UICOMR|SINPLANT|v1');
+  });
+
   it('hoja de 2 páginas con 3 opciones y un solo modelo; plantilla marcada', async () => {
-    const doc = computeLayout('DOSPAG01', { ...DEFAULT_SHEET_CONFIG, nQuestions: 150, nOptions: 3, nModels: 1, idDigits: 6 });
+    const doc = computeLayout('DOSPAG01', { ...DEFAULT_SHEET_CONFIG, nQuestions: 150, nOptions: 3, nModels: 1, idDigits: 6 }, { keyBubble: true }); // hoja antigua, con burbuja «P»
     const pages = await renderPdf(await generateSheetPdf(doc));
     expect(pages).toHaveLength(2);
     paintBubble(pages[1], ...doc.pages[1].preguntas['150'].C);

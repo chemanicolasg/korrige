@@ -105,8 +105,8 @@ export async function seedDemo(db: Db, orgId: string, userId: string, process: P
     return canon === PROBLEMATICA || canon === DIFICIL ? wrong[0] : wrong[Math.floor(random() * 3)];
   };
   const sheets: FilledSheet[] = [];
-  // hoja-plantilla del modelo B (burbuja «P»): se detecta sola al subir el PDF
-  sheets.push({ identifier: '', model: 'B', isKey: true, answers: Object.fromEntries(perm.map((a, i) => [String(i + 1), keyA[String(a)].c[0]])) });
+  // plantilla del modelo B: las mismas preguntas en otro orden
+  data = await saveKey(db, data, userId, 'B', Object.fromEntries(perm.map((a, i) => [String(i + 1), { c: [keyA[String(a)].c[0]] }])));
   const present = students.slice(0, 32); // 2 alumnos no se presentan
   present.forEach((st, idx) => {
     const ability = 0.15 + random() * 0.8;

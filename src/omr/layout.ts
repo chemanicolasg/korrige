@@ -147,7 +147,16 @@ export function pageCount(nQuestions: number): number {
 }
 
 /** Calcula el layout completo (1 o 2 páginas) para una configuración. */
-export function computeLayout(examCode: string, config: SheetConfig): LayoutDoc {
+export interface LayoutOptions {
+  /**
+   * Imprimir la burbuja «P» (hoja-plantilla del profesor), como en la hoja de referencia.
+   * Las hojas nuevas no la llevan: la plantilla se introduce en la plataforma. Los exámenes
+   * creados antes conservan su layout guardado y se siguen leyendo igual.
+   */
+  keyBubble?: boolean;
+}
+
+export function computeLayout(examCode: string, config: SheetConfig, opts: LayoutOptions = {}): LayoutDoc {
   const cfg = clampConfig(config);
   const nPages = pageCount(cfg.nQuestions);
   const opciones = ALL_OPTIONS.slice(0, cfg.nOptions);
@@ -174,12 +183,12 @@ export function computeLayout(examCode: string, config: SheetConfig): LayoutDoc 
       nia.push(colPts);
     }
 
-    // Modelo y plantilla
+    // Modelo (y, solo en hojas antiguas o de referencia, la burbuja de plantilla)
     const modelo: Record<string, Pt> = {};
     [...modelos].forEach((m, i) => {
       modelo[m] = [r4(GEO.modeloX + 3 + i * 7), r4(GEO.top - 8)];
     });
-    const plantilla: Pt = [GEO.modeloX + 3, GEO.top - 27];
+    const plantilla: Pt | null = opts.keyBubble ? [GEO.modeloX + 3, GEO.top - 27] : null;
 
     // Respuestas: columnas de 25
     const preguntas: Record<string, Record<string, Pt>> = {};

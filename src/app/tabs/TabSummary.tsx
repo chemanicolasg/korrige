@@ -18,7 +18,7 @@ function Steps() {
   const nSheets = data.sheets.filter(isStudentSheet).length;
   const steps: [boolean, string, string, string][] = [
     [data.exam.status !== 'borrador', 'Descarga e imprime la hoja de respuestas', 'hoja', 'Imprime al 100 % («tamaño real»).'],
-    [models.every((m) => keys[m]), 'Define la plantilla de respuestas correctas', 'plantillas', 'En pantalla, o marcando la burbuja «P» en una hoja y escaneándola con las demás.'],
+    [models.every((m) => keys[m]), 'Define la plantilla de respuestas correctas', 'plantillas', 'En la pestaña «Plantillas», marcando la respuesta correcta de cada pregunta.'],
     [nSheets > 0, 'Escanea el taco y sube el PDF', 'subir', 'Escanea todas las hojas de golpe en la fotocopiadora y envíatelas por correo.'],
     [nSheets > 0 && pending === 0, 'Revisa las incidencias', 'revision', pending ? `${pending} pendientes.` : 'Dobles marcas, marcas flojas, identificadores dudosos…'],
     [data.exam.status === 'cerrado', 'Exporta las notas y cierra el examen', 'notas', 'Excel o CSV para Moodle.'],

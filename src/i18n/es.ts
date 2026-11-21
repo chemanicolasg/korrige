@@ -45,7 +45,7 @@ export const es = {
   features: {
     title: 'Todo lo que necesita un examen de verdad',
     items: [
-      ['Varios modelos de examen', 'Hasta 4 modelos con su propia plantilla. La hoja-plantilla del profesor también se puede escanear con el taco.'],
+      ['Varios modelos de examen', 'Hasta 4 modelos con las preguntas en distinto orden. Cada hoja se corrige con la plantilla de su modelo.'],
       ['Penalización configurable', 'Sin penalización, fórmula clásica o la tuya. Anula una pregunta o acepta dos respuestas y todo se recalcula al instante.'],
       ['Revisión de dudas con imagen', 'Dobles marcas, marcas flojas o un NIA mal rellenado: ves el recorte de la hoja y decides con un clic.'],
       ['Estadísticas por pregunta', 'Dificultad, discriminación y análisis de distractores. Detecta las preguntas candidatas a anulación.'],
