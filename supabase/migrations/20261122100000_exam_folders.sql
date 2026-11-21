@@ -54,5 +54,7 @@ create policy exam_folder_items_update on public.exam_folder_items for update to
 revoke all on public.exam_folders, public.exam_folder_items from anon, authenticated;
 grant select, insert, delete on public.exam_folders, public.exam_folder_items to authenticated;
 grant update (name) on public.exam_folders to authenticated;
-grant update (folder_id) on public.exam_folder_items to authenticated;
+-- la app guarda con «insert … on conflict do update», que necesita permiso de update en las tres columnas;
+-- la política exam_folder_items_update impide cambiar de dueño o apuntar a un examen o carpeta ajenos
+grant update (user_id, exam_id, folder_id) on public.exam_folder_items to authenticated;
 grant all on public.exam_folders, public.exam_folder_items to service_role;

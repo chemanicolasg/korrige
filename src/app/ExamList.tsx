@@ -111,9 +111,11 @@ export function ExamList() {
       if (folderId) await db.upsert('exam_folder_items', { user_id: user.id, exam_id: examId, folder_id: folderId }, 'user_id,exam_id');
       else await db.remove('exam_folder_items', { user_id: user.id, exam_id: examId });
       setError('');
+      return true;
     } catch (e) {
       setPlaced(prev);
       setError((e as Error).message);
+      return false;
     }
   }
 
@@ -131,8 +133,9 @@ export function ExamList() {
       } else {
         const [f] = await db.insert<ExamFolder>('exam_folders', { user_id: user.id, name });
         setFolders((fs) => [...fs, f]);
-        if (form.examId) await move(form.examId, f.id);
-        else setFFolder(f.id);
+        // si no se pudo guardar el examen, el error de move() se queda a la vista
+        if (form.examId && !(await move(form.examId, f.id))) return setForm(null);
+        if (!form.examId) setFFolder(f.id);
       }
       setForm(null);
       setError('');

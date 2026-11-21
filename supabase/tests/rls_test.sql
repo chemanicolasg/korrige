@@ -214,6 +214,12 @@ insert into public.exam_folders (id, name) values ('fb000000-0000-0000-0000-0000
 select tests.throws($$insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fa000000-0000-0000-0000-000000000001')$$, 'no se guarda nada en la carpeta de otro');
 insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fb000000-0000-0000-0000-000000000001');
 select tests.throws($$update public.exam_folder_items set folder_id = 'fa000000-0000-0000-0000-000000000001'$$, 'ni se mueve un examen a la carpeta de otro');
+insert into public.exam_folders (id, name) values ('fb000000-0000-0000-0000-000000000002', 'Otra');
+select tests.eq(tests.affected($$insert into public.exam_folder_items (user_id, exam_id, folder_id) values (auth.uid(), 'e2000000-0000-0000-0000-000000000000', 'fb000000-0000-0000-0000-000000000002') on conflict (user_id, exam_id) do update set user_id = excluded.user_id, exam_id = excluded.exam_id, folder_id = excluded.folder_id$$), 1, 'mover un examen de carpeta (upsert, como hace la app)');
+select tests.eq(tests.n($$select 1 from public.exam_folder_items where folder_id = 'fb000000-0000-0000-0000-000000000002'$$), 1, 'el examen queda en la carpeta nueva');
+select tests.throws($$update public.exam_folder_items set user_id = 'a0000000-0000-0000-0000-000000000002'$$, 'no se puede pasar lo guardado a nombre de otro');
+select tests.eq(tests.affected($$delete from public.exam_folders where id = 'fb000000-0000-0000-0000-000000000002'$$), 1, 'se borra la carpeta de destino');
+insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fb000000-0000-0000-0000-000000000001');
 select tests.eq(tests.affected($$delete from public.exam_folders where id = 'fb000000-0000-0000-0000-000000000001'$$), 1, 'Bruno borra su carpeta');
 select tests.eq(tests.n('select 1 from public.exam_folder_items'), 0, 'al borrar la carpeta se vacía, y el examen sigue existiendo');
 select tests.eq(tests.n($$select 1 from public.exams where id = 'e2000000-0000-0000-0000-000000000000'$$), 1, 'el examen no se borra con la carpeta');
