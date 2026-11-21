@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { SUPABASE_CONFIGURED } from '../config';
 import { Db, setDemoMode } from '../lib/db';
 import { useAuth } from './AuthContext';
+import { LangSelect } from './LangSelect';
 
 export async function signOutEverywhere(db: Db) {
   await db.signOut();
@@ -105,6 +106,10 @@ export function UserMenu({ onTutorial }: { onTutorial: () => void }) {
                 Ver el tutorial
               </button>
             )}
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3 border-t border-slate-100 px-3 pb-1 pt-3 text-sm text-slate-700">
+            <span>Idioma</span>
+            <LangSelect />
           </div>
           <div className="mt-2 border-t border-slate-100 pt-2">
             <button role="menuitem" className={`${item} text-red-700 hover:bg-red-50`} onClick={() => void signOutEverywhere(db)}>

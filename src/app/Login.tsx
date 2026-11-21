@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { ErrorBox, Field, Logo, Notice } from '../components/ui';
 import { useAuth } from './AuthContext';
+import { LangSelect } from './LangSelect';
 
 type Mode = 'entrar' | 'crear' | 'enlace' | 'recuperar' | 'nueva';
 
@@ -67,10 +68,11 @@ export default function Login() {
   const needsPassword = mode === 'entrar' || mode === 'crear' || mode === 'nueva';
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-bone-100 px-4 py-10">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-bone-100 px-4 py-10">
       <Link to="/" className="mb-6 text-xl">
         <Logo />
       </Link>
+      <LangSelect className="absolute right-4 top-4" />
       <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6">
         <h1 className="text-lg font-semibold">{titles[mode]}</h1>
         {db.kind === 'local' && <Notice>Modo demo: pulsa «Entrar» con cualquier email. Los datos se guardan solo en este navegador.</Notice>}

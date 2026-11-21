@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ErrorBox, Field, Notice, fmtDate } from '../components/ui';
 import { SALES_EMAIL } from '../config';
 import { useAuth } from './AuthContext';
+import { LangSelect } from './LangSelect';
 import { signOutEverywhere } from './UserMenu';
 
 const ROLE: Record<string, string> = { admin: 'Administrador', teacher: 'Profesor' };
@@ -192,6 +193,14 @@ export default function AccountPage() {
             </div>
           </form>
         )}
+      </section>
+
+      <section className="card p-6">
+        <h2 className="text-base font-semibold">Idioma</h2>
+        <p className="mt-1 text-sm text-slate-600">Idioma de la aplicación en este navegador. El idioma de las hojas de respuestas se elige en cada examen.</p>
+        <div className="mt-3">
+          <LangSelect />
+        </div>
       </section>
 
       <section className="card scroll-mt-6 p-6" id="contrasena">

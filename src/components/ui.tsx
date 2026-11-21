@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef } from 'react';
+import { bcp } from '../i18n/app';
 import { ExamStatus, STATUS_LABEL } from '../lib/types';
 
 export function Spinner({ label = 'Cargando…' }: { label?: string }) {
@@ -97,10 +98,10 @@ export function Stat({ label, value, hint }: { label: string; value: ReactNode; 
   );
 }
 
-export const fmtDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
+export const fmtDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString(bcp(), { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
 export const fmtDateTime = (iso: string | null | undefined) =>
-  iso ? new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
-export const fmtNum = (n: number, decimals = 2) => n.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  iso ? new Date(iso).toLocaleString(bcp(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+export const fmtNum = (n: number, decimals = 2) => n.toLocaleString(bcp(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 /** Logotipo: la «o» es una burbuja de la hoja rellenada con boli azul. */
 export function Logo({ className = '' }: { className?: string }) {
