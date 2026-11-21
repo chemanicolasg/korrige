@@ -1,8 +1,8 @@
 import { ReactNode, useEffect, useRef } from 'react';
-import { bcp } from '../i18n/app';
+import { bcp, tr } from '../i18n/app';
 import { ExamStatus, STATUS_LABEL } from '../lib/types';
 
-export function Spinner({ label = 'Cargando…' }: { label?: string }) {
+export function Spinner({ label = tr('Cargando…') }: { label?: string }) {
   return (
     <div role="status" className="flex items-center gap-3 p-6 text-sm text-slate-500">
       <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-brand-600" aria-hidden />
@@ -18,7 +18,7 @@ export function ErrorBox({ error, onRetry }: { error: string; onRetry?: () => vo
       <span>{error}</span>
       {onRetry && (
         <button className="btn btn-sm shrink-0" onClick={onRetry}>
-          Reintentar
+          {tr('Reintentar')}
         </button>
       )}
     </div>
@@ -78,7 +78,7 @@ export function Modal({ title, onClose, children, wide }: { title: string; onClo
       <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title} className={`card my-6 w-full ${wide ? 'max-w-6xl' : 'max-w-lg'} outline-none`}>
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button className="btn-ghost btn-sm" onClick={onClose} aria-label="Cerrar">
+          <button className="btn-ghost btn-sm" onClick={onClose} aria-label={tr('Cerrar')}>
             ✕
           </button>
         </div>

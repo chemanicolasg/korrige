@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { Spinner } from '../components/ui';
+import { tr } from '../i18n/app';
 import AppShell from './AppShell';
 import { AuthProvider } from './AuthContext';
 import { ExamList, ExamNew } from './ExamList';
@@ -18,9 +19,9 @@ const DevOmr = lazy(() => import('./DevOmr'));
 function NotFound() {
   return (
     <div className="p-16 text-center">
-      <h1 className="text-2xl font-semibold">Página no encontrada</h1>
+      <h1 className="text-2xl font-semibold">{tr('Página no encontrada')}</h1>
       <Link to="/" className="btn mt-4">
-        Ir al inicio
+        {tr('Ir al inicio')}
       </Link>
     </div>
   );
@@ -28,7 +29,7 @@ function NotFound() {
 
 function Private() {
   return (
-    <AuthProvider fallback={<Spinner label="Conectando…" />}>
+    <AuthProvider fallback={<Spinner label={tr('Conectando…')} />}>
       <Routes>
         <Route path="/acceso" element={<Login />} />
         <Route path="/app" element={<AppShell />}>

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { PLAN } from '../config';
+import { tr } from '../i18n/app';
 import type { Dict } from '../i18n/es';
 
 export const eur = (n: number) => n.toLocaleString('es-ES', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }) + ' €';
@@ -21,7 +22,7 @@ export function PricingCards({ t, actions, current }: { t: Dict['pricing']; acti
         return (
           <section key={id} aria-label={p.name} className={`relative flex flex-col bg-white p-7 ${featured ? 'sheet-shadow border-[1.5px] border-ink' : 'border border-bone-300'}`}>
             {featured && 'badge' in p && <span className="label-mono absolute -top-3 left-6 bg-brand-700 px-2.5 py-1 text-white">{p.badge}</span>}
-            {current === id && <span className="label-mono absolute -top-3 right-6 bg-ink px-2.5 py-1 text-white">Tu plan</span>}
+            {current === id && <span className="label-mono absolute -top-3 right-6 bg-ink px-2.5 py-1 text-white">{tr('Tu plan')}</span>}
             <h3 className="display text-2xl text-ink">{p.name}</h3>
             <p className="mt-1 text-sm text-slate-600">{p.tagline}</p>
             <p className="mt-5 flex items-baseline gap-1.5">

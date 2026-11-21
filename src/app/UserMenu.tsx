@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SUPABASE_CONFIGURED } from '../config';
+import { tr } from '../i18n/app';
 import { Db, setDemoMode } from '../lib/db';
 import { useAuth } from './AuthContext';
 import { LangSelect } from './LangSelect';
@@ -41,8 +42,14 @@ export function UserMenu({ onTutorial }: { onTutorial: () => void }) {
 
   if (!user) return null;
   const name = profile?.full_name || user.email;
-  const planLabel = unlimited ? 'Korrige Academy' : plan ? (plan.plan === 'plus' ? 'Korrige Plus' : 'Plan gratis') : '';
-  const usage = unlimited ? 'Exámenes sin límite' : plan ? `${plan.used} de ${plan.limit} exámenes${plan.plan === 'plus' ? ' este mes' : ''}` : '';
+  const planLabel = unlimited ? 'Korrige Academy' : plan ? (plan.plan === 'plus' ? 'Korrige Plus' : tr('Plan gratis')) : '';
+  const usage = unlimited
+    ? tr('Exámenes sin límite')
+    : plan
+      ? plan.plan === 'plus'
+        ? tr('{used} de {limit} exámenes este mes', { used: plan.used, limit: plan.limit })
+        : tr('{used} de {limit} exámenes', { used: plan.used, limit: plan.limit })
+      : '';
   const item = 'block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100';
   const close = () => setOpen(false);
 
@@ -52,7 +59,7 @@ export function UserMenu({ onTutorial }: { onTutorial: () => void }) {
         className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 text-sm hover:bg-slate-50"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Menú de usuario"
+        aria-label={tr('Menú de usuario')}
         data-testid="user-menu"
         onClick={() => setOpen((v) => !v)}
       >
@@ -84,15 +91,15 @@ export function UserMenu({ onTutorial }: { onTutorial: () => void }) {
           </div>
           <div className="border-t border-slate-100 pt-2">
             <Link role="menuitem" to="/app/cuenta" className={item} onClick={close}>
-              Mi cuenta
+              {tr('Mi cuenta')}
             </Link>
             {org && (
               <Link role="menuitem" to="/app/plan" className={item} onClick={close}>
-                Plan y facturación
+                {tr('Plan y facturación')}
               </Link>
             )}
             <Link role="menuitem" to="/app/cuenta#contrasena" className={item} onClick={close}>
-              Cambiar contraseña
+              {tr('Cambiar contraseña')}
             </Link>
             {org && (
               <button
@@ -103,17 +110,17 @@ export function UserMenu({ onTutorial }: { onTutorial: () => void }) {
                   onTutorial();
                 }}
               >
-                Ver el tutorial
+                {tr('Ver el tutorial')}
               </button>
             )}
           </div>
           <div className="mt-2 flex items-center justify-between gap-3 border-t border-slate-100 px-3 pb-1 pt-3 text-sm text-slate-700">
-            <span>Idioma</span>
+            <span>{tr('Idioma')}</span>
             <LangSelect />
           </div>
           <div className="mt-2 border-t border-slate-100 pt-2">
             <button role="menuitem" className={`${item} text-red-700 hover:bg-red-50`} onClick={() => void signOutEverywhere(db)}>
-              Cerrar sesión
+              {tr('Cerrar sesión')}
             </button>
           </div>
         </div>

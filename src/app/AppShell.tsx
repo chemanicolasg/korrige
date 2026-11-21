@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ErrorBox, Field, Logo, Notice } from '../components/ui';
+import { tr, trn } from '../i18n/app';
 import { useAuth } from './AuthContext';
 import { Tutorial } from './Tutorial';
 import { UserMenu } from './UserMenu';
@@ -25,22 +26,24 @@ function Onboarding() {
   }
   return (
     <div className="mx-auto max-w-lg px-4 py-16">
-      <h1 className="text-2xl font-semibold">Te damos la bienvenida a Korrige</h1>
+      <h1 className="text-2xl font-semibold">{tr('Te damos la bienvenida a Korrige')}</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Tu cuenta ({user?.email}) todavía no pertenece a ninguna organización. Si tu facultad o academia ya usa Korrige, pide a su administrador que te invite con
-        este mismo email y vuelve a entrar. Si eres la primera persona, crea la organización: serás su administrador y podrás invitar al resto de profesores.
+        {tr(
+          'Tu cuenta ({email}) todavía no pertenece a ninguna organización. Si tu facultad o academia ya usa Korrige, pide a su administrador que te invite con este mismo email y vuelve a entrar. Si eres la primera persona, crea la organización: serás su administrador y podrás invitar al resto de profesores.',
+          { email: user?.email ?? '' },
+        )}
       </p>
       <form onSubmit={submit} className="card mt-6 space-y-4 p-6">
-        <Field label="Nombre de la organización" hint="Por ejemplo: «Facultad de Medicina» o «Academia Atenea».">
+        <Field label={tr('Nombre de la organización')} hint={tr('Por ejemplo: «Facultad de Medicina» o «Academia Atenea».')}>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={120} required autoFocus />
         </Field>
         <ErrorBox error={error} />
         <div className="flex gap-3">
           <button className="btn-primary" disabled={busy}>
-            {busy ? 'Creando…' : 'Crear organización'}
+            {busy ? tr('Creando…') : tr('Crear organización')}
           </button>
           <button type="button" className="btn" onClick={() => void refresh()}>
-            Ya me han invitado: comprobar
+            {tr('Ya me han invitado: comprobar')}
           </button>
         </div>
       </form>
@@ -66,7 +69,7 @@ export default function AppShell() {
   return (
     <div className="min-h-screen bg-bone-100">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
-        Saltar al contenido
+        {tr('Saltar al contenido')}
       </a>
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
@@ -74,24 +77,24 @@ export default function AppShell() {
             <Logo />
           </Link>
           {org && (
-            <nav className="flex items-center gap-1" aria-label="Principal">
+            <nav className="flex items-center gap-1" aria-label={tr('Principal')}>
               <NavLink to="/app" end className={nav}>
-                Exámenes
+                {tr('Exámenes')}
               </NavLink>
               <NavLink to="/app/organizacion" className={nav}>
-                Organización
+                {tr('Organización')}
               </NavLink>
               <NavLink to="/app/plan" className={nav}>
-                Plan
+                {tr('Plan')}
               </NavLink>
               <NavLink to="/app/guia" className={nav}>
-                Guía de impresión y escaneo
+                {tr('Guía de impresión y escaneo')}
               </NavLink>
             </nav>
           )}
           <div className="ml-auto flex items-center gap-3 text-sm">
             {orgs.length > 1 && (
-              <select className="input w-auto py-1.5" aria-label="Organización activa" value={org?.id} onChange={(e) => setOrgId(e.target.value)}>
+              <select className="input w-auto py-1.5" aria-label={tr('Organización activa')} value={org?.id} onChange={(e) => setOrgId(e.target.value)}>
                 {orgs.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.name}
@@ -107,17 +110,17 @@ export default function AppShell() {
       {db.kind === 'local' && (
         <div className="border-b border-amber-200 bg-amber-50">
           <div className="mx-auto max-w-7xl px-4 py-2 text-sm text-amber-900">
-            <b>Modo demo.</b> Todo se guarda únicamente en este navegador; no hay servidor ni cuentas reales.{' '}
+            {trn('<b>Modo demo.</b> Todo se guarda únicamente en este navegador; no hay servidor ni cuentas reales.')}{' '}
             <button
               className="font-semibold underline underline-offset-2"
               onClick={async () => {
-                if (!confirm('¿Reiniciar la demo? Se borrará lo que hayas hecho en ella y se volverá a crear el examen de ejemplo.')) return;
+                if (!confirm(tr('¿Reiniciar la demo? Se borrará lo que hayas hecho en ella y se volverá a crear el examen de ejemplo.'))) return;
                 const { resetLocalDemo } = await import('../lib/dbLocal');
                 await resetLocalDemo();
                 location.href = '/demo';
               }}
             >
-              Reiniciar demo
+              {tr('Reiniciar demo')}
             </button>
           </div>
         </div>
@@ -130,11 +133,11 @@ export default function AppShell() {
         <Notice>
           <span className="text-xs">
             <button className="font-medium underline" onClick={() => setShowTutorial(true)}>
-              Ver el tutorial
+              {tr('Ver el tutorial')}
             </button>{' '}
-            · Recuerda: las hojas se imprimen al <b>100 % («tamaño real»)</b>, nunca con «ajustar a página». ·{' '}
+            {trn('· Recuerda: las hojas se imprimen al <b>100 % («tamaño real»)</b>, nunca con «ajustar a página». ·')}{' '}
             <Link className="underline" to="/app/guia">
-              Guía de impresión y escaneo
+              {tr('Guía de impresión y escaneo')}
             </Link>
           </span>
         </Notice>

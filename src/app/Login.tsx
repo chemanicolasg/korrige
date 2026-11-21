@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { ErrorBox, Field, Logo, Notice } from '../components/ui';
+import { tr } from '../i18n/app';
 import { useAuth } from './AuthContext';
 import { LangSelect } from './LangSelect';
 
@@ -33,23 +34,23 @@ export default function Login() {
     try {
       if (mode === 'entrar') await db.signIn(email.trim(), password);
       if (mode === 'crear') {
-        if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
+        if (password.length < 8) throw new Error(tr('La contraseña debe tener al menos 8 caracteres.'));
         const confirm = await db.signUp(email.trim(), password, name.trim());
-        if (confirm) setInfo('Te hemos enviado un email para confirmar tu cuenta. Ábrelo y pulsa el enlace para entrar.');
+        if (confirm) setInfo(tr('Te hemos enviado un email para confirmar tu cuenta. Ábrelo y pulsa el enlace para entrar.'));
       }
       if (mode === 'enlace') {
         await db.signInMagic(email.trim());
-        setInfo('Si existe una cuenta con ese email, recibirás un enlace para entrar sin contraseña.');
+        setInfo(tr('Si existe una cuenta con ese email, recibirás un enlace para entrar sin contraseña.'));
       }
       if (mode === 'recuperar') {
         await db.resetPassword(email.trim());
-        setInfo('Si existe una cuenta con ese email, recibirás un enlace para elegir una contraseña nueva.');
+        setInfo(tr('Si existe una cuenta con ese email, recibirás un enlace para elegir una contraseña nueva.'));
       }
       if (mode === 'nueva') {
-        if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
+        if (password.length < 8) throw new Error(tr('La contraseña debe tener al menos 8 caracteres.'));
         await db.updatePassword(password);
         setMode('entrar');
-        setInfo('Contraseña cambiada.');
+        setInfo(tr('Contraseña cambiada.'));
       }
     } catch (err) {
       setError((err as Error).message);
@@ -59,11 +60,11 @@ export default function Login() {
   }
 
   const titles: Record<Mode, string> = {
-    entrar: 'Accede a tu cuenta',
-    crear: 'Crea tu cuenta',
-    enlace: 'Entrar con un enlace por email',
-    recuperar: 'Recuperar contraseña',
-    nueva: 'Elige una contraseña nueva',
+    entrar: tr('Accede a tu cuenta'),
+    crear: tr('Crea tu cuenta'),
+    enlace: tr('Entrar con un enlace por email'),
+    recuperar: tr('Recuperar contraseña'),
+    nueva: tr('Elige una contraseña nueva'),
   };
   const needsPassword = mode === 'entrar' || mode === 'crear' || mode === 'nueva';
 
@@ -75,19 +76,19 @@ export default function Login() {
       <LangSelect className="absolute right-4 top-4" />
       <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6">
         <h1 className="text-lg font-semibold">{titles[mode]}</h1>
-        {db.kind === 'local' && <Notice>Modo demo: pulsa «Entrar» con cualquier email. Los datos se guardan solo en este navegador.</Notice>}
+        {db.kind === 'local' && <Notice>{tr('Modo demo: pulsa «Entrar» con cualquier email. Los datos se guardan solo en este navegador.')}</Notice>}
         {mode === 'crear' && (
-          <Field label="Nombre y apellidos">
+          <Field label={tr('Nombre y apellidos')}>
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
           </Field>
         )}
         {mode !== 'nueva' && (
-          <Field label="Email">
+          <Field label={tr('Email')}>
             <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required autoFocus />
           </Field>
         )}
         {needsPassword && (
-          <Field label={mode === 'nueva' ? 'Contraseña nueva' : 'Contraseña'} hint={mode !== 'entrar' ? 'Mínimo 8 caracteres.' : undefined}>
+          <Field label={mode === 'nueva' ? tr('Contraseña nueva') : tr('Contraseña')} hint={mode !== 'entrar' ? tr('Mínimo 8 caracteres.') : undefined}>
             <input
               className="input"
               type="password"
@@ -101,33 +102,33 @@ export default function Login() {
         <ErrorBox error={error} />
         {info && <Notice tone="ok">{info}</Notice>}
         <button className="btn-primary w-full" disabled={busy}>
-          {busy ? 'Un momento…' : { entrar: 'Entrar', crear: 'Crear cuenta', enlace: 'Enviarme el enlace', recuperar: 'Enviar email', nueva: 'Guardar contraseña' }[mode]}
+          {busy ? tr('Un momento…') : { entrar: tr('Entrar'), crear: tr('Crear cuenta'), enlace: tr('Enviarme el enlace'), recuperar: tr('Enviar email'), nueva: tr('Guardar contraseña') }[mode]}
         </button>
         <div className="flex flex-col gap-1.5 text-sm">
           {mode !== 'entrar' && (
             <button type="button" className="text-left text-brand-700 hover:underline" onClick={() => setMode('entrar')}>
-              Ya tengo cuenta: entrar con contraseña
+              {tr('Ya tengo cuenta: entrar con contraseña')}
             </button>
           )}
           {mode === 'entrar' && (
             <>
               <button type="button" className="text-left text-brand-700 hover:underline" onClick={() => setMode('enlace')}>
-                Entrar sin contraseña (enlace por email)
+                {tr('Entrar sin contraseña (enlace por email)')}
               </button>
               <button type="button" className="text-left text-brand-700 hover:underline" onClick={() => setMode('recuperar')}>
-                He olvidado mi contraseña
+                {tr('He olvidado mi contraseña')}
               </button>
               <button type="button" className="text-left text-brand-700 hover:underline" onClick={() => setMode('crear')}>
-                No tengo cuenta: crear una
+                {tr('No tengo cuenta: crear una')}
               </button>
             </>
           )}
         </div>
       </form>
       <p className="mt-6 max-w-sm text-center text-xs text-slate-500">
-        ¿Tu facultad o academia aún no usa Korrige?{' '}
+        {tr('¿Tu facultad o academia aún no usa Korrige?')}{' '}
         <Link to="/#ventas" className="text-brand-700 hover:underline">
-          Habla con ventas
+          {tr('Habla con ventas')}
         </Link>
         .
       </p>

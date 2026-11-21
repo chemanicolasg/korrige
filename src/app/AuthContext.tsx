@@ -1,4 +1,5 @@
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { tr } from '../i18n/app';
 import { Db, SessionUser, getDb } from '../lib/db';
 import { Membership, Organization, OrgRole, PlanInfo, Profile } from '../lib/types';
 
@@ -116,7 +117,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
     };
   }, [db, user, profile, orgs, memberships, orgId, load, plan]);
 
-  if (error && !value?.user) return <div className="p-8 text-sm text-red-700">No se pudo conectar: {error}</div>;
+  if (error && !value?.user) return <div className="p-8 text-sm text-red-700">{tr('No se pudo conectar: {error}', { error })}</div>;
   // tras iniciar sesión se espera a tener sus datos: evita mostrar un instante la pantalla «sin organización»
   if (!value || !ready || loadedFor !== (user?.id ?? null)) return <>{fallback}</>;
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

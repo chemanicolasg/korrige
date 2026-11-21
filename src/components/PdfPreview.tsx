@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { tr } from '../i18n/app';
 
 /** Vista previa de un PDF (todas sus páginas) renderizado con pdf.js en un canvas. */
 export function PdfPreview({ bytes, className }: { bytes: Uint8Array | null; className?: string }) {
@@ -24,7 +25,7 @@ export function PdfPreview({ bytes, className }: { bytes: Uint8Array | null; cla
           canvas.height = Math.ceil(viewport.height);
           canvas.className = 'w-full rounded border border-slate-200 bg-white shadow-sm';
           canvas.setAttribute('role', 'img');
-          canvas.setAttribute('aria-label', `Vista previa de la hoja de respuestas, página ${i}`);
+          canvas.setAttribute('aria-label', tr('Vista previa de la hoja de respuestas, página {n}', { n: i }));
           await page.render({ canvas, canvasContext: canvas.getContext('2d')!, viewport }).promise;
           canvases.push(canvas);
         }
@@ -40,9 +41,9 @@ export function PdfPreview({ bytes, className }: { bytes: Uint8Array | null; cla
   }, [bytes]);
   return (
     <div className={className}>
-      {error && <p className="text-sm text-red-700">No se pudo generar la vista previa: {error}</p>}
+      {error && <p className="text-sm text-red-700">{tr('No se pudo generar la vista previa: {error}', { error })}</p>}
       <div ref={host} className="space-y-4" data-testid="pdf-preview">
-        <p className="p-8 text-center text-sm text-slate-500">Generando vista previa…</p>
+        <p className="p-8 text-center text-sm text-slate-500">{tr('Generando vista previa…')}</p>
       </div>
     </div>
   );
