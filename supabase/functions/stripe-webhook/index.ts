@@ -26,7 +26,8 @@ Deno.serve(async (req) => {
       userId = s.client_reference_id ?? s.metadata?.user_id;
       sub = await stripe(key, 'GET', `subscriptions/${s.subscription}`);
     } else if (event.type.startsWith('customer.subscription.')) {
-      sub = event.data.object;
+      // se lee el estado actual en Stripe: los eventos pueden llegar desordenados o repetidos
+      sub = await stripe(key, 'GET', `subscriptions/${event.data.object.id}`);
       userId = sub.metadata?.user_id;
       if (!userId) {
         // suscripciones antiguas sin metadatos: se localiza por el id de Stripe

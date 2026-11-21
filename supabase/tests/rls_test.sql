@@ -193,6 +193,23 @@ insert into public.invitations (org_id, email, invited_by) values
   ('0a000000-0000-0000-0000-000000000000', 'carla@c.test', 'a0000000-0000-0000-0000-000000000001'),
   ('0a000000-0000-0000-0000-000000000000', 'sinverificar@a.test', 'a0000000-0000-0000-0000-000000000001');
 
+-- Revisión de seguridad: propietario, código y fecha del examen
+select tests.login('a0000000-0000-0000-0000-000000000003'); -- Paula, coautora (no propietaria)
+select tests.throws($$update public.exams set owner_id = auth.uid() where id = 'e1000000-0000-0000-0000-000000000000'$$, 'una coautora no puede quedarse con el examen');
+select tests.throws($$update public.exams set code = 'AAAAAAAA' where id = 'e1000000-0000-0000-0000-000000000000'$$, 'el código del examen no se cambia');
+update public.exams set created_at = '2000-01-01' where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.eq(tests.n($$select 1 from public.exams where id = 'e1000000-0000-0000-0000-000000000000' and created_at > now() - interval '1 day'$$), 1, 'la fecha de alta no se puede falsear');
+select tests.login('a0000000-0000-0000-0000-000000000001'); -- Ana, admin
+select tests.throws($$update public.exams set owner_id = 'b0000000-0000-0000-0000-000000000002' where id = 'e1000000-0000-0000-0000-000000000000'$$, 'ni la admin puede dar el examen a alguien de fuera');
+select tests.eq(tests.affected($$update public.exams set owner_id = 'a0000000-0000-0000-0000-000000000003' where id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'la admin sí puede reasignar el examen dentro de la organización');
+select tests.eq(tests.affected($$update public.exams set owner_id = 'a0000000-0000-0000-0000-000000000002' where id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'y devolverlo a Pablo');
+-- Invitaciones: el registro de correos enviados es solo del servicio
+select tests.throws($$insert into public.invitation_sends (org_id, email) values ('0a000000-0000-0000-0000-000000000000', 'x@uni-a.test')$$, 'el registro de envíos no se puede escribir desde la API');
+select tests.throws($$select 1 from public.invitation_sends$$, 'ni leer');
+insert into public.invitations (org_id, email, invited_by, accepted_at) values ('0a000000-0000-0000-0000-000000000000', 'falsa@uni-a.test', auth.uid(), now());
+select tests.eq(tests.n($$select 1 from public.invitations where email = 'falsa@uni-a.test' and accepted_at is null$$), 1, 'una invitación no nace aceptada aunque el cliente lo envíe');
+delete from public.invitations where email = 'falsa@uni-a.test';
+
 -- ---------------------------------------------------------------------------
 -- 3b. Carpetas personales de exámenes y varias organizaciones por profesor
 -- ---------------------------------------------------------------------------

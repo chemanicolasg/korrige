@@ -108,6 +108,9 @@ export default function OrgPage() {
     email_failed: 'El servidor de correo ha rechazado el envío.',
     accepted: 'Esta invitación ya se aceptó.',
     forbidden: 'Solo un administrador puede enviar invitaciones.',
+    rate_wait: 'Acabas de enviarle un correo: espera un par de minutos antes de reenviarlo.',
+    rate_address: 'Ya se han enviado 5 correos a esta dirección en las últimas 24 horas.',
+    rate_org: 'Tu organización ha alcanzado el máximo de 50 correos de invitación al día. Si necesitas invitar a más profesores de golpe, escribe a ventas.',
   };
   /** Envía (o reenvía) el correo de invitación. Si falla, la invitación sigue creada y se puede copiar el enlace. */
   async function sendInviteEmail(id: string, mail: string): Promise<string> {

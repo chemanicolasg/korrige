@@ -20,6 +20,9 @@ function cors(req: Request): Record<string, string> {
     Vary: 'Origin',
   };
 }
+const MAX_PER_ADDRESS_DAY = 5;
+const MIN_GAP_MS = 2 * 60 * 1000;
+const MAX_PER_ORG_DAY = 50;
 const json = (req: Request, status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...cors(req), 'content-type': 'application/json; charset=utf-8' } });
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -62,6 +65,29 @@ Deno.serve(async (req) => {
 
   const key = Deno.env.get('RESEND_API_KEY');
   if (!key) return json(req, 503, { ok: false, error: 'email_not_configured' });
+
+  // Límites de envío: evitan que una organización use Korrige para mandar correo masivo.
+  //  · a la misma dirección: un correo cada 2 minutos y 5 al día
+  //  · por organización: 50 correos de invitación cada 24 horas
+  // El registro va en una tabla solo del servicio: borrar y recrear la invitación no lo reinicia.
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+  const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { data: sends, error: sendsError } = await admin.from('invitation_sends').select('email, sent_at').eq('org_id', inv.org_id).gte('sent_at', dayAgo);
+  if (sendsError) {
+    console.error('send-invite: no se pudo leer el registro de envíos', sendsError.message);
+    return json(req, 503, { ok: false, error: 'email_failed' });
+  }
+  const toSame = (sends ?? []).filter((x) => x.email === inv.email);
+  if ((sends ?? []).length >= MAX_PER_ORG_DAY) return json(req, 429, { ok: false, error: 'rate_org' });
+  if (toSame.length >= MAX_PER_ADDRESS_DAY) return json(req, 429, { ok: false, error: 'rate_address' });
+  if (toSame.some((x) => Date.now() - new Date(x.sent_at).getTime() < MIN_GAP_MS)) return json(req, 429, { ok: false, error: 'rate_wait' });
+  const { data: who } = await db.auth.getUser();
+  // se anota antes de enviar: los intentos fallidos también cuentan
+  const { error: logError } = await admin.from('invitation_sends').insert({ org_id: inv.org_id, email: inv.email, sent_by: who?.user?.id ?? null });
+  if (logError) {
+    console.error('send-invite: no se pudo anotar el envío', logError.message);
+    return json(req, 503, { ok: false, error: 'email_failed' });
+  }
 
   const [{ data: org }, { data: userData }] = await Promise.all([db.from('organizations').select('name').eq('id', inv.org_id).maybeSingle(), db.auth.getUser()]);
   const { data: me } = userData?.user ? await db.from('profiles').select('full_name, email').eq('id', userData.user.id).maybeSingle() : { data: null };
