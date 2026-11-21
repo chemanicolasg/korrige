@@ -1,5 +1,26 @@
 /** Textos de la landing en español (idioma de referencia). */
 export const es = {
+  meta: {
+    title: 'Korrige: corrector de exámenes tipo test con fotocopiadora',
+    description: 'Corrige exámenes tipo test en minutos: imprime la hoja, escanea el taco en tu fotocopiadora y sube el PDF. Notas, estadísticas y exportación a Moodle.',
+  },
+  ui: {
+    skip: 'Saltar al contenido',
+    language: 'Idioma',
+    menu: 'Menú',
+    sections: 'Secciones',
+    problem: 'El problema',
+    heroAlt: 'Pantalla de revisión de Korrige: la pregunta 8 de un alumno tiene dos burbujas marcadas y el profesor decide cuál cuenta con un clic',
+    heroCaption: 'Captura real · revisión de una doble marca',
+    sheetAlt: 'Hoja de respuestas generada por Korrige, con código QR, identificador, modelo y burbujas A–D',
+    gradesAlt: 'Tabla de notas de Korrige con aciertos, errores, en blanco, nota y estado de revisión de cada alumno',
+    gradesCaption: 'Notas · ordenables, filtrables y exportables',
+    statsAlt: 'Histograma de la distribución de notas de un examen en Korrige',
+    statsCaption: 'Estadísticas · distribución de notas',
+    writeUs: '¿Prefieres escribirnos?',
+    student: 'Soy alumno: comprobar respuestas',
+    appNote: '',
+  },
   nav: { how: 'Cómo funciona', features: 'Funcionalidades', privacy: 'Privacidad', faq: 'Preguntas frecuentes', sales: 'Hablar con ventas', login: 'Acceder', demo: 'Probar la demo' },
   hero: {
     kicker: 'Para universidades, facultades y academias',

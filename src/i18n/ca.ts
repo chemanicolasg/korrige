@@ -1,11 +1,160 @@
-import type { DeepPartial } from './index';
 import type { Dict } from './es';
 
-/** Català: estructura preparada. Lo que falte se muestra en español. */
-export const ca: DeepPartial<Dict> = {
+/** Català. */
+export const ca: Dict = {
+  meta: {
+    title: 'Korrige: corrector d’exàmens tipus test amb fotocopiadora',
+    description: 'Corregeix exàmens tipus test en minuts: imprimeix el full, escaneja el plec a la fotocopiadora i puja el PDF. Notes, estadístiques i exportació a Moodle.',
+  },
+  ui: {
+    skip: 'Ves al contingut',
+    language: 'Idioma',
+    menu: 'Menú',
+    sections: 'Seccions',
+    problem: 'El problema',
+    heroAlt: 'Pantalla de revisió de Korrige: la pregunta 8 d’un alumne té dues bombolles marcades i el professor decideix quina compta amb un clic',
+    heroCaption: 'Captura real · revisió d’una doble marca',
+    sheetAlt: 'Full de respostes generat per Korrige, amb codi QR, identificador, model i bombolles A–D',
+    gradesAlt: 'Taula de notes de Korrige amb encerts, errors, en blanc, nota i estat de revisió de cada alumne',
+    gradesCaption: 'Notes · ordenables, filtrables i exportables',
+    statsAlt: 'Histograma de la distribució de notes d’un examen a Korrige',
+    statsCaption: 'Estadístiques · distribució de notes',
+    writeUs: 'T’estimes més escriure’ns?',
+    student: 'Soc alumne: comprovar respostes',
+    appNote: 'De moment, l’aplicació del professorat està en castellà. El full de respostes i la pàgina per als alumnes sí que estan en català.',
+  },
   nav: { how: 'Com funciona', features: 'Funcionalitats', privacy: 'Privacitat', faq: 'Preguntes freqüents', sales: 'Parlar amb vendes', login: 'Accedir', demo: 'Provar la demo' },
   hero: {
     kicker: 'Per a universitats, facultats i acadèmies',
     title: 'Corregeix centenars d’exàmens tipus test en minuts amb la impressora que ja tens',
+    subtitle:
+      'Imprimeix el full de respostes, escaneja tot el plec de cop a la fotocopiadora i puja el PDF. Korrige llegeix tots els fulls, calcula les notes i t’ensenya només el que cal revisar.',
+    note: 'Sense lectors òptics, sense fulls especials i sense fotos amb el mòbil.',
+    stats: [
+      ['≈ 1 s', 'per full llegit'],
+      ['200', 'preguntes per examen'],
+      ['0', 'maquinari nou'],
+    ],
   },
+  problem: {
+    title: 'Corregir tests no t’hauria de prendre la tarda',
+    intro: 'Avui un examen tipus test de 150 alumnes es corregeix d’una d’aquestes tres maneres. Cap és bona.',
+    cards: [
+      ['A mà, amb plantilla perforada', 'Hores de feina mecànica, errors en sumar i cap estadística de les preguntes. I si cal anul·lar-ne una, torna a començar.'],
+      ['Amb apps de mòbil, foto a foto', 'Una foto per full, amb bona llum i bon pols. Amb 150 fulls són 150 fotos, i les dades acaben al mòbil personal de cada professor.'],
+      ['Amb lectores òptiques dedicades', 'Màquines cares, fulls preimpresos de proveïdor i un únic lloc a tota la facultat per on cal passar.'],
+    ],
+    table: {
+      head: ['', 'A mà', 'App de mòbil', 'Lectora òptica', 'Korrige'],
+      rows: [
+        ['Com es llegeixen 150 fulls', 'Un per un, amb plantilla', 'Una foto per full', 'A la màquina dedicada', 'Un escaneig de tot el plec'],
+        ['Què cal comprar', 'Res', 'Res', 'Lectora i fulls del proveïdor', 'Res: la fotocopiadora que ja hi ha'],
+        ['On queden les dades', 'En paper', 'Al mòbil de cada professor', 'A l’equip de la lectora', 'A l’organització, amb accés per professor'],
+        ['Si s’anul·la una pregunta', 'Es torna a corregir', 'Depèn de l’app', 'Depèn de l’equip', 'Es recalcula tot a l’instant'],
+      ],
+    },
+    after: 'La multifunció del passadís ja escaneja 100 fulls per minut i te’ls envia per correu en un PDF. Només faltava qui els llegís.',
+  },
+  how: {
+    title: 'Com funciona',
+    subtitle: 'Quatre passos. L’únic de nou és pujar un PDF.',
+    steps: [
+      ['Crea l’examen i descarrega el full', 'Tria el nombre de preguntes, opcions i models. Korrige genera el full de respostes en PDF amb el seu codi QR.'],
+      ['Imprimeix i examina', 'En paper normal, amb qualsevol impressora. Els alumnes marquen amb bolígraf blau o negre.'],
+      ['Escaneja tot el plec', 'Posa els fulls a l’alimentador de la fotocopiadora i envia-te’ls per correu com un únic PDF. Tant és si algun va del revés.'],
+      ['Puja el PDF i obtén les notes', 'En segons tens notes, incidències per revisar i estadístiques per pregunta. Exporta a Excel o a Moodle.'],
+    ],
+  },
+  features: {
+    title: 'Tot el que necessita un examen de debò',
+    items: [
+      ['Diversos models d’examen', 'Fins a 4 models amb les preguntes en ordre diferent. Cada full es corregeix amb la plantilla del seu model.'],
+      ['Penalització configurable', 'Sense penalització, fórmula clàssica o la teva. Anul·la una pregunta o accepta dues respostes i tot es recalcula a l’instant.'],
+      ['Revisió de dubtes amb imatge', 'Dobles marques, marques fluixes o un identificador mal emplenat: veus el retall del full i decideixes amb un clic.'],
+      ['Estadístiques per pregunta', 'Dificultat, discriminació i anàlisi de distractors. Detecta les preguntes candidates a anul·lació.'],
+      ['Exporta a Excel i a Moodle', 'Notes a punt per a l’acta: .xlsx complet i CSV que Moodle importa directament.'],
+      ['Registre de canvis', 'Cada correcció manual queda anotada: qui, quan, valor anterior i nou. Ideal per a revisions i reclamacions.'],
+      ['Pensat per a equips', 'Organitzacions amb administradors i professors. Comparteix un examen amb un altre professor com a coautor.'],
+      ['Respostes per als alumnes', 'Publica la plantilla correcta el dia i l’hora que triïs. Cada alumne la consulta amb un codi i, si vols, calcula la seva nota.'],
+    ],
+  },
+  privacy: {
+    title: 'Privacitat i seguretat des del disseny',
+    subtitle: 'Els exàmens són dades personals dels teus alumnes. Els tractem com a tals.',
+    items: [
+      ['Els fulls es llegeixen al teu ordinador', 'El PDF escanejat es processa al navegador del professor. No s’envia a cap servidor de processament: només es desa una imatge comprimida de cada full per a la revisió.'],
+      ['Servidors a la Unió Europea', 'La base de dades i les imatges s’allotgen a la UE.'],
+      ['Accés per organització', 'Cada professor veu només els seus exàmens i els que li comparteixin. Cap dada d’una organització és accessible des d’una altra.'],
+      ['RGPD', 'Termini de conservació d’imatges configurable, esborrat complet de qualsevol examen i registre d’activitat.'],
+    ],
+  },
+  faq: {
+    title: 'Preguntes freqüents',
+    items: [
+      ['Quin escàner necessito?', 'Qualsevol fotocopiadora o multifunció amb alimentador automàtic que escanegi a PDF (Xerox, Canon, Ricoh, Konica Minolta, HP…). Recomanem 300 ppp en blanc i negre o escala de grisos. També serveix un escàner de sobretaula.'],
+      ['Bolígraf o llapis?', 'Bolígraf blau o negre, omplint tota la bombolla. El llapis tou acostuma a funcionar, però les marques fluixes s’envien a revisió perquè decideixis tu.'],
+      ['Què passa si un alumne marca dues respostes?', 'La pregunta va a la cua de revisió amb el retall de la imatge. Decideixes amb un clic si en compta una de les dues, es deixa en blanc o és nul·la, i queda registrat.'],
+      ['Poden els alumnes comprovar les seves respostes?', 'Sí, si tu vols. Publiques les respostes correctes, des d’ara o a partir d’una data i hora, i dones un codi als alumnes. Ells entren a korrige.es/comprobar, trien el seu model i es comproven amb el que van anotar al quadernet; opcionalment poden calcular la seva nota estimada. No necessiten compte, i no es mostren notes ni dades de ningú.'],
+      ['Puc fer servir els meus fulls?', 'No: el full el genera Korrige per a cada examen, amb el seu codi QR i les marques de cantonada. A canvi pots configurar preguntes, opcions, models, identificador, capçalera i idioma, i imprimir-lo on vulguis.'],
+      ['Quantes preguntes admet?', 'De 10 a 200 per examen. Fins a 100 caben en una pàgina; a partir d’aquí el full té dues pàgines i Korrige les aparella per alumne.'],
+      ['S’integra amb Moodle?', 'Exporta un CSV que s’importa directament al qualificador de Moodle (per número d’ID o per correu). També un Excel complet amb les respostes de cada alumne. Si necessiteu una connexió directa amb el vostre Moodle, la intranet o el sistema de gestió acadèmica, la fem a mida amb Korrige Academy: parla amb vendes.'],
+      ['I si l’escàner agafa un full tort o del revés?', 'Les quatre marques de les cantonades permeten redreçar cada full, i si està cap per avall es gira sol.'],
+    ],
+  },
+  sales: {
+    title: 'Parlar amb vendes',
+    subtitle: 'Explica’ns quants professors sou i us preparem una demo amb els vostres fulls. Responem en un dia laborable.',
+    bullets: ['Pilot gratuït amb un departament', 'Alta de tota la facultat en una tarda', 'Formació per al professorat inclosa'],
+    name: 'Nom i cognoms',
+    email: 'Correu de feina',
+    institution: 'Institució',
+    role: 'Càrrec',
+    teachers: 'Nombre aproximat de professors',
+    teachersOptions: ['1–10', '11–50', '51–200', 'Més de 200'],
+    phone: 'Telèfon (opcional)',
+    message: 'Missatge',
+    messagePlaceholder: 'Quines assignatures, quants exàmens l’any, quines fotocopiadores teniu, si necessiteu integració amb Moodle o la vostra intranet…?',
+    privacy: 'He llegit i accepto la',
+    privacyLink: 'política de privacitat',
+    submit: 'Enviar',
+    sending: 'Enviant…',
+    okTitle: 'Gràcies! Hem rebut el teu missatge',
+    okText: 'T’escriurem ben aviat al correu que ens has deixat.',
+    errors: {
+      required: 'Omple els camps obligatoris i accepta la política de privacitat.',
+      email: 'Revisa el correu: no sembla vàlid.',
+      rate: 'Has enviat diversos missatges seguits. Espera uns minuts, o escriu-nos a',
+      generic: 'No s’ha pogut enviar. Torna-ho a provar o escriu-nos a',
+    },
+  },
+  pricing: {
+    nav: 'Preus',
+    title: 'Comença gratis. Paga només si el fas servir sovint',
+    subtitle: 'El teu primer examen és gratis i complet, sense targeta. Després tries.',
+    vat: 'Preus amb IVA inclòs.',
+    perMonth: '/mes',
+    yearly: 'o {price} l’any',
+    custom: 'A mida',
+    free: {
+      name: 'Gratis',
+      tagline: 'Per provar-lo amb un examen real',
+      features: ['1 examen complet', 'Totes les funcions: revisió, estadístiques i exportació', 'Fins a 200 preguntes i tots els teus alumnes', 'Sense targeta'],
+      cta: 'Crear compte gratis',
+    },
+    plus: {
+      name: 'Korrige Plus',
+      tagline: 'Per al professor que examina sovint',
+      features: ['5 exàmens nous al mes', 'Tot el del pla gratis', 'Els teus exàmens anteriors, sempre accessibles', 'Cancel·les quan vulguis'],
+      cta: 'Començar amb Plus',
+      badge: 'Recomanat',
+    },
+    academy: {
+      name: 'Korrige Academy',
+      tagline: 'Per a facultats, departaments i acadèmies',
+      features: ['Exàmens i professors sense límit', 'Organització amb administradors i coautors', 'Logotip i valors per defecte del centre', 'Posada en marxa, formació i suport prioritari', 'Integració a mida amb Moodle, intranet o gestió acadèmica'],
+      cta: 'Parlar amb vendes',
+    },
+  },
+  cta: { title: 'Ho veiem amb un dels teus exàmens?', text: 'Prova la demo ara mateix al teu navegador, sense registrar-te.' },
+  footer: { tagline: 'Correcció d’exàmens tipus test amb full òptic.', contact: 'Contacte', legal: 'Legal', legalNotice: 'Avís legal', privacy: 'Privacitat', cookies: 'Galetes', guide: 'Guia d’impressió i escaneig', rights: 'Tots els drets reservats.' },
 };

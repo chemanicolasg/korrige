@@ -84,6 +84,7 @@ export default function OrgPage() {
         ...(def.title?.trim() ? { title: def.title.trim().slice(0, 60) } : {}),
         ...(def.idLabel?.trim() ? { idLabel: def.idLabel.trim().slice(0, 12) } : {}),
         ...(def.idDigits ? { idDigits: Math.min(10, Math.max(6, Math.round(def.idDigits))) } : {}),
+        ...(def.lang && def.lang !== 'es' ? { lang: def.lang } : {}),
         ...(def.grading ? { grading: def.grading } : {}),
       };
       await db.update('organizations', { id: org.id }, { exam_defaults: clean });
@@ -296,6 +297,13 @@ export default function OrgPage() {
                     <option key={l} value={l} />
                   ))}
                 </datalist>
+              </Field>
+              <Field label="Idioma de la hoja de respuestas" hint="Idioma de los textos impresos en las hojas de los exámenes nuevos. Cada profesor puede cambiarlo en su examen.">
+                <select className="input" value={def.lang ?? 'es'} onChange={(e) => setDef({ ...def, lang: e.target.value as ExamDefaults['lang'] })}>
+                  <option value="es">Castellano</option>
+                  <option value="ca">Català</option>
+                  <option value="en">English</option>
+                </select>
               </Field>
               <Field label="Nº de dígitos del identificador" hint="Entre 6 y 10. En un DNI, los 8 números (sin la letra).">
                 <input className="input" type="number" min={6} max={10} placeholder="8" value={def.idDigits ?? ''} onChange={(e) => setDef({ ...def, idDigits: e.target.value ? Number(e.target.value) : undefined })} />

@@ -98,6 +98,26 @@ describe('hoja generada → lector (ida y vuelta)', () => {
     expect(r.qr).toBe('UICOMR|SINPLANT|v1');
   });
 
+  it('la hoja en catalán o en inglés se lee igual: solo cambian los textos impresos', async () => {
+    for (const lang of ['ca', 'en'] as const) {
+      const doc = computeLayout(`IDIOMA${lang.toUpperCase()}`, { ...DEFAULT_SHEET_CONFIG, nQuestions: 60, nOptions: 4, nModels: 2, lang });
+      expect(doc.config.lang).toBe(lang);
+      // misma geometría que en castellano
+      const es = computeLayout(`IDIOMA${lang.toUpperCase()}`, { ...DEFAULT_SHEET_CONFIG, nQuestions: 60, nOptions: 4, nModels: 2 });
+      expect(doc.pages[0].preguntas).toEqual(es.pages[0].preguntas);
+      expect(doc.pages[0].nia).toEqual(es.pages[0].nia);
+      const pages = await renderPdf(await generateSheetPdf(doc));
+      paintBubble(pages[0], ...doc.pages[0].preguntas['7'].C);
+      paintBubble(pages[0], ...doc.pages[0].modelo.B);
+      const r = readPage(cv, pages[0], doc, { pagina: 1 }).result;
+      expect(r.modelo).toBe('B');
+      expect(r.respuestas!['7']).toBe('C');
+      // ningún texto traducido cae sobre una burbuja: el resto de preguntas sigue en blanco
+      expect(Object.entries(r.respuestas!).filter(([q, v]) => q !== '7' && v !== '').length).toBe(0);
+      expect(r.nia).toBe('????????');
+    }
+  });
+
   it('hoja de 2 páginas con 3 opciones y un solo modelo; plantilla marcada', async () => {
     const doc = computeLayout('DOSPAG01', { ...DEFAULT_SHEET_CONFIG, nQuestions: 150, nOptions: 3, nModels: 1, idDigits: 6 }, { keyBubble: true }); // hoja antigua, con burbuja «P»
     const pages = await renderPdf(await generateSheetPdf(doc));

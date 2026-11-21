@@ -18,6 +18,8 @@ const app = (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/ca" element={<Landing locale="ca" />} />
+        <Route path="/en" element={<Landing locale="en" />} />
         <Route
           element={
             <Suspense fallback={<Loading />}>
@@ -39,6 +41,6 @@ const app = (
 );
 
 const root = document.getElementById('root')!;
-// La landing llega prerenderizada (scripts/prerender.mjs): se hidrata; el resto se monta de cero.
-if (location.pathname === '/' && root.firstElementChild) hydrateRoot(root, app);
+// La portada (en sus tres idiomas) llega prerenderizada (scripts/prerender.mjs): se hidrata; el resto se monta de cero.
+if (['/', '/ca', '/en'].includes(location.pathname.replace(/\/$/, '') || '/') && root.firstElementChild) hydrateRoot(root, app);
 else createRoot(root).render(app);

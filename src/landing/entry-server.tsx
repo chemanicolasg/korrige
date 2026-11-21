@@ -4,7 +4,7 @@ import { renderToString } from 'react-dom/server';
 import { Route, Routes } from 'react-router-dom';
 import { StaticRouter } from 'react-router-dom/server';
 import { APP_DOMAIN, APP_NAME, APP_URL } from '../config';
-import { getDict } from '../i18n';
+import { ENABLED_LOCALES, LOCALE_PATH, Locale, getDict } from '../i18n';
 import { ARTICLES } from './articles';
 import Landing from './Landing';
 import Legal from './Legal';
@@ -16,8 +16,10 @@ import SegmentPage from './segments';
 export const site = { APP_NAME, APP_DOMAIN, APP_URL };
 
 /** Páginas públicas indexables, con sus metadatos. La portada conserva los de index.html. */
-export const pages: { path: string; title?: string; description?: string; jsonLd?: string; priority?: string }[] = [
-  { path: '/' },
+export const pages: { path: string; title?: string; description?: string; jsonLd?: string; priority?: string; locale?: Locale }[] = [
+  { path: '/', locale: 'es' },
+  // la portada en catalán e inglés, cada una con su dirección
+  ...ENABLED_LOCALES.filter((l) => l !== 'es').map((l) => ({ path: LOCALE_PATH[l], locale: l, title: getDict(l).meta.title, description: getDict(l).meta.description, priority: '0.9' })),
   ...SEGMENTS.map((s) => ({ path: `/${s.slug}`, title: s.title, description: s.description, priority: '0.9', jsonLd: segmentJsonLd(s) })),
   {
     path: '/guia',
@@ -59,6 +61,8 @@ export function render(path = '/'): string {
       <StaticRouter location={path}>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/ca" element={<Landing locale="ca" />} />
+          <Route path="/en" element={<Landing locale="en" />} />
           <Route path="/guia" element={<PublicGuide />} />
           <Route path="/academias" element={<SegmentPage slug="academias" articles={ARTICLES} />} />
           <Route path="/universidades" element={<SegmentPage slug="universidades" articles={ARTICLES} />} />
@@ -72,8 +76,8 @@ export function render(path = '/'): string {
 }
 
 /** Datos estructurados (FAQ) para buscadores. */
-export function faqJsonLd(): string {
-  const t = getDict('es');
+export function faqJsonLd(locale: Locale = 'es'): string {
+  const t = getDict(locale);
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -82,20 +86,20 @@ export function faqJsonLd(): string {
 }
 
 /** Datos estructurados del sitio: organización, web y aplicación. */
-export function siteJsonLd(): string {
-  const t = getDict('es');
+export function siteJsonLd(locale: Locale = 'es'): string {
+  const t = getDict(locale);
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
       { '@type': 'Organization', '@id': `${APP_URL}/#org`, name: APP_NAME, url: APP_URL, logo: `${APP_URL}/icon-512.png`, email: `ventas@${APP_DOMAIN}` },
-      { '@type': 'WebSite', '@id': `${APP_URL}/#web`, name: APP_NAME, url: APP_URL, inLanguage: 'es', publisher: { '@id': `${APP_URL}/#org` } },
+      { '@type': 'WebSite', '@id': `${APP_URL}/#web`, name: APP_NAME, url: APP_URL, inLanguage: ['es', 'ca', 'en'], publisher: { '@id': `${APP_URL}/#org` } },
       {
         '@type': 'SoftwareApplication',
         name: APP_NAME,
         url: APP_URL,
         applicationCategory: 'EducationalApplication',
         operatingSystem: 'Web',
-        inLanguage: 'es',
+        inLanguage: locale,
         description: t.hero.subtitle,
         featureList: t.features.items.map(([title]) => title),
         screenshot: `${APP_URL}/shots/revision.jpg`,
@@ -104,3 +108,6 @@ export function siteJsonLd(): string {
     ],
   });
 }
+
+/** Direcciones de la portada por idioma, para las etiquetas hreflang. */
+export const landingAlternates: [string, string][] = ENABLED_LOCALES.map((l) => [l, `${APP_URL}${LOCALE_PATH[l] === '/' ? '/' : LOCALE_PATH[l]}`]);

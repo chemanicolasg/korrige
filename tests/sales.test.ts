@@ -30,9 +30,15 @@ describe('formulario de ventas', () => {
 });
 
 describe('i18n de la landing', () => {
-  it('catalán e inglés heredan del español lo que falta', () => {
+  it('catalán e inglés están completos: misma estructura y mismo número de elementos que el español', () => {
     expect(getDict('ca').nav.sales).toBe('Parlar amb vendes');
-    expect(getDict('ca').faq.title).toBe(getDict('es').faq.title);
-    expect(getDict('en').hero.stats).toEqual(getDict('es').hero.stats);
+    expect(getDict('en').faq.title).toBe('Frequently asked questions');
+    const shape = (v: unknown): unknown => (Array.isArray(v) ? v.map(shape) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, shape(x)])) : typeof v);
+    for (const l of ['ca', 'en'] as const) {
+      expect(shape(getDict(l)), l).toEqual(shape(getDict('es')));
+      // títulos y descripciones dentro de lo que muestra Google
+      expect(getDict(l).meta.title.length).toBeLessThanOrEqual(60);
+      expect(getDict(l).meta.description.length).toBeLessThanOrEqual(155);
+    }
   });
 });

@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT_EMAIL, SALES_EMAIL } from '../config';
 import { Logo } from '../components/ui';
-import { ENABLED_LOCALES, LOCALE_NAMES, Locale, detectLocale, getDict } from '../i18n';
+import { ENABLED_LOCALES, LOCALE_NAMES, LOCALE_PATH, Locale, getDict, saveLocale } from '../i18n';
 import { ARTICLES } from './articles';
 import { SEGMENTS } from './segmentData';
 import { PricingCards } from './Pricing';
@@ -63,13 +63,12 @@ function Eyebrow({ n, children }: { n: string; children: ReactNode }) {
   );
 }
 
-export default function Landing() {
-  const [locale, setLocale] = useState<Locale>('es');
+/** Portada. Cada idioma tiene su dirección (/, /ca, /en) y se prerenderiza por separado. */
+export default function Landing({ locale = 'es' }: { locale?: Locale }) {
   const [menu, setMenu] = useState(false);
-  // el idioma guardado se aplica tras montar (el HTML prerenderizado va en español)
-  useEffect(() => setLocale(detectLocale()), []);
   useEffect(() => {
     document.documentElement.lang = locale;
+    saveLocale(locale); // la página de alumnos (/comprobar) lo recuerda
   }, [locale]);
   const t = getDict(locale);
   const links: [string, string][] = [
@@ -87,7 +86,7 @@ export default function Landing() {
   return (
     <div className="bg-white text-slate-700">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
-        Saltar al contenido
+        {t.ui.skip}
       </a>
 
       <header className="sticky top-0 z-40 border-b border-bone-200 bg-white/95 backdrop-blur">
@@ -95,7 +94,7 @@ export default function Landing() {
           <a href="#top" className="text-[1.7rem] leading-none">
             <Logo />
           </a>
-          <nav className="hidden items-center gap-6 text-sm text-slate-600 lg:flex" aria-label="Secciones">
+          <nav className="hidden items-center gap-6 text-sm text-slate-600 lg:flex" aria-label={t.ui.sections}>
             {links.map(([href, label]) => (
               <a key={href} href={href} className="underline-offset-4 hover:text-ink hover:underline">
                 {label}
@@ -105,12 +104,14 @@ export default function Landing() {
           <div className="ml-auto flex items-center gap-2">
             {ENABLED_LOCALES.length > 1 && (
               <select
-                aria-label="Idioma"
+                aria-label={t.ui.language}
                 className="rounded-md border border-bone-300 bg-white px-2 py-1.5 text-sm"
                 value={locale}
                 onChange={(e) => {
-                  localStorage.setItem('korrige-lang', e.target.value);
-                  setLocale(e.target.value as Locale);
+                  // cada idioma es una página propia: se navega a su dirección
+                  const next = e.target.value as Locale;
+                  saveLocale(next);
+                  location.href = LOCALE_PATH[next];
                 }}
               >
                 {ENABLED_LOCALES.map((l) => (
@@ -126,7 +127,7 @@ export default function Landing() {
             <a href="#ventas" className="inline-flex rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
               {t.nav.sales}
             </a>
-            <button className="rounded-md p-2 text-ink hover:bg-bone-100 lg:hidden" aria-label="Menú" aria-expanded={menu} onClick={() => setMenu(!menu)}>
+            <button className="rounded-md p-2 text-ink hover:bg-bone-100 lg:hidden" aria-label={t.ui.menu} aria-expanded={menu} onClick={() => setMenu(!menu)}>
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                 <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
@@ -134,7 +135,7 @@ export default function Landing() {
           </div>
         </div>
         {menu && (
-          <nav className="border-t border-bone-200 bg-white px-5 py-3 lg:hidden" aria-label="Secciones (móvil)">
+          <nav className="border-t border-bone-200 bg-white px-5 py-3 lg:hidden" aria-label={t.ui.sections}>
             {[...links, ['/acceso', t.nav.login] as [string, string]].map(([href, label]) => (
               <a key={href} href={href} className="block py-2 text-sm font-medium text-ink" onClick={() => setMenu(false)}>
                 {label}
@@ -168,11 +169,11 @@ export default function Landing() {
             <figure className="relative lg:-mr-24">
               <div className="sheet-shadow relative border-[1.5px] border-ink bg-white p-7 sm:p-9">
                 <CornerMarks />
-                <Shot src="/shots/revision.jpg" width={1824} height={1104} alt="Pantalla de revisión de Korrige: la pregunta 8 de un alumno tiene dos burbujas marcadas y el profesor decide cuál cuenta con un clic" />
+                <Shot src="/shots/revision.jpg" width={1824} height={1104} alt={t.ui.heroAlt} />
               </div>
               <figcaption className="label-mono mt-5 flex items-center gap-3 text-slate-500">
                 <Bubbles marked={0} />
-                Captura real · revisión de una doble marca
+                {t.ui.heroCaption}
               </figcaption>
             </figure>
           </div>
@@ -189,7 +190,7 @@ export default function Landing() {
         {/* 2. El problema: comparación */}
         <section className="border-b border-bone-200 bg-bone-100 py-16 sm:py-24">
           <div className={wrap}>
-            <Eyebrow n="01">El problema</Eyebrow>
+            <Eyebrow n="01">{t.ui.problem}</Eyebrow>
             <h2 className={h2}>{t.problem.title}</h2>
             <p className="mt-4 max-w-2xl text-lg text-slate-600">{t.problem.intro}</p>
             <div className="mt-10 overflow-x-auto">
@@ -233,7 +234,7 @@ export default function Landing() {
               <Eyebrow n="02">{t.how.title}</Eyebrow>
               <h2 className={h2}>{t.how.subtitle}</h2>
               <figure className="relative mt-8 hidden max-w-sm rotate-[-1.5deg] border border-bone-300 bg-white shadow-[0_18px_40px_-18px_rgba(20,22,27,0.35)] lg:block">
-                <Shot src="/shots/hoja.jpg" width={1232} height={1742} alt="Hoja de respuestas generada por Korrige, con código QR, identificador, modelo y burbujas A–D" />
+                <Shot src="/shots/hoja.jpg" width={1232} height={1742} alt={t.ui.sheetAlt} />
               </figure>
             </div>
             <ol className="border-t-[1.5px] border-ink">
@@ -272,12 +273,12 @@ export default function Landing() {
               </dl>
               <div className="space-y-6 lg:pl-6">
                 <figure className="border border-bone-300 bg-white p-2 shadow-[0_18px_40px_-22px_rgba(20,22,27,0.4)]">
-                  <Shot src="/shots/notas.jpg" width={2492} height={840} alt="Tabla de notas de Korrige con aciertos, errores, en blanco, nota y estado de revisión de cada alumno" />
-                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">Notas · ordenables, filtrables y exportables</figcaption>
+                  <Shot src="/shots/notas.jpg" width={2492} height={840} alt={t.ui.gradesAlt} />
+                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">{t.ui.gradesCaption}</figcaption>
                 </figure>
                 <figure className="border border-bone-300 bg-white p-2 shadow-[0_18px_40px_-22px_rgba(20,22,27,0.4)]">
-                  <Shot src="/shots/estadisticas.jpg" width={2496} height={724} alt="Histograma de la distribución de notas de un examen en Korrige" />
-                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">Estadísticas · distribución de notas</figcaption>
+                  <Shot src="/shots/estadisticas.jpg" width={2496} height={724} alt={t.ui.statsAlt} />
+                  <figcaption className="label-mono px-2 pb-1 pt-3 text-slate-500">{t.ui.statsCaption}</figcaption>
                 </figure>
               </div>
             </div>
@@ -358,7 +359,9 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Por tipo de centro (enlaces a las páginas de academias y universidades) */}
+        {/* Por tipo de centro y guías: páginas que solo existen en castellano */}
+        {locale === 'es' && (
+        <>
         <section className="border-b border-bone-200 py-14">
           <div className={wrap}>
             <h2 className="display text-2xl text-ink">Korrige para tu centro</h2>
@@ -398,6 +401,9 @@ export default function Landing() {
           </div>
         </section>
 
+        </>
+        )}
+
         {/* 7. Hablar con ventas */}
         <section id="ventas" className="scroll-mt-16 bg-bone-100 py-16 sm:py-24">
           <div className={`${wrap} grid gap-12 lg:grid-cols-[0.85fr_1.15fr]`}>
@@ -414,7 +420,7 @@ export default function Landing() {
                 ))}
               </ul>
               <p className="mt-8 text-sm text-slate-600">
-                ¿Prefieres escribirnos?{' '}
+                {t.ui.writeUs}{' '}
                 <a className="font-semibold text-brand-700 underline underline-offset-4" href={`mailto:${SALES_EMAIL}`}>
                   {SALES_EMAIL}
                 </a>
@@ -440,6 +446,7 @@ export default function Landing() {
           <div>
             <Logo className="text-3xl" />
             <p className="mt-3 max-w-xs text-sm text-slate-600">{t.footer.tagline}</p>
+            {t.ui.appNote && <p className="mt-3 max-w-xs text-xs text-slate-500">{t.ui.appNote}</p>}
           </div>
           <div className="text-sm">
             <h3 className="label-mono text-slate-500">{t.footer.contact}</h3>
@@ -461,9 +468,11 @@ export default function Landing() {
               </li>
               <li>
                 <a className="underline-offset-4 hover:underline" href="/comprobar">
-                  Soy alumno: comprobar respuestas
+                  {t.ui.student}
                 </a>
               </li>
+              {locale === 'es' && (
+                <>
               <li>
                 <Link className="underline-offset-4 hover:underline" to="/academias">
                   Para academias de oposiciones
@@ -479,6 +488,8 @@ export default function Landing() {
                   Recursos para profesores
                 </Link>
               </li>
+                </>
+              )}
             </ul>
           </div>
           <div className="text-sm">

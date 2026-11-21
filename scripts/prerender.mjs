@@ -10,7 +10,7 @@ const dist = path.resolve('dist');
 const ssrDir = path.resolve('node_modules/.korrige-ssr');
 execSync(`npx vite build --ssr src/landing/entry-server.tsx --outDir "${ssrDir}" --emptyOutDir --logLevel error`, { stdio: 'inherit' });
 const entry = fs.readdirSync(ssrDir).find((f) => /^entry-server\.m?js$/.test(f));
-const { render, faqJsonLd, siteJsonLd, site, pages } = await import(pathToFileURL(path.join(ssrDir, entry)).href);
+const { render, faqJsonLd, siteJsonLd, site, pages, landingAlternates } = await import(pathToFileURL(path.join(ssrDir, entry)).href);
 
 const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 if (!shell.includes('<!--app-html-->')) throw new Error('index.html no contiene el marcador <!--app-html-->');
@@ -28,9 +28,23 @@ if (tooLong.length) throw new Error('Títulos (>60) o descripciones (>155) demas
 for (const page of pages) {
   const url = `${site.APP_URL}${page.path}`;
   let html = shell.replace('<!--app-html-->', render(page.path));
-  if (page.path === '/') {
+  if (page.locale) {
+    // portada en cada idioma: mismos datos estructurados, traducidos, y enlaces hreflang entre ellas
     const ld = (json) => `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}</script>`;
-    html = html.replace('<!--app-head-->', `${INDEXABLE}\n    ${ld(siteJsonLd())}\n    ${ld(faqJsonLd())}`);
+    const hreflang = [...landingAlternates, ['x-default', landingAlternates[0][1]]].map(([l, href]) => `<link rel="alternate" hreflang="${l}" href="${href}" />`).join('\n    ');
+    html = html.replace('<!--app-head-->', `${INDEXABLE}\n    ${hreflang}\n    ${ld(siteJsonLd(page.locale))}\n    ${ld(faqJsonLd(page.locale))}`);
+    if (page.locale !== 'es') {
+      const OG = { ca: 'ca_ES', en: 'en_GB' };
+      html = html
+        .replace('<html lang="es">', `<html lang="${page.locale}">`)
+        .replace(/<title>[^<]*<\/title>/, `<title>${esc(page.title)}</title>`)
+        .replace(/(<meta name="description" content=")[^"]*"/, `$1${esc(page.description)}"`)
+        .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
+        .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
+        .replace(/(<meta property="og:locale" content=")[^"]*"/, `$1${OG[page.locale]}"`)
+        .replace(/(<meta property="og:title" content=")[^"]*"/, `$1${esc(page.title)}"`)
+        .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${esc(page.description)}"`);
+    }
   } else {
     // cada página pública lleva su propio título, descripción y URL canónica
     html = html

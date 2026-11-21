@@ -390,6 +390,7 @@ export function ExamNew() {
     title: def.title || org.name,
     idLabel: def.idLabel || DEFAULT_SHEET_CONFIG.idLabel,
     idDigits: def.idDigits || DEFAULT_SHEET_CONFIG.idDigits,
+    ...(def.lang && def.lang !== 'es' ? { lang: def.lang } : {}),
     ...(def.logo ? { logo: def.logo } : {}),
   });
   const [busy, setBusy] = useState(false);

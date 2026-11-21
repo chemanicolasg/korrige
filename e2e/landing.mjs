@@ -18,7 +18,7 @@ export async function testLanding(baseUrl, outDir) {
   assert.match(await (await fetch(`${baseUrl}/robots.txt`)).text(), /Sitemap: https:\/\/korrige\.es\/sitemap\.xml/);
 
   // las páginas públicas del sitemap son indexables y tienen su propia URL canónica
-  for (const [p, re] of [['/guia', /imprimir y escanear/], ['/academias', /simulacros de tu academia/], ['/universidades', /"@type":"FAQPage"/], ['/recursos/analisis-de-items-dificultad-discriminacion', /grupo superior/], ['/legal/privacidad', /Política de privacidad/], ['/recursos', /Guías para corregir/], ['/recursos/formula-penalizacion-examen-tipo-test', /errores ÷ \(k − 1\)/], ['/recursos/alternativa-zipgrade-fotocopiadora', /"@type":"Article"/]]) {
+  for (const [p, re] of [['/guia', /imprimir y escanear/], ['/ca', /Corregeix centenars d.exàmens/], ['/en', /Grade hundreds of multiple-choice exams/], ['/ca', /hreflang="en" href="https:\/\/korrige\.es\/en"/], ['/en', /<html lang="en">/], ['/academias', /simulacros de tu academia/], ['/universidades', /"@type":"FAQPage"/], ['/recursos/analisis-de-items-dificultad-discriminacion', /grupo superior/], ['/legal/privacidad', /Política de privacidad/], ['/recursos', /Guías para corregir/], ['/recursos/formula-penalizacion-examen-tipo-test', /errores ÷ \(k − 1\)/], ['/recursos/alternativa-zipgrade-fotocopiadora', /"@type":"Article"/]]) {
     // (Netlify sirve /guia desde guia.html; el servidor de pruebas necesita la ruta completa)
     const h = await (await fetch(`${baseUrl}${p}.html`)).text();
     assert.match(h, re, `${p} prerenderizada`);

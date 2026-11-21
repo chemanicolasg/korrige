@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Field } from '../components/ui';
 import { fileToLogo } from '../lib/logoImage';
-import { DEFAULT_FIELDS, SheetConfig, pageCount } from '../omr/layout';
+import { SheetConfig, defaultFields, pageCount } from '../omr/layout';
+import { SHEET_LANGS, SHEET_LANG_NAMES, SheetLang, sheetLang } from '../omr/sheetText';
 
 /** Nombres habituales del identificador del alumno según el centro. */
 export const ID_LABELS = ['NIA', 'NIUB', 'NIU', 'NIUBA', 'DNI', 'NIE', 'Expediente', 'Matrícula', 'Código'];
@@ -11,7 +12,7 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
   const set = <K extends keyof SheetConfig>(k: K, v: SheetConfig[K]) => onChange({ ...value, [k]: v });
   const file = useRef<HTMLInputElement>(null);
   const [logoError, setLogoError] = useState('');
-  const fields = value.fields ?? DEFAULT_FIELDS;
+  const fields = value.fields ?? defaultFields(value.lang);
   async function onLogo(f: File | undefined) {
     if (!f) return;
     setLogoError('');
@@ -103,6 +104,26 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
           <span className="mt-1 block text-xs text-slate-500">PNG, JPG o SVG. Se imprime arriba a la izquierda, junto al título. Mejor en negro o colores oscuros sobre fondo claro.</span>
           {logoError && <span className="mt-1 block text-xs text-red-700">{logoError}</span>}
         </div>
+        <Field label="Idioma de la hoja" hint="Idioma de los textos impresos: instrucciones, cabecera y campos. No afecta a la corrección.">
+          <select
+            className="input"
+            disabled={disabled}
+            value={sheetLang(value.lang)}
+            onChange={(e) => {
+              const lang = e.target.value as SheetLang;
+              // los campos manuscritos pasan a los del idioma nuevo, salvo que el profesor los haya escrito a mano
+              const { fields: _f, lang: _l, ...rest } = value;
+              const custom = value.fields && !SHEET_LANGS.some((l) => defaultFields(l).every((x, i) => x === value.fields?.[i]));
+              onChange({ ...rest, ...(lang !== 'es' ? { lang } : {}), ...(custom ? { fields: value.fields } : {}) });
+            }}
+          >
+            {SHEET_LANGS.map((l) => (
+              <option key={l} value={l}>
+                {SHEET_LANG_NAMES[l]}
+              </option>
+            ))}
+          </select>
+        </Field>
         <Field label="Nota junto a «Respuestas»" hint="Opcional. Por ejemplo: «Duración: 90 min · Cada error resta 1/3».">
           <input className="input" disabled={disabled} maxLength={90} value={value.note ?? ''} onChange={(e) => set('note', e.target.value)} />
         </Field>

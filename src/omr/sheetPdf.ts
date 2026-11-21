@@ -5,7 +5,8 @@
 import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import qrcode from 'qrcode-generator';
 import { APP_NAME } from '../config';
-import { BUBBLE_R, DEFAULT_FIELDS, GEO, LayoutDoc, MARGIN, MARK, PAGE_H, PAGE_W, PageLayout, QUESTIONS_PER_COLUMN } from './layout';
+import { SHEET_TEXT, sheetLang } from './sheetText';
+import { BUBBLE_R, GEO, LayoutDoc, MARGIN, MARK, PAGE_H, PAGE_W, PageLayout, QUESTIONS_PER_COLUMN } from './layout';
 
 const MM = 72 / 25.4;
 const GRIS = rgb(0.35, 0.35, 0.35);
@@ -143,9 +144,11 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
     return z;
   };
   const title = (cfg.title || APP_NAME).toUpperCase();
-  const subtitle = cfg.subtitle || 'Hoja de respuestas  ·  Examen tipo test';
-  const pag = nPages > 1 ? `   ·   Página ${pageNo} de ${nPages}` : '';
-  const aviso = `Examen: ${doc.exam_id}${pag}   (no escribir en las marcas negras ni en el código QR)`;
+  const tx = SHEET_TEXT[sheetLang(cfg.lang)];
+  // el subtítulo por defecto en castellano se traduce; uno escrito por el profesor se respeta
+  const subtitle = !cfg.subtitle || cfg.subtitle === SHEET_TEXT.es.defaultSubtitle ? tx.defaultSubtitle : cfg.subtitle;
+  const pag = nPages > 1 ? `   ·   ${tx.page(pageNo, nPages)}` : '';
+  const aviso = `${tx.exam}: ${doc.exam_id}${pag}   (${tx.warning})`;
   pen.text(hx, H - 16, title, fit(title, 12, bold, 7), { bold: true });
   pen.text(hx, H - 21.5, subtitle, fit(subtitle, 10, regular, 6.5));
   pen.text(hx, H - 26, aviso, fit(aviso, 7.5, regular, 5.5), { color: GRIS });
@@ -155,7 +158,7 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
   drawQr(pen, lay.qr_text ?? `UICOMR|${doc.exam_id}|v1`, qx, qy, qs);
 
   // Campos manuscritos
-  (cfg.fields ?? DEFAULT_FIELDS).forEach((campo, i) => {
+  (cfg.fields ?? tx.fields).forEach((campo, i) => {
     const y = H - 35 - i * 7;
     pen.text(24, y, `${campo}:`, 8.5);
     pen.line(56, y - 0.8, W - 58, y - 0.8, 0.4);
@@ -163,8 +166,8 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
 
   // Identificador
   const top = GEO.top;
-  pen.text(24, top, `NÚMERO DE IDENTIFICACIÓN (${cfg.idLabel.toUpperCase()})`, 8, { bold: true });
-  pen.text(24, top - 3.5, 'Escribe un dígito por casilla y marca su burbuja debajo', 6.5, { color: GRIS });
+  pen.text(24, top, tx.idTitle(cfg.idLabel.toUpperCase()), 8, { bold: true });
+  pen.text(24, top - 3.5, tx.idHint, 6.5, { color: GRIS });
   const boxY = top - 11;
   lay.nia.forEach((col) => {
     const x = col[0][0];
@@ -176,7 +179,7 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
   const mx = GEO.modeloX;
   const modelos = Object.entries(lay.modelo);
   if (modelos.length) {
-    pen.text(mx, top, 'MODELO DE EXAMEN', 8, { bold: true });
+    pen.text(mx, top, tx.model, 8, { bold: true });
     modelos.forEach(([m, [x, y]]) => pen.bubble(x, y, m));
   }
   if (lay.plantilla) {
@@ -189,29 +192,20 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
 
   // Instrucciones
   const ix = GEO.instrX;
-  pen.text(ix, top, 'INSTRUCCIONES', 8, { bold: true });
-  [
-    'Usa bolígrafo azul o negro.',
-    'Rellena la burbuja por completo:',
-    '',
-    '',
-    'Una sola respuesta por pregunta.',
-    'Para corregir, usa corrector y',
-    'vuelve a marcar.',
-    'No dobles ni grapes la hoja.',
-  ].forEach((t, k) => t && pen.text(ix, top - 4.5 - k * 3.6, t, 6.8));
+  pen.text(ix, top, tx.instructions, 8, { bold: true });
+  tx.lines.forEach((t, k) => t && pen.text(ix, top - 4.5 - k * 3.6, t, 6.8));
   const ey = top - 4.5 - 2.6 * 3.6;
   pen.circle(ix + 3, ey, BUBBLE_R, { fill: NEGRO });
-  pen.text(ix + 6.5, ey - 0.9, 'Correcto', 6.5);
+  pen.text(ix + 6.5, ey - 0.9, tx.right, 6.5);
   pen.circle(ix + 25, ey, BUBBLE_R, { stroke: ROSA, width: 0.6 });
   pen.line(ix + 23.6, ey - 1.4, ix + 26.4, ey + 1.4, 0.8);
   pen.line(ix + 23.6, ey + 1.4, ix + 26.4, ey - 1.4, 0.8);
-  pen.text(ix + 28.5, ey - 0.9, 'Incorrecto', 6.5);
+  pen.text(ix + 28.5, ey - 0.9, tx.wrong, 6.5);
 
   // Respuestas
   const sepY = GEO.sepY;
   pen.line(22, sepY, W - 22, sepY, 0.5);
-  pen.text(24, sepY - 4.5, 'RESPUESTAS', 8, { bold: true });
+  pen.text(24, sepY - 4.5, tx.answers, 8, { bold: true });
   if (cfg.note) pen.text(W - 24, sepY - 4.5, cfg.note, 7, { color: GRIS, align: 'right' });
   const qs_ = Object.keys(lay.preguntas).map(Number).sort((a, b) => a - b);
   const first = qs_[0] ?? 1;
@@ -228,7 +222,7 @@ function drawPage(page: PDFPage, regular: PDFFont, bold: PDFFont, doc: LayoutDoc
     for (const [o, [x, by]] of Object.entries(opts)) pen.bubble(x, by, o);
   }
 
-  pen.text(W / 2, 13, `${doc.exam_id} · Hoja de respuestas · v1${nPages > 1 ? ` · pág. ${pageNo}/${nPages}` : ''}`, 6, {
+  pen.text(W / 2, 13, `${doc.exam_id} · ${tx.footer} · v1${nPages > 1 ? ` · ${tx.pageShort} ${pageNo}/${nPages}` : ''}`, 6, {
     color: GRIS,
     align: 'center',
   });

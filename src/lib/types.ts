@@ -90,6 +90,8 @@ export interface ExamDefaults {
   title?: string;
   idLabel?: string;
   idDigits?: number;
+  /** Idioma de la hoja de respuestas: 'es' (por defecto), 'ca' o 'en'. */
+  lang?: 'es' | 'ca' | 'en';
   grading?: GradingConfig;
 }
 

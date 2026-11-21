@@ -5,6 +5,7 @@
  * El generador de PDF y el lector usan este mismo layout.
  */
 import { QR_PREFIX, QR_VERSION } from '../config';
+import { SHEET_TEXT, SheetLang, sheetLang } from './sheetText';
 
 export type Pt = [number, number];
 
@@ -29,9 +30,13 @@ export interface SheetConfig {
   fields?: string[];
   /** Nota breve impresa junto al título «Respuestas» (duración, penalización…). */
   note?: string;
+  /** Idioma de los textos impresos (por defecto, castellano). No afecta a la lectura. */
+  lang?: SheetLang;
 }
 
 export const DEFAULT_FIELDS = ['Apellidos y nombre', 'Asignatura', 'Fecha'];
+/** Etiquetas por defecto de los campos manuscritos en el idioma de la hoja. */
+export const defaultFields = (lang?: SheetLang): string[] => [...SHEET_TEXT[sheetLang(lang)].fields];
 /** Tamaño máximo del logotipo guardado (caracteres del data URL ≈ 220 kB). */
 export const MAX_LOGO_CHARS = 300_000;
 
@@ -113,9 +118,14 @@ export function clampConfig(c: Partial<SheetConfig>): SheetConfig {
   };
   // personalización opcional (solo se guarda lo que se ha rellenado)
   if (typeof c.logo === 'string' && /^data:image\/(png|jpeg);base64,/.test(c.logo) && c.logo.length <= MAX_LOGO_CHARS) out.logo = c.logo;
+  const lang = sheetLang(c.lang);
+  if (lang !== 'es') out.lang = lang;
   if (Array.isArray(c.fields)) {
-    const fields = DEFAULT_FIELDS.map((def, i) => (c.fields?.[i] ?? def).toString().trim().slice(0, 22));
-    if (fields.some((f, i) => f !== DEFAULT_FIELDS[i])) out.fields = fields;
+    const defs = defaultFields(lang);
+    const fields = defs.map((def, i) => (c.fields?.[i] ?? def).toString().trim().slice(0, 22));
+    // solo se guardan si el profesor las ha cambiado (y no son las de otro idioma por defecto)
+    const isDefaultOf = (l: SheetLang) => fields.every((f, i) => f === SHEET_TEXT[l].fields[i]);
+    if (!isDefaultOf('es') && !isDefaultOf('ca') && !isDefaultOf('en')) out.fields = fields;
   }
   const note = (c.note ?? '').toString().trim().slice(0, 90);
   if (note) out.note = note;
