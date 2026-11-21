@@ -1,4 +1,5 @@
 /** Exportación de notas: Excel (.xlsx) y CSV compatible con Moodle. */
+import { tr } from '../i18n/app';
 import { ExamData, isStudentSheet } from './service';
 
 export interface ExportRow {
@@ -51,6 +52,7 @@ const csvCell = (v: string | number) => (typeof v === 'number' ? String(v) : `"$
 /**
  * CSV para "Calificaciones → Importar → Archivo CSV" de Moodle: UTF-8 con BOM,
  * separador coma y punto decimal. Se puede emparejar por "Número de ID" o por email.
+ * Las cabeceras NO se traducen: Moodle las reconoce por su nombre al importar.
  */
 export function toMoodleCsv(data: ExamData): string {
   const header = ['Número de ID', 'Dirección de correo', 'Apellido(s)', 'Nombre', data.exam.title];
@@ -62,37 +64,37 @@ export function toMoodleCsv(data: ExamData): string {
 /** Libro Excel con las notas y, en una segunda hoja, las respuestas de cada alumno. */
 export async function toXlsx(data: ExamData): Promise<Uint8Array> {
   const XLSX = await import('xlsx');
-  const label = data.exam.sheet_config.idLabel || 'Identificador';
+  const label = data.exam.sheet_config.idLabel || tr('Identificador');
   const rows = exportRows(data).map((r) => ({
     [label]: r.identifier,
-    Apellidos: r.last_name,
-    Nombre: r.first_name,
-    Email: r.email,
-    Grupo: r.group_name,
-    Modelo: r.model,
-    Aciertos: r.n_correct,
-    Errores: r.n_wrong,
-    'En blanco': r.n_blank,
-    Anuladas: r.n_void,
-    'Puntuación bruta': r.raw,
-    Nota: r.grade,
-    'Pendiente de revisión': r.pending ? `Sí (${r.pending})` : 'No',
+    [tr('Apellidos')]: r.last_name,
+    [tr('Nombre')]: r.first_name,
+    [tr('Email')]: r.email,
+    [tr('Grupo')]: r.group_name,
+    [tr('Modelo')]: r.model,
+    [tr('Aciertos')]: r.n_correct,
+    [tr('Errores')]: r.n_wrong,
+    [tr('En blanco')]: r.n_blank,
+    [tr('Anuladas')]: r.n_void,
+    [tr('Puntuación bruta')]: r.raw,
+    [tr('Nota')]: r.grade,
+    [tr('Pendiente de revisión')]: r.pending ? tr('Sí ({n})', { n: r.pending }) : tr('No'),
   }));
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{ wch: 14 }, { wch: 26 }, { wch: 20 }, { wch: 28 }, { wch: 10 }, { wch: 8 }, { wch: 9 }, { wch: 9 }, { wch: 10 }, { wch: 9 }, { wch: 16 }, { wch: 8 }, { wch: 20 }];
-  XLSX.utils.book_append_sheet(wb, ws, 'Notas');
+  XLSX.utils.book_append_sheet(wb, ws, tr('Notas'));
 
   const n = data.exam.sheet_config.nQuestions;
   const results = new Set(data.results.map((r) => r.sheet_id));
   const answers = data.sheets
     .filter((s) => isStudentSheet(s) && results.has(s.id))
     .map((s) => {
-      const row: Record<string, string> = { [label]: s.identifier, Modelo: s.model ?? '' };
-      for (let q = 1; q <= n; q++) row[`P${q}`] = s.answers[String(q)] === '*' ? 'NULA' : (s.answers[String(q)] ?? '');
+      const row: Record<string, string> = { [label]: s.identifier, [tr('Modelo')]: s.model ?? '' };
+      for (let q = 1; q <= n; q++) row[tr('P{q}', { q })] = s.answers[String(q)] === '*' ? tr('NULA') : (s.answers[String(q)] ?? '');
       return row;
     });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(answers), 'Respuestas');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(answers), tr('Respuestas'));
   return new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
 }
 

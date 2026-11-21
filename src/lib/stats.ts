@@ -1,4 +1,5 @@
 /** Estadísticas del examen y análisis de ítems (funciones puras). */
+import { tr } from '../i18n/app';
 import { outcomeOf } from './grading';
 import { INVALID, KeyAnswers, ModelMap } from './types';
 
@@ -32,9 +33,9 @@ export function examStats(grades: number[], scale: number, passMark = scale / 2)
 export type ItemFlag = 'discriminacion_negativa' | 'muy_dificil' | 'distractor_dominante';
 
 export const FLAG_LABEL: Record<ItemFlag, string> = {
-  discriminacion_negativa: 'Discriminación negativa: la aciertan más quienes peor nota sacan',
-  muy_dificil: 'Casi nadie la acierta',
-  distractor_dominante: 'Una opción incorrecta se elige más que la correcta',
+  discriminacion_negativa: tr('Discriminación negativa: la aciertan más quienes peor nota sacan'),
+  muy_dificil: tr('Casi nadie la acierta'),
+  distractor_dominante: tr('Una opción incorrecta se elige más que la correcta'),
 };
 
 export interface ItemStats {
@@ -141,19 +142,19 @@ export type Level = 'bien' | 'neutro' | 'aviso' | 'mal';
 /** Dificultad según el % de acierto. */
 export function difficultyLabel(p: number | null): { text: string; level: Level } | null {
   if (p == null) return null;
-  if (p >= 0.8) return { text: 'Fácil', level: 'neutro' };
-  if (p >= 0.5) return { text: 'Media', level: 'bien' };
-  if (p >= 0.2) return { text: 'Difícil', level: 'aviso' };
-  return { text: 'Muy difícil', level: 'mal' };
+  if (p >= 0.8) return { text: tr('Fácil'), level: 'neutro' };
+  if (p >= 0.5) return { text: tr('Media'), level: 'bien' };
+  if (p >= 0.2) return { text: tr('Difícil'), level: 'aviso' };
+  return { text: tr('Muy difícil'), level: 'mal' };
 }
 
 /** Discriminación: cuánto distingue la pregunta a quien sabe de quien no. */
 export function discriminationLabel(d: number | null): { text: string; level: Level } | null {
   if (d == null) return null;
-  if (d < 0) return { text: 'Negativa', level: 'mal' };
-  if (d < 0.2) return { text: 'Baja', level: 'aviso' };
-  if (d < 0.3) return { text: 'Aceptable', level: 'neutro' };
-  return { text: 'Buena', level: 'bien' };
+  if (d < 0) return { text: tr('Negativa'), level: 'mal' };
+  if (d < 0.2) return { text: tr('Baja'), level: 'aviso' };
+  if (d < 0.3) return { text: tr('Aceptable'), level: 'neutro' };
+  return { text: tr('Buena'), level: 'bien' };
 }
 
 export interface QualitySummary {

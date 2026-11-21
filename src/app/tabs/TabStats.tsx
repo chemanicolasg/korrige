@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Empty, Stat, fmtNum } from '../../components/ui';
+import { tr, trn } from '../../i18n/app';
 import { FLAG_LABEL, ItemStats, Level, difficultyLabel, discriminationLabel, examStats, itemStats, qualitySummary } from '../../lib/stats';
 import { currentKeys, isStudentSheet, sheetModel } from '../../lib/service';
 import { INVALID } from '../../lib/types';
@@ -22,7 +23,7 @@ function Histogram({ bins, scale, pass }: { bins: { from: number; to: number; co
   const ticks = [...new Set([0, Math.ceil(max / 2), max])];
   return (
     <figure>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Histograma de notas">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={tr('Histograma de notas')}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="#e2e8f0" strokeWidth={1} />
@@ -46,7 +47,7 @@ function Histogram({ bins, scale, pass }: { bins: { from: number; to: number; co
                   fill={b.from >= pass ? BAR : BAR_FAIL}
                   opacity={hover === null || hover === i ? 1 : 0.55}
                 >
-                  <title>{`De ${fmtNum(b.from, 1)} a ${fmtNum(b.to, 1)}: ${b.count} alumno(s)`}</title>
+                  <title>{tr('De {desde} a {hasta}: {n} alumno(s)', { desde: fmtNum(b.from, 1), hasta: fmtNum(b.to, 1), n: b.count })}</title>
                 </path>
               )}
               {(hover === i || (hover === null && b.count === max)) && b.count > 0 && (
@@ -67,18 +68,18 @@ function Histogram({ bins, scale, pass }: { bins: { from: number; to: number; co
           {fmtNum(scale, 0)}
         </text>
         <text x={pad.l} y={H - 4} fontSize={11} fill="#64748b">
-          Nota
+          {tr('Nota')}
         </text>
         <text x={4} y={11} fontSize={11} fill="#64748b">
-          Alumnos
+          {tr('Alumnos')}
         </text>
       </svg>
       <figcaption className="mt-1 flex gap-4 text-xs text-slate-600">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: BAR }} /> Aprobados (≥ {fmtNum(pass, 1)})
+          <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: BAR }} /> {tr('Aprobados (≥ {nota})', { nota: fmtNum(pass, 1) })}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: BAR_FAIL }} /> Suspensos
+          <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: BAR_FAIL }} /> {tr('Suspensos')}
         </span>
       </figcaption>
     </figure>
@@ -89,20 +90,20 @@ function Histogram({ bins, scale, pass }: { bins: { from: number; to: number; co
 function OptionBars({ it, options }: { it: ItemStats; options: string[] }) {
   const cats = [...options, ''];
   return (
-    <div className="flex items-end gap-1" aria-label="Frecuencia de cada opción">
+    <div className="flex items-end gap-1" aria-label={tr('Frecuencia de cada opción')}>
       {cats.map((o) => {
         const c = (it.freq[o] ?? 0) + (o === '' ? (it.freq[INVALID] ?? 0) : 0);
         const pct = it.n ? c / it.n : 0;
         const ok = it.correct.includes(o);
         return (
-          <div key={o || 'blanco'} className="flex w-9 flex-col items-center" title={`${o || 'En blanco / nula'}: ${c} (${Math.round(pct * 100)} %)${ok ? ' · correcta' : ''}`}>
+          <div key={o || 'blanco'} className="flex w-9 flex-col items-center" title={`${o || tr('En blanco / nula')}: ${c} (${Math.round(pct * 100)} %)${ok ? tr(' · correcta') : ''}`}>
             <span className="text-[10px] tabular-nums text-slate-600">{Math.round(pct * 100)}%</span>
             <div className="flex h-8 w-full items-end rounded-sm bg-slate-100">
               <div className="w-full rounded-t-sm" style={{ height: `${Math.max(pct * 100, c ? 4 : 0)}%`, background: ok ? BAR : BAR_FAIL }} />
             </div>
             <span className={`text-[11px] ${ok ? 'font-bold text-slate-900' : 'text-slate-500'}`}>
               {o || '—'}
-              {ok && <span aria-label="correcta">✓</span>}
+              {ok && <span aria-label={tr('correcta')}>✓</span>}
             </span>
           </div>
         );
@@ -161,14 +162,14 @@ export default function TabStats() {
   if (!stats.n) {
     return (
       <Empty
-        title="Aún no hay estadísticas"
+        title={tr('Aún no hay estadísticas')}
         action={
           <Link className="btn-primary" to="../subir">
-            Subir hojas
+            {tr('Subir hojas')}
           </Link>
         }
       >
-        Cuando haya hojas corregidas verás aquí la distribución de notas y el análisis de cada pregunta (dificultad, discriminación y distractores).
+        {tr('Cuando haya hojas corregidas verás aquí la distribución de notas y el análisis de cada pregunta (dificultad, discriminación y distractores).')}
       </Empty>
     );
   }
@@ -184,123 +185,136 @@ export default function TabStats() {
     <div className="space-y-5">
       {pending > 0 && (
         <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
-          Hay {pending} incidencias sin revisar: los indicadores pueden cambiar cuando las resuelvas.{' '}
-          <Link className="font-medium underline" to="../revision">
-            Ir a Revisión
-          </Link>
+          {trn('Hay {n} incidencias sin revisar: los indicadores pueden cambiar cuando las resuelvas. {link}', {
+            n: pending,
+            link: (
+              <Link className="font-medium underline" to="../revision">
+                {tr('Ir a Revisión')}
+              </Link>
+            ),
+          })}
         </p>
       )}
 
       <section aria-labelledby="kpi-examen">
         <h2 id="kpi-examen" className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Resultado del examen
+          {tr('Resultado del examen')}
         </h2>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          <Stat label="Presentados" value={stats.n} hint={roster ? `de ${roster} en la lista · ${absent} sin entregar` : 'hojas corregidas'} />
-          <Stat label="Aprobados" value={`${Math.round(stats.passRate * 100)} %`} hint={`${Math.round(stats.passRate * stats.n)} de ${stats.n} con nota ≥ ${fmtNum(g.scale / 2, 1)}`} />
-          <Stat label="Nota media" value={fmtNum(stats.mean)} hint={`sobre ${fmtNum(g.scale, 0)}`} />
-          <Stat label="Mediana" value={fmtNum(stats.median)} hint="la mitad de la clase saca más y la otra mitad menos" />
-          <Stat label="Dispersión" value={fmtNum(stats.sd)} hint={`desviación típica · notas entre ${fmtNum(stats.min)} y ${fmtNum(stats.max)}`} />
+          <Stat label={tr('Presentados')} value={stats.n} hint={roster ? tr('de {n} en la lista · {ausentes} sin entregar', { n: roster, ausentes: absent }) : tr('hojas corregidas')} />
+          <Stat label={tr('Aprobados')} value={`${Math.round(stats.passRate * 100)} %`} hint={tr('{n} de {total} con nota ≥ {nota}', { n: Math.round(stats.passRate * stats.n), total: stats.n, nota: fmtNum(g.scale / 2, 1) })} />
+          <Stat label={tr('Nota media')} value={fmtNum(stats.mean)} hint={tr('sobre {max}', { max: fmtNum(g.scale, 0) })} />
+          <Stat label={tr('Mediana')} value={fmtNum(stats.median)} hint={tr('la mitad de la clase saca más y la otra mitad menos')} />
+          <Stat label={tr('Dispersión')} value={fmtNum(stats.sd)} hint={tr('desviación típica · notas entre {min} y {max}', { min: fmtNum(stats.min), max: fmtNum(stats.max) })} />
         </div>
       </section>
 
       <section aria-labelledby="kpi-preguntas">
         <h2 id="kpi-preguntas" className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Calidad de las preguntas
+          {tr('Calidad de las preguntas')}
         </h2>
         <div className="grid gap-3 md:grid-cols-3">
           <Split
-            title={`Dificultad · acierto medio ${q.meanDifficulty == null ? '—' : `${Math.round(q.meanDifficulty * 100)} %`}`}
+            title={tr('Dificultad · acierto medio {pct}', { pct: q.meanDifficulty == null ? '—' : `${Math.round(q.meanDifficulty * 100)} %` })}
             parts={[
-              ['fáciles', q.easy, '#b9b4a8'],
-              ['medias', q.medium, '#2439b0'],
-              ['difíciles', q.hard, '#d6336c'],
+              [tr('fáciles'), q.easy, '#b9b4a8'],
+              [tr('medias'), q.medium, '#2439b0'],
+              [tr('difíciles'), q.hard, '#d6336c'],
             ]}
           />
           <Split
-            title="Discriminación"
+            title={tr('Discriminación')}
             parts={[
-              ['distinguen bien', q.goodDiscrimination, '#2439b0'],
-              ['distinguen poco', q.lowDiscrimination, '#b9b4a8'],
-              ['al revés', q.negativeDiscrimination, '#d6336c'],
+              [tr('distinguen bien'), q.goodDiscrimination, '#2439b0'],
+              [tr('distinguen poco'), q.lowDiscrimination, '#b9b4a8'],
+              [tr('al revés'), q.negativeDiscrimination, '#d6336c'],
             ]}
           />
           <Stat
-            label="Preguntas a revisar"
+            label={tr('Preguntas a revisar')}
             value={q.flagged}
-            hint={q.flagged ? `de ${q.scored + q.voided}: ${flagged.map((f) => f.q).slice(0, 8).join(', ')}${flagged.length > 8 ? '…' : ''}` : `de ${q.scored + q.voided} · ninguna da problemas${q.voided ? ` · ${q.voided} anuladas` : ''}`}
+            hint={
+              q.flagged
+                ? tr('de {total}: {lista}', { total: q.scored + q.voided, lista: `${flagged.map((f) => f.q).slice(0, 8).join(', ')}${flagged.length > 8 ? '…' : ''}` })
+                : `${tr('de {total} · ninguna da problemas', { total: q.scored + q.voided })}${q.voided ? tr(' · {n} anuladas', { n: q.voided }) : ''}`
+            }
           />
         </div>
       </section>
 
       <details className="card px-5 py-3 text-sm text-slate-700" data-testid="kpi-help">
-        <summary className="cursor-pointer font-semibold text-brand-800">Cómo leer estos indicadores</summary>
+        <summary className="cursor-pointer font-semibold text-brand-800">{tr('Cómo leer estos indicadores')}</summary>
         <dl className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">
           <div>
-            <dt className="font-semibold text-slate-900">Dificultad</dt>
-            <dd>Porcentaje de alumnos que aciertan la pregunta. Fácil: 80 % o más. Media: entre 50 y 80 %. Difícil: menos del 50 %. Muy difícil: menos del 20 %.</dd>
+            <dt className="font-semibold text-slate-900">{tr('Dificultad')}</dt>
+            <dd>{tr('Porcentaje de alumnos que aciertan la pregunta. Fácil: 80 % o más. Media: entre 50 y 80 %. Difícil: menos del 50 %. Muy difícil: menos del 20 %.')}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-900">Discriminación</dt>
+            <dt className="font-semibold text-slate-900">{tr('Discriminación')}</dt>
             <dd>
-              Acierto del 27 % de alumnos con mejor nota menos el del 27 % con peor nota. Buena: 0,30 o más. Aceptable: 0,20–0,30. Baja: menos de 0,20. Negativa: la
-              aciertan más los que peor nota sacan; suele indicar un enunciado confuso o una clave equivocada.
+              {tr(
+                'Acierto del 27 % de alumnos con mejor nota menos el del 27 % con peor nota. Buena: 0,30 o más. Aceptable: 0,20–0,30. Baja: menos de 0,20. Negativa: la aciertan más los que peor nota sacan; suele indicar un enunciado confuso o una clave equivocada.',
+              )}
             </dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-900">Opciones elegidas (distractores)</dt>
-            <dd>Qué porcentaje marcó cada opción; la correcta lleva ✓. Si una incorrecta supera a la correcta, revisa la clave y el enunciado.</dd>
+            <dt className="font-semibold text-slate-900">{tr('Opciones elegidas (distractores)')}</dt>
+            <dd>{tr('Qué porcentaje marcó cada opción; la correcta lleva ✓. Si una incorrecta supera a la correcta, revisa la clave y el enunciado.')}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-900">Mediana y dispersión</dt>
-            <dd>La mediana no se ve afectada por unas pocas notas muy altas o muy bajas. La desviación típica indica lo repartidas que están las notas: cuanto mayor, más diferencia entre alumnos.</dd>
+            <dt className="font-semibold text-slate-900">{tr('Mediana y dispersión')}</dt>
+            <dd>{tr('La mediana no se ve afectada por unas pocas notas muy altas o muy bajas. La desviación típica indica lo repartidas que están las notas: cuanto mayor, más diferencia entre alumnos.')}</dd>
           </div>
         </dl>
       </details>
 
       <section className="card p-5">
-        <h2 className="mb-3 font-semibold">Distribución de notas</h2>
+        <h2 className="mb-3 font-semibold">{tr('Distribución de notas')}</h2>
         <div className="max-w-2xl">
           <Histogram bins={stats.histogram} scale={g.scale} pass={g.scale / 2} />
         </div>
       </section>
       <section className="card p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="font-semibold">Análisis por pregunta</h2>
+          <h2 className="font-semibold">{tr('Análisis por pregunta')}</h2>
           <label className="flex items-center gap-2 text-sm text-slate-600">
-            <input type="checkbox" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} /> Solo las problemáticas ({flagged.length})
+            <input type="checkbox" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} /> {tr('Solo las problemáticas ({n})', { n: flagged.length })}
           </label>
         </div>
         <p className="mt-1 text-xs text-slate-500">
-          Una fila por pregunta, con su dificultad, su discriminación y qué opción eligió cada alumno.{' '}
-          {cfg.nModels > 1 && (mapped ? 'Las preguntas se agregan entre modelos con la correspondencia definida (numeración del modelo A).' : 'Sin correspondencia entre modelos definida: se agrega por número de pregunta.')}
+          {tr('Una fila por pregunta, con su dificultad, su discriminación y qué opción eligió cada alumno.')}{' '}
+          {cfg.nModels > 1 && (mapped ? tr('Las preguntas se agregan entre modelos con la correspondencia definida (numeración del modelo A).') : tr('Sin correspondencia entre modelos definida: se agrega por número de pregunta.'))}
         </p>
         {flagged.length > 0 && (
           <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            ⚠ {flagged.length} pregunta(s) candidatas a revisar o anular: {flagged.map((f) => f.q).join(', ')}. Puedes anularlas en{' '}
-            <Link className="font-medium underline" to="../plantillas">
-              Plantillas
-            </Link>
-            .
+            {trn('⚠ {n} pregunta(s) candidatas a revisar o anular: {lista}. Puedes anularlas en {link}.', {
+              n: flagged.length,
+              lista: flagged.map((f) => f.q).join(', '),
+              link: (
+                <Link className="font-medium underline" to="../plantillas">
+                  {tr('Plantillas')}
+                </Link>
+              ),
+            })}
           </p>
         )}
         <div className="mt-3 overflow-x-auto">
           <table className="w-full" data-testid="items-table">
             <thead className="border-b border-slate-200">
               <tr>
-                <th className="th">Pregunta</th>
-                <th className="th">Correcta</th>
-                <th className="th text-right">Dificultad (% acierto)</th>
-                <th className="th text-right">Discriminación</th>
-                <th className="th">Opciones elegidas</th>
-                <th className="th">Avisos</th>
+                <th className="th">{tr('Pregunta')}</th>
+                <th className="th">{tr('Correcta')}</th>
+                <th className="th text-right">{tr('Dificultad (% acierto)')}</th>
+                <th className="th text-right">{tr('Discriminación')}</th>
+                <th className="th">{tr('Opciones elegidas')}</th>
+                <th className="th">{tr('Avisos')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {shown.map((it) => (
                 <tr key={it.q} className={it.flags.length ? 'bg-amber-50/60' : ''}>
                   <td className="td font-semibold tabular-nums">{it.q}</td>
-                  <td className="td">{it.voided ? <span className="badge bg-slate-200 text-slate-600">Anulada</span> : it.correct.join(', ') || '—'}</td>
+                  <td className="td">{it.voided ? <span className="badge bg-slate-200 text-slate-600">{tr('Anulada')}</span> : it.correct.join(', ') || '—'}</td>
                   <td className="td whitespace-nowrap text-right tabular-nums">
                     {it.p == null ? '—' : `${Math.round(it.p * 100)} %`} <Tag label={difficultyLabel(it.p)} />
                   </td>

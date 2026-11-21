@@ -1,3 +1,4 @@
+import { tr } from '../i18n/app';
 import type { PageLayout, Pt } from '../omr/layout';
 import { DUDOSA, MARCADA } from '../omr/thresholds';
 
@@ -53,13 +54,13 @@ export function SheetOverlay({
   const hl = highlight ? layout.preguntas[highlight] : undefined;
   const hlPts = hl ? Object.values(hl) : [];
   return (
-    <svg viewBox={vb.join(' ')} className={className} role="img" aria-label="Imagen de la hoja con la lectura superpuesta" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox={vb.join(' ')} className={className} role="img" aria-label={tr('Imagen de la hoja con la lectura superpuesta')} preserveAspectRatio="xMidYMid meet">
       <rect x={0} y={0} width={W} height={H} fill="#f8fafc" />
       {imageUrl ? (
         <image href={imageUrl} x={0} y={0} width={W} height={H} preserveAspectRatio="none" />
       ) : (
         <text x={vb[0] + vb[2] / 2} y={vb[1] + vb[3] / 2} textAnchor="middle" fontSize={Math.max(2.5, vb[3] / 12)} fill="#94a3b8">
-          Imagen no disponible
+          {tr('Imagen no disponible')}
         </text>
       )}
       {hlPts.length > 0 && (

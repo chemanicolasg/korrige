@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { idCrop, modelCrop, questionCrop, scoreColor } from '../../components/SheetOverlay';
 import { Empty } from '../../components/ui';
+import { tr, trn } from '../../i18n/app';
 import { Resolution, isStudentSheet, resolveItem } from '../../lib/service';
 import { INVALID, KIND_LABEL, ReviewItem, ReviewKind, Sheet } from '../../lib/types';
 import { modelLetters, optionLetters } from '../../omr/layout';
@@ -11,6 +12,17 @@ import { SheetImage, pageOfQuestion } from '../SheetImage';
 const KIND_ORDER: ReviewKind[] = ['ilegible', 'en_blanco', 'qr', 'pagina_faltante', 'id_dudoso', 'id_duplicado', 'id_no_en_lista', 'modelo', 'doble', 'floja'];
 const isIdKind = (k: ReviewKind) => k === 'id_dudoso' || k === 'id_duplicado' || k === 'id_no_en_lista';
 const isQKind = (k: ReviewKind) => k === 'doble' || k === 'floja';
+
+// Valores que se guardan en castellano en la base de datos y se traducen al mostrarlos
+const RESOLUTION_TEXT: Record<string, string> = {
+  respuesta: tr('respuesta'),
+  modelo: tr('modelo'),
+  identificador: tr('identificador'),
+  aceptar: tr('aceptar'),
+  excluir: tr('excluir'),
+  auto: tr('auto'),
+};
+const MODEL_STATE_TEXT: Record<string, string> = { 'sin marcar': tr('sin marcar'), blanco: tr('blanco'), doble: tr('doble'), floja: tr('floja') };
 
 function Kbd({ children }: { children: string }) {
   return <kbd className="kbd">{children}</kbd>;
@@ -102,29 +114,29 @@ export default function TabReview() {
   if (!data.sheets.length) {
     return (
       <Empty
-        title="Todavía no hay nada que revisar"
+        title={tr('Todavía no hay nada que revisar')}
         action={
           <Link className="btn-primary" to="../subir">
-            Subir hojas
+            {tr('Subir hojas')}
           </Link>
         }
       >
-        Cuando subas el PDF escaneado, aquí aparecerá todo lo dudoso: dobles marcas, marcas flojas, identificadores incompletos, hojas en blanco…
+        {tr('Cuando subas el PDF escaneado, aquí aparecerá todo lo dudoso: dobles marcas, marcas flojas, identificadores incompletos, hojas en blanco…')}
       </Empty>
     );
   }
-  if (!data.items.length) return <Empty title="Sin incidencias">Todas las hojas se han leído sin dudas. Puedes ir directamente a Notas.</Empty>;
+  if (!data.items.length) return <Empty title={tr('Sin incidencias')}>{tr('Todas las hojas se han leído sin dudas. Puedes ir directamente a Notas.')}</Empty>;
 
   const describe = (it: ReviewItem, s?: Sheet) => {
     const who = s ? (students.get(s.identifier) ? `${students.get(s.identifier)!.last_name}, ${students.get(s.identifier)!.first_name}` : s.identifier) : '';
-    return `${KIND_LABEL[it.kind]}${it.question ? ` · P${it.question}` : ''} — hoja ${s?.seq ?? '?'} (${who})`;
+    return tr('{tipo}{pregunta} — hoja {n} ({quien})', { tipo: KIND_LABEL[it.kind], pregunta: it.question ? tr(' · P{q}', { q: it.question }) : '', n: s?.seq ?? '?', quien: who });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <button className={`badge px-3 py-1 ${kind === 'todas' ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-700'}`} onClick={() => setKind('todas')}>
-          Todas ({pendingAll.length})
+          {tr('Todas ({n})', { n: pendingAll.length })}
         </button>
         {KIND_ORDER.filter((k) => counts[k]).map((k) => (
           <button key={k} className={`badge px-3 py-1 ${kind === k ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-700'}`} onClick={() => setKind(k)}>
@@ -132,24 +144,24 @@ export default function TabReview() {
           </button>
         ))}
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600">
-          <input type="checkbox" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Ver también las resueltas
+          <input type="checkbox" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> {tr('Ver también las resueltas')}
         </label>
       </div>
 
       {pendingAll.length === 0 && !showDone ? (
         <Empty
-          title="¡Revisión terminada!"
+          title={tr('¡Revisión terminada!')}
           action={
             <Link className="btn-primary" to="../notas">
-              Ver notas
+              {tr('Ver notas')}
             </Link>
           }
         >
-          No quedan incidencias pendientes. Todas las correcciones han quedado registradas en Actividad.
+          {tr('No quedan incidencias pendientes. Todas las correcciones han quedado registradas en Actividad.')}
         </Empty>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-          <ol className="card max-h-[70vh] divide-y divide-slate-100 overflow-y-auto" aria-label="Cola de revisión">
+          <ol className="card max-h-[70vh] divide-y divide-slate-100 overflow-y-auto" aria-label={tr('Cola de revisión')}>
             {list.map((it) => {
               const s = sheets.get(it.sheet_id);
               return (
@@ -162,25 +174,28 @@ export default function TabReview() {
                     <span className="font-medium">
                       {it.status === 'resuelta' && '✓ '}
                       {KIND_LABEL[it.kind]}
-                      {it.question ? ` · pregunta ${it.question}` : ''}
+                      {it.question ? tr(' · pregunta {q}', { q: it.question }) : ''}
                     </span>
                     <span className="block text-xs text-slate-500">
-                      Hoja {s?.seq} · {s?.identifier}
+                      {tr('Hoja {n} · {id}', { n: s?.seq ?? '', id: s?.identifier ?? '' })}
                       {s && students.get(s.identifier) ? ` · ${students.get(s.identifier)!.last_name}` : ''}
                     </span>
                   </button>
                 </li>
               );
             })}
-            {list.length === 0 && <li className="p-4 text-sm text-slate-500">Nada pendiente de este tipo.</li>}
+            {list.length === 0 && <li className="p-4 text-sm text-slate-500">{tr('Nada pendiente de este tipo.')}</li>}
           </ol>
 
           {cur && sheet && (
             <section className="card p-5" aria-live="polite" data-testid="review-panel">
               <h2 className="text-base font-semibold">{describe(cur, sheet)}</h2>
               <p className="text-xs text-slate-500">
-                {sheet.pages[0]?.archivo}, página {sheet.pages[0]?.pdf_pagina} del PDF
-                {cur.status === 'resuelta' && ` · resuelta (${String(cur.resolution?.tipo ?? '')}${cur.resolution?.valor !== undefined ? `: ${String(cur.resolution.valor) || 'en blanco'}` : ''})`}
+                {tr('{archivo}, página {n} del PDF', { archivo: sheet.pages[0]?.archivo ?? '', n: sheet.pages[0]?.pdf_pagina ?? '' })}
+                {cur.status === 'resuelta' &&
+                  tr(' · resuelta ({detalle})', {
+                    detalle: `${RESOLUTION_TEXT[String(cur.resolution?.tipo ?? '')] ?? String(cur.resolution?.tipo ?? '')}${cur.resolution?.valor !== undefined ? `: ${String(cur.resolution.valor) || tr('en blanco')}` : ''}`,
+                  })}
               </p>
 
               {/* Pregunta con doble marca o marca floja */}
@@ -195,8 +210,10 @@ export default function TabReview() {
                     className="w-full max-w-2xl rounded-lg border border-slate-200"
                   />
                   <p className="mt-3 text-sm text-slate-700">
-                    El sistema ha leído <b>{cur.kind === 'doble' ? `varias marcas (${String(cur.detail.leido)})` : `una marca floja (${String(cur.detail.leido)})`}</b>. Respuesta actual:{' '}
-                    <b>{sheet.answers[String(cur.question)] === INVALID ? 'nula' : sheet.answers[String(cur.question)] || 'en blanco'}</b>. ¿Qué respuesta cuenta?
+                    {trn('El sistema ha leído {leido}. Respuesta actual: {actual}. ¿Qué respuesta cuenta?', {
+                      leido: <b>{cur.kind === 'doble' ? tr('varias marcas ({v})', { v: String(cur.detail.leido) }) : tr('una marca floja ({v})', { v: String(cur.detail.leido) })}</b>,
+                      actual: <b>{sheet.answers[String(cur.question)] === INVALID ? tr('nula') : sheet.answers[String(cur.question)] || tr('en blanco')}</b>,
+                    })}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {options.map((o, j) => {
@@ -205,28 +222,27 @@ export default function TabReview() {
                         <button key={o} className="btn min-w-16 flex-col !gap-0 py-1.5" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'respuesta', value: o })}>
                           <span className="text-base font-semibold">{o}</span>
                           <span className="text-[10px] font-normal" style={{ color: scoreColor(sc) }}>
-                            relleno {Math.round(sc * 100)} %
+                            {tr('relleno {n} %', { n: Math.round(sc * 100) })}
                           </span>
                         </button>
                       );
                     })}
                     <button className="btn" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'respuesta', value: '' })}>
-                      En blanco
+                      {tr('En blanco')}
                     </button>
                     <button className="btn" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'respuesta', value: INVALID })}>
-                      Nula (cuenta como error)
+                      {tr('Nula (cuenta como error)')}
                     </button>
                   </div>
                   <p className="mt-3 text-xs text-slate-500">
-                    Atajos: {options.map((o) => <Kbd key={o}>{o}</Kbd>).reduce<React.ReactNode[]>((a, x) => [...a, ' ', x], [])} elegir · <Kbd>0</Kbd> en blanco · <Kbd>X</Kbd> nula
-                    {suggestion && (
-                      <>
-                        {' '}
-                        · <Kbd>Enter</Kbd> aceptar {suggestion}
-                      </>
-                    )}{' '}
-                    · <Kbd>↑</Kbd>
-                    <Kbd>↓</Kbd> moverse
+                    {trn('Atajos: {opciones} elegir · {cero} en blanco · {x} nula{sugerencia} · {arriba}{abajo} moverse', {
+                      opciones: options.map((o) => <Kbd key={o}>{o}</Kbd>).reduce<React.ReactNode[]>((a, x) => [...a, ' ', x], []),
+                      cero: <Kbd>0</Kbd>,
+                      x: <Kbd>X</Kbd>,
+                      sugerencia: suggestion ? trn(' · {enter} aceptar {letra}', { enter: <Kbd>Enter</Kbd>, letra: suggestion }) : null,
+                      arriba: <Kbd>↑</Kbd>,
+                      abajo: <Kbd>↓</Kbd>,
+                    })}
                   </p>
                 </div>
               )}
@@ -237,27 +253,22 @@ export default function TabReview() {
                   <SheetImage sheet={sheet} layout={data.layout} crop={idCrop(data.layout.pages[0])} className="w-full rounded-lg border border-slate-200" />
                   <div>
                     <p className="text-sm text-slate-700">
-                      {cur.kind === 'id_dudoso' && (
-                        <>
-                          El sistema ha leído <b className="font-mono">{sheet.identifier}</b> (cada «?» es una columna sin marcar o con dos marcas). Mira los dígitos escritos a mano y
-                          complétalo.
-                        </>
-                      )}
-                      {cur.kind === 'id_no_en_lista' && (
-                        <>
-                          <b className="font-mono">{sheet.identifier}</b> no está en la lista de alumnos. Corrígelo si el alumno se equivocó al marcarlo, o acéptalo tal cual.
-                        </>
-                      )}
-                      {cur.kind === 'id_duplicado' && (
-                        <>
-                          Hay más de una hoja con <b className="font-mono">{sheet.identifier}</b>:{' '}
-                          {data.sheets
+                      {cur.kind === 'id_dudoso' &&
+                        trn('El sistema ha leído {id} (cada «?» es una columna sin marcar o con dos marcas). Mira los dígitos escritos a mano y complétalo.', {
+                          id: <b className="font-mono">{sheet.identifier}</b>,
+                        })}
+                      {cur.kind === 'id_no_en_lista' &&
+                        trn('{id} no está en la lista de alumnos. Corrígelo si el alumno se equivocó al marcarlo, o acéptalo tal cual.', {
+                          id: <b className="font-mono">{sheet.identifier}</b>,
+                        })}
+                      {cur.kind === 'id_duplicado' &&
+                        trn('Hay más de una hoja con {id}: {hojas}. Corrige el identificador, excluye la hoja que sobre o acepta que haya dos.', {
+                          id: <b className="font-mono">{sheet.identifier}</b>,
+                          hojas: data.sheets
                             .filter((s) => isStudentSheet(s) && s.identifier === sheet.identifier)
-                            .map((s) => `hoja ${s.seq} (${s.pages[0]?.archivo})`)
-                            .join(', ')}
-                          . Corrige el identificador, excluye la hoja que sobre o acepta que haya dos.
-                        </>
-                      )}
+                            .map((s) => tr('hoja {n} ({archivo})', { n: s.seq, archivo: String(s.pages[0]?.archivo) }))
+                            .join(', '),
+                        })}
                     </p>
                     <form
                       className="mt-3 flex gap-2"
@@ -270,7 +281,7 @@ export default function TabReview() {
                         ref={idInput}
                         className="input font-mono text-lg tracking-widest"
                         inputMode="numeric"
-                        aria-label={`${data.exam.sheet_config.idLabel} corregido`}
+                        aria-label={tr('{etiqueta} corregido', { etiqueta: data.exam.sheet_config.idLabel })}
                         maxLength={data.exam.sheet_config.idDigits}
                         value={idValue}
                         disabled={readOnly || cur.status !== 'pendiente'}
@@ -278,7 +289,7 @@ export default function TabReview() {
                         onKeyDown={(e) => e.key === 'Escape' && (e.target as HTMLInputElement).blur()}
                       />
                       <button className="btn-primary shrink-0" disabled={readOnly || busy || cur.status !== 'pendiente' || !idValue || idValue === sheet.identifier}>
-                        Guardar
+                        {tr('Guardar')}
                       </button>
                     </form>
                     <p className="mt-1 text-sm">
@@ -287,22 +298,26 @@ export default function TabReview() {
                           ✓ {students.get(idValue)!.last_name}, {students.get(idValue)!.first_name}
                         </span>
                       ) : data.students.length > 0 && idValue.length === data.exam.sheet_config.idDigits ? (
-                        <span className="text-amber-700">No está en la lista de alumnos</span>
+                        <span className="text-amber-700">{tr('No está en la lista de alumnos')}</span>
                       ) : null}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {cur.kind !== 'id_dudoso' && (
                         <button className="btn" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'aceptar' })}>
-                          Aceptar tal cual
+                          {tr('Aceptar tal cual')}
                         </button>
                       )}
                       <button className="btn text-red-700" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'excluir' })}>
-                        Excluir esta hoja
+                        {tr('Excluir esta hoja')}
                       </button>
                     </div>
                     <p className="mt-3 text-xs text-slate-500">
-                      Atajos: <Kbd>Enter</Kbd> escribir el identificador · <Kbd>Supr</Kbd> excluir la hoja · <Kbd>↑</Kbd>
-                      <Kbd>↓</Kbd> moverse
+                      {trn('Atajos: {enter} escribir el identificador · {supr} excluir la hoja · {arriba}{abajo} moverse', {
+                        enter: <Kbd>Enter</Kbd>,
+                        supr: <Kbd>{tr('Supr')}</Kbd>,
+                        arriba: <Kbd>↑</Kbd>,
+                        abajo: <Kbd>↓</Kbd>,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -314,8 +329,9 @@ export default function TabReview() {
                   <SheetImage sheet={sheet} layout={data.layout} crop={modelCrop(data.layout.pages[0])} className="w-full rounded-lg border border-slate-200" />
                   <div>
                     <p className="text-sm text-slate-700">
-                      No se ha podido leer el modelo de examen ({String(cur.detail.estado ?? 'sin marcar')}
-                      {cur.detail.leido ? `: ${String(cur.detail.leido)}` : ''}). Sin modelo la hoja no se puede corregir. ¿Qué modelo es?
+                      {tr('No se ha podido leer el modelo de examen ({detalle}). Sin modelo la hoja no se puede corregir. ¿Qué modelo es?', {
+                        detalle: `${MODEL_STATE_TEXT[String(cur.detail.estado ?? 'sin marcar')] ?? String(cur.detail.estado ?? 'sin marcar')}${cur.detail.leido ? `: ${String(cur.detail.leido)}` : ''}`,
+                      })}
                     </p>
                     <div className="mt-3 flex gap-2">
                       {models.map((m) => (
@@ -324,11 +340,11 @@ export default function TabReview() {
                         </button>
                       ))}
                       <button className="btn text-red-700" disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'excluir' })}>
-                        Excluir hoja
+                        {tr('Excluir hoja')}
                       </button>
                     </div>
                     <p className="mt-3 text-xs text-slate-500">
-                      Atajos: {models.map((m) => <Kbd key={m}>{m}</Kbd>).reduce<React.ReactNode[]>((a, x) => [...a, ' ', x], [])} elegir modelo
+                      {trn('Atajos: {modelos} elegir modelo', { modelos: models.map((m) => <Kbd key={m}>{m}</Kbd>).reduce<React.ReactNode[]>((a, x) => [...a, ' ', x], []) })}
                     </p>
                   </div>
                 </div>
@@ -340,37 +356,41 @@ export default function TabReview() {
                   <SheetImage sheet={sheet} layout={data.layout} className="w-full rounded-lg border border-slate-200" />
                   <div>
                     <p className="text-sm text-slate-700">
-                      {cur.kind === 'en_blanco' && 'La hoja no tiene ninguna marca (ni identificador ni respuestas). Lo normal es excluirla.'}
-                      {cur.kind === 'qr' && 'No se ha podido leer el código QR, así que no se ha comprobado que la hoja sea de este examen. Si lo es, acéptala.'}
-                      {cur.kind === 'pagina_faltante' && `Falta la página ${String(cur.detail.pagina)} de esta hoja. Puedes aceptarla (sus preguntas quedan en blanco), o excluirla y volver a escanear.`}
-                      {cur.kind === 'ilegible' && 'No se encuentran las 4 marcas negras de las esquinas (hoja doblada, cortada o mal escaneada). Exclúyela y vuelve a escanearla.'}
+                      {cur.kind === 'en_blanco' && tr('La hoja no tiene ninguna marca (ni identificador ni respuestas). Lo normal es excluirla.')}
+                      {cur.kind === 'qr' && tr('No se ha podido leer el código QR, así que no se ha comprobado que la hoja sea de este examen. Si lo es, acéptala.')}
+                      {cur.kind === 'pagina_faltante' && tr('Falta la página {n} de esta hoja. Puedes aceptarla (sus preguntas quedan en blanco), o excluirla y volver a escanear.', { n: String(cur.detail.pagina) })}
+                      {cur.kind === 'ilegible' && tr('No se encuentran las 4 marcas negras de las esquinas (hoja doblada, cortada o mal escaneada). Exclúyela y vuelve a escanearla.')}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button className={cur.kind === 'en_blanco' || cur.kind === 'ilegible' ? 'btn-primary' : 'btn text-red-700'} disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'excluir' })}>
-                        Excluir hoja
+                        {tr('Excluir hoja')}
                       </button>
                       {cur.kind !== 'ilegible' && (
                         <button className={cur.kind === 'en_blanco' ? 'btn' : 'btn-primary'} disabled={readOnly || busy || cur.status !== 'pendiente'} onClick={() => void resolve({ type: 'aceptar' })}>
-                          {cur.kind === 'en_blanco' ? 'Mantenerla' : 'Aceptar la hoja'}
+                          {cur.kind === 'en_blanco' ? tr('Mantenerla') : tr('Aceptar la hoja')}
                         </button>
                       )}
                     </div>
                     <p className="mt-3 text-xs text-slate-500">
-                      Atajos: <Kbd>Enter</Kbd> aceptar · <Kbd>Supr</Kbd> excluir
+                      {trn('Atajos: {enter} aceptar · {supr} excluir', { enter: <Kbd>Enter</Kbd>, supr: <Kbd>{tr('Supr')}</Kbd> })}
                     </p>
                   </div>
                 </div>
               )}
 
               <details className="mt-5">
-                <summary className="cursor-pointer text-sm text-brand-700">Ver la hoja completa</summary>
+                <summary className="cursor-pointer text-sm text-brand-700">{tr('Ver la hoja completa')}</summary>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   {sheet.pages.map((p) => (
                     <SheetImage key={p.hoja_pagina} sheet={sheet} layout={data.layout} page={p.hoja_pagina} className="w-full rounded-lg border border-slate-200" />
                   ))}
                 </div>
                 <p className="mt-2 text-xs text-slate-500">
-                  <span style={{ color: scoreColor(1) }}>● verde</span> = marcada · <span style={{ color: scoreColor(0.3) }}>● naranja</span> = floja · <span style={{ color: scoreColor(0) }}>● gris</span> = vacía
+                  {trn('{verde} = marcada · {naranja} = floja · {gris} = vacía', {
+                    verde: <span style={{ color: scoreColor(1) }}>{tr('● verde')}</span>,
+                    naranja: <span style={{ color: scoreColor(0.3) }}>{tr('● naranja')}</span>,
+                    gris: <span style={{ color: scoreColor(0) }}>{tr('● gris')}</span>,
+                  })}
                 </p>
               </details>
             </section>
