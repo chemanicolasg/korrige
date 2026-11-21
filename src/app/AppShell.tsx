@@ -1,10 +1,9 @@
 import { FormEvent, useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ErrorBox, Field, Logo, Notice } from '../components/ui';
-import { setDemoMode } from '../lib/db';
-import { SUPABASE_CONFIGURED } from '../config';
 import { useAuth } from './AuthContext';
 import { Tutorial } from './Tutorial';
+import { UserMenu } from './UserMenu';
 
 function Onboarding() {
   const { db, user, refresh } = useAuth();
@@ -50,7 +49,7 @@ function Onboarding() {
 }
 
 export default function AppShell() {
-  const { db, user, profile, orgs, org, role, setOrgId, canCreateExam, markOnboarded } = useAuth();
+  const { db, user, profile, orgs, org, setOrgId, canCreateExam, markOnboarded } = useAuth();
   const [showTutorial, setShowTutorial] = useState(false);
   const loc = useLocation();
   if (!user) return <Navigate to={`/acceso?volver=${encodeURIComponent(loc.pathname)}`} replace />;
@@ -100,23 +99,8 @@ export default function AppShell() {
                 ))}
               </select>
             )}
-            {orgs.length === 1 && <span className="hidden text-slate-500 sm:inline">{org?.name}</span>}
-            <span className="hidden text-slate-700 md:inline" title={user.email}>
-              {profile?.full_name || user.email}
-              {role === 'admin' && <span className="badge ml-2 bg-slate-100 text-slate-600">admin</span>}
-            </span>
-            <button
-              className="btn btn-sm"
-              onClick={async () => {
-                await db.signOut();
-                if (db.kind === 'local' && SUPABASE_CONFIGURED) {
-                  setDemoMode(false);
-                  location.href = '/';
-                }
-              }}
-            >
-              Salir
-            </button>
+            {orgs.length === 1 && <span className="hidden text-slate-500 lg:inline">{org?.name}</span>}
+            <UserMenu onTutorial={() => setShowTutorial(true)} />
           </div>
         </div>
       </header>
@@ -139,7 +123,7 @@ export default function AppShell() {
         </div>
       )}
       <main id="contenido" className="mx-auto max-w-7xl px-4 py-6">
-        {org ? <Outlet /> : <Onboarding />}
+        {org || loc.pathname.startsWith('/app/cuenta') ? <Outlet /> : <Onboarding />}
       </main>
       {(showTutorial || firstVisit) && <Tutorial canCreateExam={canCreateExam} onClose={closeTutorial} />}
       <footer className="mx-auto max-w-7xl px-4 pb-8 pt-4 text-xs text-slate-400">
