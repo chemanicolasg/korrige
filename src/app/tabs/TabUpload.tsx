@@ -1,6 +1,7 @@
 import { DragEvent, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorBox, Notice, fmtDateTime } from '../../components/ui';
+import { tr, trn } from '../../i18n/app';
 import { DuplicatePolicy, deleteUpload, duplicatesWithExisting, saveUpload } from '../../lib/service';
 import { buildReviewItems, findDuplicates } from '../../lib/review';
 import { ProcessHandle, Progress, processPdfs } from '../../omr/client';
@@ -32,18 +33,21 @@ export default function TabUpload() {
 
   async function start(files: File[]) {
     const pdfs = files.filter((f) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
-    if (!pdfs.length) return setError('Arrastra archivos PDF (el que te envía la fotocopiadora por correo).');
+    if (!pdfs.length) return setError(tr('Arrastra archivos PDF (el que te envía la fotocopiadora por correo).'));
     setError('');
     setKeyModels({});
     setStage({ s: 'reading', p: null });
     try {
       handle.current = processPdfs(pdfs, data.layout, { onProgress: (p) => setStage({ s: 'reading', p }) });
       const pages = await handle.current.promise;
-      if (!pages.length) throw new Error('El PDF no contiene páginas.');
+      if (!pages.length) throw new Error(tr('El PDF no contiene páginas.'));
       const { submissions, excluded } = groupPages(pages, data.layout, data.exam.code);
       setStage({ s: 'summary', submissions, excluded });
     } catch (e) {
-      setError(`No se pudo leer el PDF: ${(e as Error).message}`);
+      const raw = (e as Error).message;
+      // mensaje fijo que llega del lector (src/omr): se traduce al mostrarlo
+      const msg = ({ 'Error en el lector de hojas': tr('Error en el lector de hojas') } as Record<string, string>)[raw] ?? raw;
+      setError(tr('No se pudo leer el PDF: {msg}', { msg }));
       setStage({ s: 'idle' });
     }
   }
@@ -90,25 +94,25 @@ export default function TabUpload() {
   return (
     <div className="space-y-4">
       <ErrorBox error={error} />
-      {readOnly && <Notice>El examen está cerrado: reábrelo para subir más hojas.</Notice>}
+      {readOnly && <Notice>{tr('El examen está cerrado: reábrelo para subir más hojas.')}</Notice>}
 
       {!readOnly && (stage.s === 'idle' || stage.s === 'done') && (
         <>
           {stage.s === 'done' && (
             <Notice tone="ok">
-              <b>{stage.n} hojas guardadas.</b>{' '}
+              <b>{tr('{n} hojas guardadas.', { n: stage.n })}</b>{' '}
               {stage.incidents > 0 ? (
                 <>
-                  Hay {stage.incidents} incidencias por revisar.{' '}
+                  {tr('Hay {n} incidencias por revisar.', { n: stage.incidents })}{' '}
                   <Link className="font-medium underline" to="../revision">
-                    Ir a Revisión
+                    {tr('Ir a Revisión')}
                   </Link>
                 </>
               ) : (
                 <>
-                  No hay incidencias pendientes.{' '}
+                  {tr('No hay incidencias pendientes.')}{' '}
                   <Link className="font-medium underline" to="../notas">
-                    Ver notas
+                    {tr('Ver notas')}
                   </Link>
                 </>
               )}
@@ -123,21 +127,21 @@ export default function TabUpload() {
             onDrop={onDrop}
             className={`rounded-xl border-2 border-dashed px-6 py-14 text-center transition ${over ? 'border-brand-500 bg-brand-50' : 'border-slate-300 bg-white'}`}
           >
-            <h2 className="text-base font-semibold">{data.sheets.length ? 'Sube otra tanda de hojas' : 'Aún no has subido hojas'}</h2>
+            <h2 className="text-base font-semibold">{data.sheets.length ? tr('Sube otra tanda de hojas') : tr('Aún no has subido hojas')}</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
-              Escanea el taco en la fotocopiadora (escanear a correo, 300 ppp, sin grapas) y arrastra aquí el PDF que recibas. Puedes soltar varios a la vez.
+              {tr('Escanea el taco en la fotocopiadora (escanear a correo, 300 ppp, sin grapas) y arrastra aquí el PDF que recibas. Puedes soltar varios a la vez.')}
             </p>
             <input ref={input} type="file" accept="application/pdf" multiple className="hidden" data-testid="upload-input" onChange={(e) => e.target.files && void start([...e.target.files])} />
             <button className="btn-primary mt-5" onClick={() => input.current?.click()}>
-              Elegir PDF…
+              {tr('Elegir PDF…')}
             </button>
             {db.kind === 'local' && (
               <button className="btn ml-3 mt-5" data-testid="upload-sample" onClick={() => void sample()}>
-                Probar con 12 hojas de ejemplo
+                {tr('Probar con 12 hojas de ejemplo')}
               </button>
             )}
             <p className="mt-4 text-xs text-slate-500">
-              Las hojas se leen en tu ordenador: el PDF no se envía a ningún servidor. Solo se guarda una imagen comprimida de cada hoja para la revisión.
+              {tr('Las hojas se leen en tu ordenador: el PDF no se envía a ningún servidor. Solo se guarda una imagen comprimida de cada hoja para la revisión.')}
             </p>
           </div>
         </>
@@ -146,10 +150,14 @@ export default function TabUpload() {
       {stage.s === 'reading' && (
         <div className="card space-y-3 p-6" aria-live="polite">
           <h2 className="font-semibold" data-testid="upload-progress">
-            {stage.p?.phase === 'hoja' ? `Procesando hoja ${stage.p.done} de ${stage.p.total}…` : stage.p?.phase === 'pdf' ? `Abriendo ${stage.p.fileName ?? 'el PDF'}…` : 'Preparando el lector de hojas…'}
+            {stage.p?.phase === 'hoja'
+              ? tr('Procesando hoja {done} de {total}…', { done: stage.p.done, total: stage.p.total })
+              : stage.p?.phase === 'pdf'
+                ? tr('Abriendo {file}…', { file: stage.p.fileName ?? tr('el PDF') })
+                : tr('Preparando el lector de hojas…')}
           </h2>
           <Bar done={stage.p?.phase === 'hoja' ? stage.p.done : 0} total={stage.p?.phase === 'hoja' ? stage.p.total : 0} />
-          <p className="text-xs text-slate-500">Puedes seguir usando el ordenador; la lectura se hace en segundo plano.</p>
+          <p className="text-xs text-slate-500">{tr('Puedes seguir usando el ordenador; la lectura se hace en segundo plano.')}</p>
           <button
             className="btn btn-sm"
             onClick={() => {
@@ -157,36 +165,37 @@ export default function TabUpload() {
               setStage({ s: 'idle' });
             }}
           >
-            Cancelar
+            {tr('Cancelar')}
           </button>
         </div>
       )}
 
       {stage.s === 'summary' && summary && (
         <div className="card space-y-4 p-6" data-testid="upload-summary">
-          <h2 className="text-base font-semibold">Lectura terminada: revisa el resumen antes de guardar</h2>
+          <h2 className="text-base font-semibold">{tr('Lectura terminada: revisa el resumen antes de guardar')}</h2>
           <ul className="space-y-1.5 text-sm text-slate-800">
             <li>
-              <b>{summary.students.length}</b> hojas de alumnos
-              {summary.blank > 0 && ` (${summary.blank} en blanco)`}
-              {summary.illegible > 0 && ` (${summary.illegible} ilegibles)`}.
+              {trn('{n} hojas de alumnos{extra}.', {
+                n: <b>{summary.students.length}</b>,
+                extra: (summary.blank > 0 ? ` ${tr('({n} en blanco)', { n: summary.blank })}` : '') + (summary.illegible > 0 ? ` ${tr('({n} ilegibles)', { n: summary.illegible })}` : ''),
+              })}
             </li>
             <li>
-              <b>{summary.incidents}</b> incidencias para revisar (dobles marcas, marcas flojas, identificadores dudosos…).
+              {trn('{n} incidencias para revisar (dobles marcas, marcas flojas, identificadores dudosos…).', { n: <b>{summary.incidents}</b> })}
             </li>
             {summary.keys.map(({ s, i }) => (
               <li key={i} className="flex flex-wrap items-center gap-2">
-                <span className="badge bg-brand-100 text-brand-800">Plantilla</span>
-                Hoja con la burbuja «P» ({s.pages[0].fileName}, pág. {s.pages[0].read.pagina}):
+                <span className="badge bg-brand-100 text-brand-800">{tr('Plantilla')}</span>
+                {tr('Hoja con la burbuja «P» ({file}, pág. {page}):', { file: s.pages[0].fileName, page: s.pages[0].read.pagina })}
                 {s.model || models.length === 1 ? (
                   <span>
-                    se guardará como plantilla del <b>modelo {s.model ?? 'A'}</b>.
+                    {trn('se guardará como plantilla del {modelo}.', { modelo: <b>{tr('modelo {m}', { m: s.model ?? 'A' })}</b> })}
                   </span>
                 ) : (
                   <label className="flex items-center gap-2">
-                    no tiene el modelo marcado. ¿De qué modelo es?
+                    {tr('no tiene el modelo marcado. ¿De qué modelo es?')}
                     <select className="input w-auto py-1" value={keyModels[i] ?? ''} onChange={(e) => setKeyModels({ ...keyModels, [i]: e.target.value })}>
-                      <option value="">Elegir…</option>
+                      <option value="">{tr('Elegir…')}</option>
                       {models.map((m) => (
                         <option key={m}>{m}</option>
                       ))}
@@ -199,14 +208,14 @@ export default function TabUpload() {
 
           {stage.excluded.length > 0 && (
             <Notice tone="warn">
-              <b>{stage.excluded.length} hoja(s) no son de este examen y se excluyen:</b>
+              <b>{tr('{n} hoja(s) no son de este examen y se excluyen:', { n: stage.excluded.length })}</b>
               <ul className="mt-1 list-inside list-disc">
                 {stage.excluded.slice(0, 8).map((e, i) => (
                   <li key={i}>
-                    {e.page.fileName}, pág. {e.page.read.pagina}: {e.reason}
+                    {tr('{file}, pág. {page}: {reason}', { file: e.page.fileName, page: e.page.read.pagina, reason: e.reason })}
                   </li>
                 ))}
-                {stage.excluded.length > 8 && <li>… y {stage.excluded.length - 8} más</li>}
+                {stage.excluded.length > 8 && <li>{tr('… y {n} más', { n: stage.excluded.length - 8 })}</li>}
               </ul>
             </Notice>
           )}
@@ -214,7 +223,7 @@ export default function TabUpload() {
           {summary.dupExisting.length > 0 && (
             <fieldset className="rounded-lg border border-amber-300 bg-amber-50 p-4">
               <legend className="px-1 text-sm font-semibold text-amber-900">
-                {summary.dupExisting.length} {data.exam.sheet_config.idLabel} ya tenían hoja en una subida anterior
+                {tr('{n} {label} ya tenían hoja en una subida anterior', { n: summary.dupExisting.length, label: data.exam.sheet_config.idLabel })}
               </legend>
               <p className="text-xs text-amber-900">
                 {summary.dupExisting.slice(0, 12).join(', ')}
@@ -223,9 +232,9 @@ export default function TabUpload() {
               <div className="mt-3 space-y-1.5 text-sm">
                 {(
                   [
-                    ['sustituir', 'Sustituir: la hoja nueva reemplaza a la anterior (la anterior queda excluida)'],
-                    ['conservar', 'Conservar ambas y decidir una a una en Revisión'],
-                    ['descartar', 'Descartar las hojas nuevas repetidas'],
+                    ['sustituir', tr('Sustituir: la hoja nueva reemplaza a la anterior (la anterior queda excluida)')],
+                    ['conservar', tr('Conservar ambas y decidir una a una en Revisión')],
+                    ['descartar', tr('Descartar las hojas nuevas repetidas')],
                   ] as const
                 ).map(([v, l]) => (
                   <label key={v} className="flex items-center gap-2">
@@ -238,32 +247,32 @@ export default function TabUpload() {
 
           <div className="flex flex-wrap items-center gap-3">
             <button className="btn-primary" disabled={keysWithoutModel.length > 0 || summary.students.length + summary.keys.length === 0} onClick={() => void save()}>
-              Guardar {summary.students.length} hojas{summary.keys.length > 0 && ` y ${summary.keys.length} plantilla(s)`}
+              {summary.keys.length > 0 ? tr('Guardar {n} hojas y {k} plantilla(s)', { n: summary.students.length, k: summary.keys.length }) : tr('Guardar {n} hojas', { n: summary.students.length })}
             </button>
             <button className="btn" onClick={() => setStage({ s: 'idle' })}>
-              Descartar
+              {tr('Descartar')}
             </button>
-            {keysWithoutModel.length > 0 && <span className="text-sm text-amber-700">Indica el modelo de la plantilla para continuar.</span>}
+            {keysWithoutModel.length > 0 && <span className="text-sm text-amber-700">{tr('Indica el modelo de la plantilla para continuar.')}</span>}
           </div>
         </div>
       )}
 
       {stage.s === 'saving' && (
         <div className="card space-y-3 p-6" aria-live="polite">
-          <h2 className="font-semibold">{stage.total ? `Guardando imágenes: ${stage.done} de ${stage.total}…` : 'Guardando…'}</h2>
+          <h2 className="font-semibold">{stage.total ? tr('Guardando imágenes: {done} de {total}…', { done: stage.done, total: stage.total }) : tr('Guardando…')}</h2>
           <Bar done={stage.done} total={stage.total} />
-          <p className="text-xs text-slate-500">No cierres esta pestaña hasta que termine.</p>
+          <p className="text-xs text-slate-500">{tr('No cierres esta pestaña hasta que termine.')}</p>
         </div>
       )}
 
       {data.uploads.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold text-slate-600">Subidas anteriores</h2>
+          <h2 className="mb-2 text-sm font-semibold text-slate-600">{tr('Subidas anteriores')}</h2>
           <div className="card overflow-x-auto">
             <table className="w-full">
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
-                  {['Fecha', 'Archivos', 'Páginas', 'Hojas', 'Excluidas', ''].map((h) => (
+                  {[tr('Fecha'), tr('Archivos'), tr('Páginas'), tr('Hojas'), tr('Excluidas'), ''].map((h) => (
                     <th key={h} className="th">
                       {h}
                     </th>
@@ -282,9 +291,9 @@ export default function TabUpload() {
                       {!readOnly && (
                         <button
                           className="text-xs text-red-700 hover:underline"
-                          onClick={() => confirm('¿Eliminar esta subida con todas sus hojas, imágenes y correcciones? No se puede deshacer.') && void run((d) => deleteUpload(db, d, u.id))}
+                          onClick={() => confirm(tr('¿Eliminar esta subida con todas sus hojas, imágenes y correcciones? No se puede deshacer.')) && void run((d) => deleteUpload(db, d, u.id))}
                         >
-                          Eliminar subida
+                          {tr('Eliminar subida')}
                         </button>
                       )}
                     </td>
