@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Empty, ErrorBox, Field, Spinner, StatusBadge, fmtDate } from '../components/ui';
 import { createExam } from '../lib/service';
-import { DEFAULT_GRADING, Exam, Profile } from '../lib/types';
+import { DEFAULT_GRADING, Exam, ExamStatus, Profile, STATUS_LABEL } from '../lib/types';
 import { DEFAULT_SHEET_CONFIG, SheetConfig } from '../omr/layout';
 import { useSession } from './AuthContext';
 import { SheetConfigForm } from './SheetConfigForm';
@@ -13,6 +13,10 @@ export function ExamList() {
   const [owners, setOwners] = useState<Record<string, Profile>>({});
   const [error, setError] = useState('');
   const [q, setQ] = useState('');
+  const [fStatus, setFStatus] = useState('');
+  const [fSubject, setFSubject] = useState('');
+  const [fSession, setFSession] = useState('');
+  const [fOwner, setFOwner] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -34,14 +38,36 @@ export function ExamList() {
     };
   }, [db, org.id]);
 
-  const shown = (exams ?? []).filter((e) => `${e.title} ${e.subject} ${e.group_name} ${e.session} ${e.code}`.toLowerCase().includes(q.toLowerCase()));
+  const all = exams ?? [];
+  const ownerName = (id: string) => (id === user.id ? 'Tú' : owners[id]?.full_name || owners[id]?.email || '—');
+  // las opciones de cada filtro salen de los exámenes que hay
+  const distinct = (get: (e: Exam) => string) => [...new Set(all.map(get).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const subjects = distinct((e) => e.subject);
+  const sessions = distinct((e) => e.session);
+  const ownerIds = [...new Set(all.map((e) => e.owner_id))];
+  const needle = q.trim().toLowerCase();
+  const shown = all.filter(
+    (e) =>
+      (!needle || `${e.title} ${e.subject} ${e.group_name} ${e.session} ${e.code}`.toLowerCase().includes(needle)) &&
+      (!fStatus || e.status === fStatus) &&
+      (!fSubject || e.subject === fSubject) &&
+      (!fSession || e.session === fSession) &&
+      (!fOwner || e.owner_id === fOwner),
+  );
+  const filtering = !!(needle || fStatus || fSubject || fSession || fOwner);
+  const clear = () => {
+    setQ('');
+    setFStatus('');
+    setFSubject('');
+    setFSession('');
+    setFOwner('');
+  };
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Exámenes</h1>
         <div className="flex gap-3">
-          {(exams?.length ?? 0) > 5 && <input className="input w-56" placeholder="Buscar…" aria-label="Buscar examen" value={q} onChange={(e) => setQ(e.target.value)} />}
           <Link to="/app/examenes/nuevo" className="btn-primary">
             Nuevo examen
           </Link>
@@ -61,6 +87,53 @@ export function ExamList() {
           >
             Crea el examen, descarga e imprime la hoja de respuestas y, después del examen, escanea todo el taco en la fotocopiadora y sube el PDF.
           </Empty>
+        )}
+        {exams && exams.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2" role="search" aria-label="Filtrar exámenes" data-testid="exam-filters">
+            <input className="input w-full sm:w-64" type="search" placeholder="Buscar por nombre, asignatura, grupo o código…" aria-label="Buscar examen" value={q} onChange={(e) => setQ(e.target.value)} />
+            <select className="input w-auto" aria-label="Filtrar por estado" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
+              <option value="">Todos los estados</option>
+              {(Object.keys(STATUS_LABEL) as ExamStatus[]).map((st) => (
+                <option key={st} value={st}>
+                  {STATUS_LABEL[st]}
+                </option>
+              ))}
+            </select>
+            {subjects.length > 1 && (
+              <select className="input w-auto max-w-56" aria-label="Filtrar por asignatura" value={fSubject} onChange={(e) => setFSubject(e.target.value)}>
+                <option value="">Todas las asignaturas</option>
+                {subjects.map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
+            )}
+            {sessions.length > 1 && (
+              <select className="input w-auto max-w-48" aria-label="Filtrar por convocatoria" value={fSession} onChange={(e) => setFSession(e.target.value)}>
+                <option value="">Todas las convocatorias</option>
+                {sessions.map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
+            )}
+            {ownerIds.length > 1 && (
+              <select className="input w-auto max-w-56" aria-label="Filtrar por profesor" value={fOwner} onChange={(e) => setFOwner(e.target.value)}>
+                <option value="">Todos los profesores</option>
+                {ownerIds.map((id) => (
+                  <option key={id} value={id}>
+                    {ownerName(id)}
+                  </option>
+                ))}
+              </select>
+            )}
+            {filtering && (
+              <button className="btn-ghost btn-sm" onClick={clear}>
+                Quitar filtros
+              </button>
+            )}
+            <span className="ml-auto text-sm text-slate-500" aria-live="polite">
+              {filtering ? `${shown.length} de ${all.length} exámenes` : `${all.length} ${all.length === 1 ? 'examen' : 'exámenes'}`}
+            </span>
+          </div>
         )}
         {exams && exams.length > 0 && (
           <div className="card overflow-x-auto">
@@ -90,12 +163,19 @@ export function ExamList() {
                     <td className="td">
                       <StatusBadge status={e.status} />
                     </td>
-                    <td className="td text-slate-600">{e.owner_id === user.id ? 'Tú' : owners[e.owner_id]?.full_name || owners[e.owner_id]?.email || '—'}</td>
+                    <td className="td text-slate-600">{ownerName(e.owner_id)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {shown.length === 0 && <p className="p-4 text-sm text-slate-500">Ningún examen coincide con la búsqueda.</p>}
+            {shown.length === 0 && (
+              <p className="p-4 text-sm text-slate-500">
+                Ningún examen coincide con los filtros.{' '}
+                <button className="font-medium text-brand-700 underline" onClick={clear}>
+                  Quitar filtros
+                </button>
+              </p>
+            )}
           </div>
         )}
       </div>

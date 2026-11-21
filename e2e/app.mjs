@@ -95,7 +95,15 @@ export async function testApp(baseUrl, outDir) {
     await shot('12-organizacion');
     await page.getByRole('link', { name: 'Exámenes' }).first().click();
     await page.getByRole('link', { name: /Anatomía I/ }).waitFor();
+    // filtros de la lista de exámenes
+    const filtros = page.getByTestId('exam-filters');
+    await filtros.getByLabel('Filtrar por estado').selectOption('cerrado');
+    await page.getByText('Ningún examen coincide con los filtros.').waitFor();
+    await filtros.getByRole('button', { name: 'Quitar filtros' }).click();
+    await filtros.getByLabel('Buscar examen').fill('anatom');
+    await page.getByRole('link', { name: /Anatomía I/ }).waitFor();
     await shot('13-examenes');
+    await filtros.getByRole('button', { name: 'Quitar filtros' }).click();
 
     // 7b) valores por defecto de la organización: identificador, logotipo y fórmula para los exámenes nuevos
     await page.getByRole('link', { name: 'Organización' }).click();
