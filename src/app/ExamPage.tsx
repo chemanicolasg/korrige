@@ -53,7 +53,7 @@ export function useImageUrl(path: string | null | undefined): string | null {
 
 export default function ExamPage() {
   const { id } = useParams();
-  const { db, user } = useSession();
+  const { db, user, org, orgs, setOrgId } = useSession();
   const [data, setData] = useState<ExamData | null>(null);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState('');
@@ -77,6 +77,12 @@ export default function ExamPage() {
     setError('');
     void reload();
   }, [reload]);
+
+  // si el examen es de otra de mis organizaciones (enlace directo), esa pasa a ser la activa: el rol depende de ella
+  const examOrg = data?.exam.org_id;
+  useEffect(() => {
+    if (examOrg && examOrg !== org.id && orgs.some((o) => o.id === examOrg)) setOrgId(examOrg);
+  }, [examOrg, org.id, orgs, setOrgId]);
 
   const run = useCallback<ExamCtx['run']>(
     async (fn) => {

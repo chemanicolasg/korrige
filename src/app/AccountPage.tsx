@@ -16,13 +16,18 @@ export function planName(unlimited: boolean, plan: { plan: string } | null): str
 
 /** Mi cuenta: datos personales, plan, contraseña y sesión. */
 export default function AccountPage() {
-  const { db, user, profile, orgs, memberships, org, plan, unlimited, refresh } = useAuth();
+  const { db, user, profile, orgs, memberships, org, plan, unlimited, refresh, setOrgId } = useAuth();
   const demo = db.kind === 'local';
 
   const [name, setName] = useState(profile?.full_name ?? '');
   const [nameBusy, setNameBusy] = useState(false);
   const [nameMsg, setNameMsg] = useState('');
   const [nameErr, setNameErr] = useState('');
+
+  /** null = formulario cerrado */
+  const [newOrg, setNewOrg] = useState<string | null>(null);
+  const [orgBusy, setOrgBusy] = useState(false);
+  const [orgErr, setOrgErr] = useState('');
 
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -51,6 +56,22 @@ export default function AccountPage() {
       setNameErr((err as Error).message);
     } finally {
       setNameBusy(false);
+    }
+  }
+
+  async function createOrg(e: FormEvent) {
+    e.preventDefault();
+    setOrgBusy(true);
+    setOrgErr('');
+    try {
+      const id = await db.rpc<string>('create_organization', { p_name: (newOrg ?? '').trim() });
+      await refresh();
+      setOrgId(id);
+      setNewOrg(null);
+    } catch (err) {
+      setOrgErr((err as Error).message);
+    } finally {
+      setOrgBusy(false);
     }
   }
 
@@ -126,19 +147,50 @@ export default function AccountPage() {
         )}
       </section>
 
-      <section className="card p-6">
+      <section className="card p-6" data-testid="account-orgs">
         <h2 className="text-base font-semibold">Organizaciones</h2>
+        <p className="mt-1 text-sm text-slate-600">Si trabajas en más de un centro, puedes tener una organización para cada uno y cambiar de una a otra cuando quieras.</p>
         {orgs.length === 0 ? (
           <p className="mt-3 text-sm text-slate-600">Todavía no perteneces a ninguna organización.</p>
         ) : (
           <ul className="mt-3 divide-y divide-slate-100">
             {orgs.map((o) => (
-              <li key={o.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+              <li key={o.id} className="flex flex-wrap items-center gap-3 py-2.5 text-sm">
                 <span className="font-medium">{o.name}</span>
                 <span className="badge bg-slate-100 text-slate-600">{ROLE[memberships.find((m) => m.org_id === o.id)?.role ?? ''] ?? 'Miembro'}</span>
+                {plan?.academy_orgs.includes(o.id) && <span className="badge bg-brand-50 text-brand-800">Academy</span>}
+                <span className="ml-auto">
+                  {o.id === org?.id ? (
+                    <span className="text-xs text-slate-500">Activa ahora</span>
+                  ) : (
+                    <button className="btn btn-sm" onClick={() => setOrgId(o.id)}>
+                      Cambiar a esta
+                    </button>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
+        )}
+        {newOrg === null ? (
+          <button className="btn mt-4" onClick={() => setNewOrg('')}>
+            Crear otra organización
+          </button>
+        ) : (
+          <form onSubmit={createOrg} className="mt-4 space-y-3">
+            <Field label="Nombre de la nueva organización" hint="Serás su administrador y podrás invitar a otros profesores. Para unirte a una que ya existe, pide a su administrador que te invite con este email.">
+              <input className="input" value={newOrg} onChange={(e) => setNewOrg(e.target.value)} minLength={2} maxLength={120} required autoFocus />
+            </Field>
+            <ErrorBox error={orgErr} />
+            <div className="flex gap-3">
+              <button className="btn-primary" disabled={orgBusy}>
+                {orgBusy ? 'Creando…' : 'Crear organización'}
+              </button>
+              <button type="button" className="btn" onClick={() => setNewOrg(null)}>
+                Cancelar
+              </button>
+            </div>
+          </form>
         )}
       </section>
 

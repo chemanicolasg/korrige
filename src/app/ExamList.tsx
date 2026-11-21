@@ -2,32 +2,54 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Empty, ErrorBox, Field, Spinner, StatusBadge, fmtDate } from '../components/ui';
 import { createExam } from '../lib/service';
-import { DEFAULT_GRADING, Exam, ExamStatus, Profile, STATUS_LABEL } from '../lib/types';
+import { DEFAULT_GRADING, Exam, ExamFolder, ExamFolderItem, ExamStatus, Profile, STATUS_LABEL } from '../lib/types';
 import { DEFAULT_SHEET_CONFIG, SheetConfig } from '../omr/layout';
 import { useSession } from './AuthContext';
 import { SheetConfigForm } from './SheetConfigForm';
 
+const SCOPE_KEY = 'korrige-exam-scope';
+
 export function ExamList() {
-  const { db, org, user, plan, unlimited, canCreateExam } = useSession();
+  const { db, org, orgs, user, plan, unlimited, canCreateExam, setOrgId } = useSession();
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [owners, setOwners] = useState<Record<string, Profile>>({});
+  const [folders, setFolders] = useState<ExamFolder[]>([]);
+  /** examen → carpeta (de este usuario) */
+  const [placed, setPlaced] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [q, setQ] = useState('');
   const [fStatus, setFStatus] = useState('');
   const [fSubject, setFSubject] = useState('');
   const [fSession, setFSession] = useState('');
   const [fOwner, setFOwner] = useState('');
+  /** '' todas · 'none' sin carpeta · id de carpeta */
+  const [fFolder, setFFolder] = useState('');
+  // con varias organizaciones se pueden ver los exámenes de todas a la vez
+  const [allOrgs, setAllOrgs] = useState(() => localStorage.getItem(SCOPE_KEY) === 'all');
+  const multi = orgs.length > 1;
+  const everywhere = multi && allOrgs;
+  const orgIds = everywhere ? orgs.map((o) => o.id) : [org.id];
+  const orgKey = orgIds.join(',');
+  /** Formulario de carpeta: nueva (con examen que guardar al crearla, si lo hay) o renombrar. */
+  const [form, setForm] = useState<{ mode: 'new' | 'rename'; name: string; examId?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let alive = true;
     setExams(null);
     (async () => {
       try {
-        const list = await db.select<Exam>('exams', { org_id: org.id }, { order: 'created_at', asc: false });
+        const [list, fs, items] = await Promise.all([
+          db.select<Exam>('exams', { org_id: orgKey.split(',') }, { order: 'created_at', asc: false }),
+          db.select<ExamFolder>('exam_folders', { user_id: user.id }, { order: 'name' }),
+          db.select<ExamFolderItem>('exam_folder_items', { user_id: user.id }),
+        ]);
         const ids = [...new Set(list.map((e) => e.owner_id))];
         const ps = ids.length ? await db.select<Profile>('profiles', { id: ids }) : [];
         if (!alive) return;
         setOwners(Object.fromEntries(ps.map((p) => [p.id, p])));
+        setFolders(fs);
+        setPlaced(Object.fromEntries(items.map((i) => [i.exam_id, i.folder_id])));
         setExams(list);
       } catch (e) {
         if (alive) setError((e as Error).message);
@@ -36,10 +58,14 @@ export function ExamList() {
     return () => {
       alive = false;
     };
-  }, [db, org.id]);
+  }, [db, orgKey, user.id]);
 
   const all = exams ?? [];
   const ownerName = (id: string) => (id === user.id ? 'Tú' : owners[id]?.full_name || owners[id]?.email || '—');
+  const orgName = (id: string) => orgs.find((o) => o.id === id)?.name ?? '—';
+  const sortedFolders = [...folders].sort((x, y) => x.name.localeCompare(y.name, 'es', { numeric: true }));
+  const folderOf = (e: Exam) => (folders.some((f) => f.id === placed[e.id]) ? placed[e.id] : '');
+  const inFolder = (id: string) => all.filter((e) => folderOf(e) === id).length;
   // las opciones de cada filtro salen de los exámenes que hay
   const distinct = (get: (e: Exam) => string) => [...new Set(all.map(get).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
   const subjects = distinct((e) => e.subject);
@@ -52,16 +78,88 @@ export function ExamList() {
       (!fStatus || e.status === fStatus) &&
       (!fSubject || e.subject === fSubject) &&
       (!fSession || e.session === fSession) &&
-      (!fOwner || e.owner_id === fOwner),
+      (!fOwner || e.owner_id === fOwner) &&
+      (!fFolder || (fFolder === 'none' ? !folderOf(e) : folderOf(e) === fFolder)),
   );
-  const filtering = !!(needle || fStatus || fSubject || fSession || fOwner);
+  const filtering = !!(needle || fStatus || fSubject || fSession || fOwner || fFolder);
   const clear = () => {
     setQ('');
     setFStatus('');
     setFSubject('');
     setFSession('');
     setFOwner('');
+    setFFolder('');
   };
+
+  function chooseOrg(value: string) {
+    const every = value === 'all';
+    localStorage.setItem(SCOPE_KEY, every ? 'all' : 'org');
+    setAllOrgs(every);
+    if (!every) setOrgId(value);
+  }
+
+  /** Guarda el examen en una carpeta ('' = sacarlo de la carpeta). */
+  async function move(examId: string, folderId: string) {
+    const prev = placed;
+    setPlaced((p) => {
+      const next = { ...p };
+      if (folderId) next[examId] = folderId;
+      else delete next[examId];
+      return next;
+    });
+    try {
+      if (folderId) await db.upsert('exam_folder_items', { user_id: user.id, exam_id: examId, folder_id: folderId }, 'user_id,exam_id');
+      else await db.remove('exam_folder_items', { user_id: user.id, exam_id: examId });
+      setError('');
+    } catch (e) {
+      setPlaced(prev);
+      setError((e as Error).message);
+    }
+  }
+
+  async function submitFolder(ev: FormEvent) {
+    ev.preventDefault();
+    if (!form) return;
+    const name = form.name.trim();
+    if (!name) return;
+    if (folders.some((f) => f.name.toLowerCase() === name.toLowerCase() && !(form.mode === 'rename' && f.id === fFolder))) return setError('Ya tienes una carpeta con ese nombre.');
+    setBusy(true);
+    try {
+      if (form.mode === 'rename') {
+        await db.update('exam_folders', { id: fFolder }, { name });
+        setFolders((fs) => fs.map((f) => (f.id === fFolder ? { ...f, name } : f)));
+      } else {
+        const [f] = await db.insert<ExamFolder>('exam_folders', { user_id: user.id, name });
+        setFolders((fs) => [...fs, f]);
+        if (form.examId) await move(form.examId, f.id);
+        else setFFolder(f.id);
+      }
+      setForm(null);
+      setError('');
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeFolder() {
+    const f = folders.find((x) => x.id === fFolder);
+    if (!f || !confirm(`¿Eliminar la carpeta «${f.name}»? Los exámenes no se borran: vuelven a «Sin carpeta».`)) return;
+    try {
+      await db.remove('exam_folders', { id: f.id });
+      setFolders((fs) => fs.filter((x) => x.id !== f.id));
+      setPlaced((p) => Object.fromEntries(Object.entries(p).filter(([, v]) => v !== f.id)));
+      setFFolder('');
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  const pill = (active: boolean) =>
+    `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${active ? 'border-brand-700 bg-brand-50 font-semibold text-brand-800' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`;
+  const count = (n: number) => <span className="text-xs font-normal text-slate-400">{n}</span>;
+  const headers = ['Examen', 'Asignatura', 'Grupo', 'Convocatoria', 'Fecha', 'Estado', ...(everywhere ? ['Organización'] : []), 'Profesor', 'Carpeta'];
 
   return (
     <div>
@@ -81,9 +179,9 @@ export function ExamList() {
       <div className="mt-5">
         <ErrorBox error={error} />
         {!exams && !error && <Spinner label="Cargando exámenes…" />}
-        {exams && exams.length === 0 && (
+        {exams && exams.length === 0 && !everywhere && (
           <Empty
-            title="Aún no tienes exámenes"
+            title={multi ? `Aún no tienes exámenes en ${org.name}` : 'Aún no tienes exámenes'}
             action={
               <Link to={canCreateExam ? '/app/examenes/nuevo' : '/app/plan?limite=1'} className="btn-primary">
                 Crear mi primer examen
@@ -93,9 +191,75 @@ export function ExamList() {
             Crea el examen, descarga e imprime la hoja de respuestas y, después del examen, escanea todo el taco en la fotocopiadora y sube el PDF.
           </Empty>
         )}
-        {exams && exams.length > 0 && (
+        {exams && (exams.length > 0 || multi) && (
+          <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="exam-folders" aria-label="Carpetas">
+            <button className={pill(fFolder === '')} onClick={() => setFFolder('')}>
+              Todos {count(all.length)}
+            </button>
+            {sortedFolders.map((f) => (
+              <button key={f.id} className={pill(fFolder === f.id)} onClick={() => setFFolder(f.id)}>
+                <svg width="14" height="12" viewBox="0 0 14 12" aria-hidden className="text-slate-400">
+                  <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3l1.5 1.8h4.5A1.5 1.5 0 0 1 13 4.3v5.2A1.5 1.5 0 0 1 11.5 11h-9A1.5 1.5 0 0 1 1 9.5z" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                </svg>
+                {f.name} {count(inFolder(f.id))}
+              </button>
+            ))}
+            {folders.length > 0 && (
+              <button className={pill(fFolder === 'none')} onClick={() => setFFolder('none')}>
+                Sin carpeta {count(inFolder(''))}
+              </button>
+            )}
+            {form && !form.examId ? null : (
+              <button className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-white" onClick={() => setForm({ mode: 'new', name: '' })}>
+                + Nueva carpeta
+              </button>
+            )}
+            {folders.some((f) => f.id === fFolder) && !form && (
+              <span className="ml-auto flex gap-1">
+                <button className="btn-ghost btn-sm" onClick={() => setForm({ mode: 'rename', name: folders.find((f) => f.id === fFolder)?.name ?? '' })}>
+                  Renombrar
+                </button>
+                <button className="btn-ghost btn-sm text-red-700" onClick={() => void removeFolder()}>
+                  Eliminar carpeta
+                </button>
+              </span>
+            )}
+          </div>
+        )}
+        {form && (
+          <form onSubmit={submitFolder} className="mb-3 flex flex-wrap items-center gap-2" data-testid="folder-form">
+            <input
+              className="input w-full sm:w-72"
+              autoFocus
+              maxLength={60}
+              required
+              placeholder="Nombre de la carpeta (p. ej. Curso 2026-27)"
+              aria-label="Nombre de la carpeta"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <button className="btn-primary btn-sm" disabled={busy}>
+              {form.mode === 'rename' ? 'Guardar nombre' : form.examId ? 'Crear y guardar el examen' : 'Crear carpeta'}
+            </button>
+            <button type="button" className="btn-ghost btn-sm" onClick={() => setForm(null)}>
+              Cancelar
+            </button>
+            <span className="text-xs text-slate-500">Las carpetas son tuyas: tus compañeros no las ven.</span>
+          </form>
+        )}
+        {exams && (exams.length > 0 || multi) && (
           <div className="mb-3 flex flex-wrap items-center gap-2" role="search" aria-label="Filtrar exámenes" data-testid="exam-filters">
             <input className="input w-full sm:w-64" type="search" placeholder="Buscar por nombre, asignatura, grupo o código…" aria-label="Buscar examen" value={q} onChange={(e) => setQ(e.target.value)} />
+            {multi && (
+              <select className="input w-auto max-w-64" aria-label="Filtrar por organización" value={everywhere ? 'all' : org.id} onChange={(e) => chooseOrg(e.target.value)}>
+                <option value="all">Todas mis organizaciones</option>
+                {orgs.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <select className="input w-auto" aria-label="Filtrar por estado" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
               <option value="">Todos los estados</option>
               {(Object.keys(STATUS_LABEL) as ExamStatus[]).map((st) => (
@@ -130,7 +294,7 @@ export function ExamList() {
                 ))}
               </select>
             )}
-            {filtering && (
+            {(needle || fStatus || fSubject || fSession || fOwner) && (
               <button className="btn-ghost btn-sm" onClick={clear}>
                 Quitar filtros
               </button>
@@ -140,12 +304,13 @@ export function ExamList() {
             </span>
           </div>
         )}
+        {exams && exams.length === 0 && everywhere && <p className="card p-4 text-sm text-slate-500">Aún no tienes exámenes en ninguna de tus organizaciones.</p>}
         {exams && exams.length > 0 && (
           <div className="card overflow-x-auto">
             <table className="w-full">
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
-                  {['Examen', 'Asignatura', 'Grupo', 'Convocatoria', 'Fecha', 'Estado', 'Profesor'].map((h) => (
+                  {headers.map((h) => (
                     <th key={h} className="th">
                       {h}
                     </th>
@@ -156,7 +321,8 @@ export function ExamList() {
                 {shown.map((e) => (
                   <tr key={e.id} className="hover:bg-slate-50">
                     <td className="td">
-                      <Link to={`/app/examenes/${e.id}`} className="font-medium text-brand-800 hover:underline">
+                      {/* al abrir un examen de otra organización, esa pasa a ser la activa */}
+                      <Link to={`/app/examenes/${e.id}`} className="font-medium text-brand-800 hover:underline" onClick={() => e.org_id !== org.id && setOrgId(e.org_id)}>
                         {e.title}
                       </Link>
                       <div className="font-mono text-xs text-slate-400">{e.code}</div>
@@ -168,16 +334,35 @@ export function ExamList() {
                     <td className="td">
                       <StatusBadge status={e.status} />
                     </td>
+                    {everywhere && <td className="td text-slate-600">{orgName(e.org_id)}</td>}
                     <td className="td text-slate-600">{ownerName(e.owner_id)}</td>
+                    <td className="td">
+                      <select
+                        className="max-w-40 rounded-md border border-transparent bg-transparent py-1 pl-1 pr-6 text-sm text-slate-600 hover:border-slate-200 focus:border-slate-300"
+                        aria-label={`Carpeta de ${e.title}`}
+                        value={folderOf(e)}
+                        onChange={(ev) => (ev.target.value === '+' ? setForm({ mode: 'new', name: '', examId: e.id }) : void move(e.id, ev.target.value))}
+                      >
+                        <option value="">Sin carpeta</option>
+                        {sortedFolders.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name}
+                          </option>
+                        ))}
+                        <option value="+">+ Nueva carpeta…</option>
+                      </select>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {shown.length === 0 && (
               <p className="p-4 text-sm text-slate-500">
-                Ningún examen coincide con los filtros.{' '}
+                {fFolder && fFolder !== 'none' && !needle && !fStatus && !fSubject && !fSession && !fOwner
+                  ? 'Esta carpeta está vacía. Usa la columna «Carpeta» de la lista para guardar exámenes en ella. '
+                  : 'Ningún examen coincide con los filtros. '}
                 <button className="font-medium text-brand-700 underline" onClick={clear}>
-                  Quitar filtros
+                  {fFolder && !needle ? 'Ver todos' : 'Quitar filtros'}
                 </button>
               </p>
             )}

@@ -27,6 +27,18 @@ export interface Profile {
   /** Cuándo vio el tutorial de inicio. */
   onboarded_at?: string | null;
 }
+/** Carpeta personal de exámenes (privada de cada profesor). */
+export interface ExamFolder {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+}
+export interface ExamFolderItem {
+  user_id: string;
+  exam_id: string;
+  folder_id: string;
+}
 export interface Membership {
   org_id: string;
   user_id: string;

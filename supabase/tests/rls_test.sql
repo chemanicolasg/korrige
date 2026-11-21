@@ -194,6 +194,37 @@ insert into public.invitations (org_id, email, invited_by) values
   ('0a000000-0000-0000-0000-000000000000', 'sinverificar@a.test', 'a0000000-0000-0000-0000-000000000001');
 
 -- ---------------------------------------------------------------------------
+-- 3b. Carpetas personales de exámenes y varias organizaciones por profesor
+-- ---------------------------------------------------------------------------
+select tests.login('a0000000-0000-0000-0000-000000000002'); -- Pablo
+insert into public.exam_folders (id, name) values ('fa000000-0000-0000-0000-000000000001', 'Curso 2026-27');
+select tests.eq(tests.n($$select 1 from public.exam_folders where user_id = auth.uid()$$), 1, 'la carpeta se crea a nombre de quien la crea');
+select tests.throws($$insert into public.exam_folders (name) values ('  curso 2026-27 ')$$, 'no hay dos carpetas con el mismo nombre');
+select tests.throws($$insert into public.exam_folders (user_id, name) values ('a0000000-0000-0000-0000-000000000003', 'ajena')$$, 'no se crean carpetas a nombre de otro');
+insert into public.exam_folder_items (exam_id, folder_id) values ('e1000000-0000-0000-0000-000000000000', 'fa000000-0000-0000-0000-000000000001');
+select tests.eq(tests.n('select 1 from public.exam_folder_items'), 1, 'Pablo guarda su examen en la carpeta');
+select tests.throws($$insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fa000000-0000-0000-0000-000000000001')$$, 'no se guarda en carpetas un examen de otra organización');
+
+select tests.login('b0000000-0000-0000-0000-000000000002'); -- Bruno, otra organización
+select tests.eq(tests.n('select 1 from public.exam_folders'), 0, 'las carpetas de otro profesor no se ven');
+select tests.eq(tests.n('select 1 from public.exam_folder_items'), 0, 'ni lo que tiene guardado en ellas');
+select tests.eq(tests.affected($$update public.exam_folders set name = 'hackeada'$$), 0, 'ni se pueden renombrar');
+select tests.eq(tests.affected($$delete from public.exam_folders$$), 0, 'ni borrar');
+insert into public.exam_folders (id, name) values ('fb000000-0000-0000-0000-000000000001', 'Mis exámenes');
+select tests.throws($$insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fa000000-0000-0000-0000-000000000001')$$, 'no se guarda nada en la carpeta de otro');
+insert into public.exam_folder_items (exam_id, folder_id) values ('e2000000-0000-0000-0000-000000000000', 'fb000000-0000-0000-0000-000000000001');
+select tests.throws($$update public.exam_folder_items set folder_id = 'fa000000-0000-0000-0000-000000000001'$$, 'ni se mueve un examen a la carpeta de otro');
+select tests.eq(tests.affected($$delete from public.exam_folders where id = 'fb000000-0000-0000-0000-000000000001'$$), 1, 'Bruno borra su carpeta');
+select tests.eq(tests.n('select 1 from public.exam_folder_items'), 0, 'al borrar la carpeta se vacía, y el examen sigue existiendo');
+select tests.eq(tests.n($$select 1 from public.exams where id = 'e2000000-0000-0000-0000-000000000000'$$), 1, 'el examen no se borra con la carpeta');
+
+-- Un profesor puede pertenecer a más de una organización
+select public.create_organization('Academia de Bruno');
+select tests.eq(tests.n($$select 1 from public.memberships where user_id = auth.uid()$$), 2, 'Bruno pertenece a dos organizaciones');
+select tests.eq(tests.n('select 1 from public.organizations'), 2, 'y ve las dos (y solo esas)');
+select tests.eq(tests.n($$select 1 from public.exams where org_id = '0a000000-0000-0000-0000-000000000000'$$), 0, 'sigue sin ver la organización A');
+
+-- ---------------------------------------------------------------------------
 -- 4. Invitaciones
 -- ---------------------------------------------------------------------------
 select tests.login('c0000000-0000-0000-0000-000000000001'); -- Carla
@@ -263,7 +294,7 @@ select tests.eq(tests.affected($$delete from public.exams where id = 'e2000000-0
 select tests.throws($$insert into public.exams (org_id, owner_id, title, sheet_config) values ('0b000000-0000-0000-0000-000000000000', auth.uid(), 'otro', '{}')$$, 'plan gratis: borrar el examen no devuelve el examen gratuito');
 select tests.throws($$insert into public.subscriptions (user_id, status) values (auth.uid(), 'active')$$, 'nadie puede darse de alta en Plus a mano');
 select tests.throws($$update public.exam_usage set n = 0$$, 'nadie puede poner a cero su consumo');
-select tests.eq(tests.affected($$update public.organizations set name = name$$), 0, 'un profesor no toca la organización');
+select tests.eq(tests.affected($$update public.organizations set name = name where id = '0b000000-0000-0000-0000-000000000000'$$), 0, 'un profesor no toca la organización donde no es administrador');
 select tests.login('b0000000-0000-0000-0000-000000000001'); -- Berta, admin de B
 select tests.throws($$update public.organizations set plan = 'academy' where id = '0b000000-0000-0000-0000-000000000000'$$, 'ni siquiera la admin puede ponerse el plan Academy');
 

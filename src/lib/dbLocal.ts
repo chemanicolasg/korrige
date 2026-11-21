@@ -11,7 +11,7 @@ type Tables = Record<string, Row[]>;
 const STORE_KEY = 'korrige-demo-v1';
 const SESSION_KEY = 'korrige-demo-session';
 const IDB_NAME = 'korrige-demo';
-const NO_ID = new Set(['memberships', 'exam_collaborators', 'results', 'exam_layouts']);
+const NO_ID = new Set(['memberships', 'exam_collaborators', 'results', 'exam_layouts', 'exam_folder_items']);
 const EXAM_CHILDREN = ['exam_layouts', 'exam_collaborators', 'answer_keys', 'students', 'uploads', 'sheets', 'results', 'review_items'];
 
 export const DEMO_USER: SessionUser = { id: '00000000-0000-4000-8000-000000000001', email: 'demo@korrige.es' };
@@ -149,6 +149,12 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     const row: Row = { ...input };
     if (!NO_ID.has(table) && table !== 'audit_log') row.id ??= uuid();
     row.created_at ??= now();
+    if (table === 'exam_folders' || table === 'exam_folder_items') row.user_id ??= user?.id;
+    if (table === 'exam_folders') {
+      row.name = String(row.name ?? '').trim();
+      if (!row.name) throw new Error('La carpeta necesita un nombre');
+      if (T(table).some((f) => f.user_id === row.user_id && String(f.name).toLowerCase() === String(row.name).toLowerCase())) throw new Error('Ya tienes una carpeta con ese nombre');
+    }
     if (table === 'exams') {
       const plan = demoPlan();
       if (plan !== 'academy') {
@@ -286,6 +292,11 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
         const ids = new Set(doomed.map((r) => r.id));
         for (const child of EXAM_CHILDREN) tables[child] = T(child).filter((r) => !ids.has(r.exam_id));
         for (const a of T('audit_log')) if (ids.has(a.exam_id)) a.exam_id = null;
+        tables.exam_folder_items = T('exam_folder_items').filter((r) => !ids.has(r.exam_id));
+      }
+      if (table === 'exam_folders') {
+        const ids = new Set(doomed.map((r) => r.id));
+        tables.exam_folder_items = T('exam_folder_items').filter((r) => !ids.has(r.folder_id));
       }
       if (table === 'uploads' || table === 'sheets') {
         const sheetIds = new Set(table === 'sheets' ? doomed.map((r) => r.id) : T('sheets').filter((s) => doomed.some((u) => u.id === s.upload_id)).map((s) => s.id));
