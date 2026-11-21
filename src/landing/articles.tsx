@@ -266,6 +266,299 @@ export const ARTICLES: Article[] = [
       </>
     ),
   },
+  {
+    slug: 'plantilla-hoja-de-respuestas-tipo-test',
+    title: 'Plantilla de hoja de respuestas tipo test en PDF',
+    description: 'Crea gratis una hoja de respuestas tipo test en PDF: de 10 a 200 preguntas, 3 a 5 opciones, varios modelos y lista para corregir automáticamente.',
+    h1: 'Plantilla de hoja de respuestas tipo test en PDF',
+    intro: 'Una hoja de respuestas bien diseñada ahorra horas de corrección. Estas son las claves para hacer la tuya y cómo generarla gratis, a medida de tu examen.',
+    updated: '2026-11-21',
+    body: (
+      <>
+        <h2>Qué debe tener una hoja de respuestas</h2>
+        <ul>
+          <li>
+            <b>Una burbuja por opción</b> (A, B, C, D…), todas del mismo tamaño y bien separadas, para que una marca no invada la de al lado.
+          </li>
+          <li>
+            <b>Preguntas numeradas en columnas</b> de 25, que es lo que cabe con comodidad en un A4: 100 preguntas por cara.
+          </li>
+          <li>
+            <b>Identificador del alumno en burbujas</b>: un dígito por columna. Escribirlo además a mano permite comprobarlo si se equivoca al marcar.
+          </li>
+          <li>
+            <b>Espacio para nombre, asignatura y fecha</b>, e instrucciones breves de cómo marcar y cómo rectificar.
+          </li>
+          <li>
+            <b>Modelo de examen</b>, si repartes varias versiones con las preguntas en distinto orden.
+          </li>
+          <li>
+            <b>Marcas en las cuatro esquinas y un código del examen</b> si la vas a corregir de forma automática.
+          </li>
+        </ul>
+
+        <h2>Por qué no conviene una plantilla genérica</h2>
+        <p>
+          Una plantilla en Word o un PDF descargado de internet sirve para corregir a mano, pero tiene dos problemas. El primero es que nunca encaja: sobran preguntas,
+          faltan opciones o el identificador no tiene los dígitos de tu centro. El segundo es que un programa no puede leerla, porque no sabe en qué punto exacto de la
+          página está cada burbuja ni a qué examen pertenece la hoja.
+        </p>
+        <p>Por eso lo más práctico es generar la hoja a partir de los datos de tu examen: sale ajustada y, además, queda preparada para la corrección automática.</p>
+
+        <h2>Cómo crear tu hoja de respuestas gratis</h2>
+        <ol>
+          <li>Crea una cuenta en Korrige. El primer examen es gratis y completo, sin tarjeta.</li>
+          <li>Indica el número de preguntas (de 10 a 200), las opciones por pregunta (3, 4 o 5) y cuántos modelos hay (hasta 4).</li>
+          <li>Elige el identificador del alumno: NIA, DNI, número de expediente o el que uses, de 6 a 10 dígitos.</li>
+          <li>Si quieres, añade el logotipo del centro, el título y una nota breve (duración, penalización…).</li>
+          <li>Descarga el PDF e imprímelo. Con más de 100 preguntas la hoja ocupa dos páginas.</li>
+        </ol>
+
+        <h2>Tamaños habituales</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Examen</th>
+              <th>Preguntas</th>
+              <th>Opciones</th>
+              <th>Páginas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Parcial de universidad</td>
+              <td>30–60</td>
+              <td>4</td>
+              <td>1</td>
+            </tr>
+            <tr>
+              <td>Examen final</td>
+              <td>80–100</td>
+              <td>4 o 5</td>
+              <td>1</td>
+            </tr>
+            <tr>
+              <td>Simulacro de oposición</td>
+              <td>100–150</td>
+              <td>4</td>
+              <td>1 o 2</td>
+            </tr>
+            <tr>
+              <td>Simulacro tipo MIR o EIR</td>
+              <td>hasta 200</td>
+              <td>4</td>
+              <td>2</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Consejos de impresión</h2>
+        <ul>
+          <li>
+            Imprime siempre al <b>100 % («tamaño real»)</b>. Con «ajustar a página» la hoja se encoge y las burbujas dejan de estar donde el programa las espera.
+          </li>
+          <li>Usa papel blanco normal de 80 g. Las fotocopias de fotocopias pierden contraste: imprime desde el PDF original.</li>
+          <li>Pide que marquen con bolígrafo azul o negro y que rellenen la burbuja entera.</li>
+          <li>No grapes la hoja de respuestas al examen: después hay que pasarla por el alimentador del escáner.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    slug: 'corregir-simulacros-oposiciones',
+    title: 'Cómo corregir simulacros de oposiciones tipo test',
+    description: 'Cómo corregir rápido los simulacros tipo test de una academia de oposiciones: penalización, preguntas de reserva, anulaciones y análisis por pregunta.',
+    h1: 'Cómo corregir simulacros de oposiciones tipo test',
+    intro: 'Un simulacro solo sirve si el opositor recibe pronto su nota y sabe en qué ha fallado. Así se organiza la corrección para que no dependa de una tarde libre del preparador.',
+    updated: '2026-11-21',
+    body: (
+      <>
+        <h2>Corrige con las reglas de la convocatoria</h2>
+        <p>
+          La nota de un simulacro tiene que parecerse a la del examen real. Antes de corregir, revisa las bases de la convocatoria y aplica exactamente lo mismo:
+        </p>
+        <ul>
+          <li>
+            <b>Penalización por error.</b> Lo más frecuente con cuatro opciones es que cada error reste un tercio de un acierto, pero hay convocatorias que restan un
+            cuarto, otras la mitad y otras que no penalizan.
+          </li>
+          <li>
+            <b>Preguntas en blanco.</b> Normalmente ni suman ni restan.
+          </li>
+          <li>
+            <b>Preguntas de reserva.</b> Solo cuentan si se anula alguna de las ordinarias, y en el orden que fijen las bases.
+          </li>
+          <li>
+            <b>Nota de corte.</b> Algunas convocatorias exigen una puntuación mínima; otras aprueban a los mejores hasta cubrir plazas.
+          </li>
+        </ul>
+        <Formula>Nota = (aciertos − errores × penalización) ÷ n.º de preguntas × nota máxima</Formula>
+
+        <h2>El proceso, paso a paso</h2>
+        <ol>
+          <li>
+            <b>Prepara la hoja de respuestas</b> con el número de preguntas del simulacro, incluidas las de reserva, y el identificador de tus alumnos.
+          </li>
+          <li>
+            <b>Haz el simulacro en condiciones reales</b>: mismo tiempo, misma hoja de respuestas separada del cuadernillo y bolígrafo.
+          </li>
+          <li>
+            <b>Escanea todas las hojas de una vez</b> en el alimentador de la fotocopiadora y envíate el PDF.
+          </li>
+          <li>
+            <b>Revisa las hojas dudosas</b>: dobles marcas, marcas flojas e identificadores mal rellenados.
+          </li>
+          <li>
+            <b>Publica las notas el mismo día</b> y reserva la clase siguiente para las preguntas más falladas.
+          </li>
+        </ol>
+
+        <h2>Qué hacer con las preguntas impugnadas</h2>
+        <p>
+          En los simulacros, como en los exámenes reales, aparecen preguntas ambiguas o con la respuesta mal puesta en la plantilla. Si corriges a mano, anular una pregunta
+          obliga a repasar todas las hojas. Con una corrección automática basta con marcarla como anulada o corregir la plantilla: las notas de todos los alumnos se
+          recalculan solas.
+        </p>
+
+        <h2>Los datos que ayudan a preparar mejor</h2>
+        <ul>
+          <li>
+            <b>Preguntas más falladas</b>: señalan los temas que el grupo no domina.
+          </li>
+          <li>
+            <b>Distractor más elegido</b>: si la mayoría elige la misma opción incorrecta, hay un concepto mal entendido que conviene explicar en clase.
+          </li>
+          <li>
+            <b>Preguntas en blanco</b>: muchas en blanco al final del examen indican un problema de tiempo, no de conocimiento.
+          </li>
+          <li>
+            <b>Evolución de cada alumno</b> de un simulacro a otro, más útil que la nota aislada.
+          </li>
+        </ul>
+
+        <h2>Cuánto tiempo se ahorra</h2>
+        <p>
+          Corregir a mano una hoja de 100 preguntas con plantilla perforada lleva entre dos y tres minutos, sin contar la suma ni el traslado de notas. Con 120 alumnos son
+          varias horas por simulacro. Escaneando el taco entero, el tiempo no depende del número de hojas: unos minutos de escáner y la revisión de los casos dudosos.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'analisis-de-items-dificultad-discriminacion',
+    title: 'Análisis de ítems: dificultad y discriminación',
+    description: 'Qué son el índice de dificultad y el de discriminación de una pregunta tipo test, cómo se calculan y cómo usarlos para detectar preguntas defectuosas.',
+    h1: 'Análisis de ítems: índice de dificultad y de discriminación',
+    intro: 'Dos números por pregunta bastan para saber si un examen tipo test ha medido bien: cuántos la aciertan y si la aciertan los que más saben.',
+    updated: '2026-11-21',
+    body: (
+      <>
+        <h2>Índice de dificultad</h2>
+        <p>Es la proporción de alumnos que acierta la pregunta. A pesar del nombre, cuanto más alto, más fácil es la pregunta.</p>
+        <Formula>p = alumnos que aciertan ÷ alumnos que se presentan</Formula>
+        <table>
+          <thead>
+            <tr>
+              <th>Valor de p</th>
+              <th>Interpretación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>más de 0,85</td>
+              <td>Muy fácil: casi todos la aciertan y apenas distingue entre alumnos</td>
+            </tr>
+            <tr>
+              <td>0,50 – 0,85</td>
+              <td>Dificultad adecuada para la mayoría de los exámenes</td>
+            </tr>
+            <tr>
+              <td>0,25 – 0,50</td>
+              <td>Difícil</td>
+            </tr>
+            <tr>
+              <td>menos de 0,25</td>
+              <td>Muy difícil: con cuatro opciones, equivale a responder al azar</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Los umbrales son orientativos: dependen del número de opciones y de la finalidad del examen.</p>
+
+        <h2>Índice de discriminación</h2>
+        <p>
+          Mide si la pregunta separa a los alumnos que dominan la materia de los que no. La forma más sencilla de calcularlo es comparar el grupo con mejores notas y el
+          grupo con peores notas, normalmente el 27 % superior y el 27 % inferior:
+        </p>
+        <Formula>D = p (grupo superior) − p (grupo inferior)</Formula>
+        <p>
+          Otra forma habitual es la correlación entre acertar la pregunta y la nota del resto del examen (correlación biserial puntual). Las dos se interpretan de manera
+          parecida:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Valor de D</th>
+              <th>Interpretación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0,40 o más</td>
+              <td>Muy buena pregunta</td>
+            </tr>
+            <tr>
+              <td>0,30 – 0,39</td>
+              <td>Buena</td>
+            </tr>
+            <tr>
+              <td>0,20 – 0,29</td>
+              <td>Aceptable, mejorable</td>
+            </tr>
+            <tr>
+              <td>0 – 0,19</td>
+              <td>Discrimina poco: conviene revisarla</td>
+            </tr>
+            <tr>
+              <td>negativo</td>
+              <td>La aciertan más los que peor nota sacan: casi siempre hay un error</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Un ejemplo</h2>
+        <p>
+          En un examen con 100 alumnos, la pregunta 12 la aciertan 62. Su dificultad es p = 0,62. Entre los 27 mejores la aciertan 24 (0,89) y entre los 27 peores, 9
+          (0,33). Su discriminación es D = 0,89 − 0,33 = 0,56: una pregunta de dificultad media que distingue muy bien.
+        </p>
+
+        <h2>Señales de una pregunta defectuosa</h2>
+        <ul>
+          <li>
+            <b>Discriminación negativa.</b> Revisa primero la plantilla: lo más habitual es que la respuesta marcada como correcta no lo sea.
+          </li>
+          <li>
+            <b>Un distractor elegido más que la respuesta correcta.</b> El enunciado puede ser ambiguo o haber dos respuestas defendibles.
+          </li>
+          <li>
+            <b>Dificultad por debajo del azar.</b> Si con cuatro opciones acierta menos del 25 %, algo induce al error.
+          </li>
+          <li>
+            <b>Distractores que nadie elige.</b> No hacen daño a la nota, pero convierten la pregunta en una de menos opciones.
+          </li>
+        </ul>
+
+        <h2>Qué hacer después</h2>
+        <p>
+          Si la plantilla estaba mal, se corrige y se recalculan las notas. Si la pregunta es ambigua, lo habitual es anularla para todos, o dar por buenas dos respuestas.
+          Y en todos los casos, anota el resultado en tu banco de preguntas: al cabo de dos o tres cursos tendrás un examen mucho más fiable.
+        </p>
+        <p>
+          Korrige calcula la dificultad y la discriminación de cada pregunta al corregir, muestra qué eligió el grupo y avisa de las preguntas sospechosas. Anular una
+          pregunta o cambiar la plantilla recalcula todas las notas sin volver a escanear.
+        </p>
+      </>
+    ),
+  },
 ];
 
 export const articleBySlug = (slug: string | undefined) => ARTICLES.find((a) => a.slug === slug);

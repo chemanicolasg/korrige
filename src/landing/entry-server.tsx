@@ -10,12 +10,15 @@ import Landing from './Landing';
 import Legal from './Legal';
 import PublicGuide from './PublicGuide';
 import ResourcePage from './Resources';
+import { SEGMENTS, segmentJsonLd } from './segmentData';
+import SegmentPage from './segments';
 
 export const site = { APP_NAME, APP_DOMAIN, APP_URL };
 
 /** Páginas públicas indexables, con sus metadatos. La portada conserva los de index.html. */
 export const pages: { path: string; title?: string; description?: string; jsonLd?: string; priority?: string }[] = [
   { path: '/' },
+  ...SEGMENTS.map((s) => ({ path: `/${s.slug}`, title: s.title, description: s.description, priority: '0.9', jsonLd: segmentJsonLd(s) })),
   {
     path: '/guia',
     title: `Guía de impresión y escaneo de hojas de respuestas — ${APP_NAME}`,
@@ -57,6 +60,8 @@ export function render(path = '/'): string {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/guia" element={<PublicGuide />} />
+          <Route path="/academias" element={<SegmentPage slug="academias" articles={ARTICLES} />} />
+          <Route path="/universidades" element={<SegmentPage slug="universidades" articles={ARTICLES} />} />
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/recursos" element={<ResourcePage />} />
           <Route path="/recursos/:slug" element={<ResourcePage />} />

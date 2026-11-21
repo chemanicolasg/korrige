@@ -4,6 +4,7 @@ import { CONTACT_EMAIL, SALES_EMAIL } from '../config';
 import { Logo } from '../components/ui';
 import { ENABLED_LOCALES, LOCALE_NAMES, Locale, detectLocale, getDict } from '../i18n';
 import { ARTICLES } from './articles';
+import { SEGMENTS } from './segmentData';
 import { PricingCards } from './Pricing';
 import { SalesForm } from './SalesForm';
 
@@ -357,6 +358,24 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Por tipo de centro (enlaces a las páginas de academias y universidades) */}
+        <section className="border-b border-bone-200 py-14">
+          <div className={wrap}>
+            <h2 className="display text-2xl text-ink">Korrige para tu centro</h2>
+            <ul className="mt-6 grid gap-6 md:grid-cols-2">
+              {SEGMENTS.map((s) => (
+                <li key={s.slug}>
+                  <Link to={`/${s.slug}`} className="group block h-full border-[1.5px] border-ink bg-white p-6 hover:bg-bone-100">
+                    <span className="label-mono text-brand-700">{s.label}</span>
+                    <span className="display mt-2 block text-2xl text-ink underline-offset-4 group-hover:underline">{s.h1}</span>
+                    <span className="mt-2 block text-slate-600">{s.teaser}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         {/* Recursos (enlaces internos a las guías) */}
         <section className="border-b border-bone-200 py-14">
           <div className={wrap}>
@@ -367,7 +386,7 @@ export default function Landing() {
               </Link>
             </div>
             <ul className="mt-6 grid gap-x-8 border-t-[1.5px] border-ink md:grid-cols-3">
-              {ARTICLES.map((a) => (
+              {ARTICLES.slice(0, 3).map((a) => (
                 <li key={a.slug} className="border-b border-bone-300 py-5 md:border-b-0">
                   <Link to={`/recursos/${a.slug}`} className="font-semibold text-ink underline-offset-4 hover:underline">
                     {a.h1}
@@ -438,6 +457,16 @@ export default function Landing() {
               <li>
                 <Link className="underline-offset-4 hover:underline" to="/guia">
                   {t.footer.guide}
+                </Link>
+              </li>
+              <li>
+                <Link className="underline-offset-4 hover:underline" to="/academias">
+                  Para academias de oposiciones
+                </Link>
+              </li>
+              <li>
+                <Link className="underline-offset-4 hover:underline" to="/universidades">
+                  Para universidades
                 </Link>
               </li>
               <li>

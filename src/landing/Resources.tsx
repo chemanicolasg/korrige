@@ -5,7 +5,7 @@ import { ARTICLES, articleBySlug } from './articles';
 const PROSE =
   'text-[17px] leading-[1.7] text-slate-700 [&_h2]:display [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:text-[1.7rem] [&_h2]:leading-tight [&_h2]:text-ink [&_h3]:mt-7 [&_h3]:mb-1 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-ink [&_p]:my-4 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_b]:text-ink [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse [&_table]:text-[15px] [&_th]:border-b-[1.5px] [&_th]:border-ink [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_th]:text-ink [&_td]:border-b [&_td]:border-bone-300 [&_td]:px-3 [&_td]:py-2.5 [&_td]:align-top';
 
-function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-white">
       <header className="border-b border-bone-200">
@@ -14,6 +14,12 @@ function Shell({ children }: { children: React.ReactNode }) {
             <Logo />
           </Link>
           <nav className="ml-auto flex items-center gap-5 text-sm">
+            <Link to="/academias" className="hidden text-slate-600 underline-offset-4 hover:text-ink hover:underline md:inline">
+              Academias
+            </Link>
+            <Link to="/universidades" className="hidden text-slate-600 underline-offset-4 hover:text-ink hover:underline md:inline">
+              Universidades
+            </Link>
             <Link to="/recursos" className="text-slate-600 underline-offset-4 hover:text-ink hover:underline">
               Recursos
             </Link>
@@ -30,6 +36,8 @@ function Shell({ children }: { children: React.ReactNode }) {
       <footer className="border-t-[1.5px] border-ink">
         <div className="label-mono mx-auto flex max-w-5xl flex-wrap gap-x-6 gap-y-2 px-5 py-6 text-slate-500">
           <Link to="/">Korrige</Link>
+          <Link to="/academias">Para academias</Link>
+          <Link to="/universidades">Para universidades</Link>
           <Link to="/recursos">Recursos</Link>
           <Link to="/guia">Guía de impresión y escaneo</Link>
           <Link to="/legal/privacidad">Privacidad</Link>
