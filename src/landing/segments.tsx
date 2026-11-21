@@ -102,6 +102,9 @@ export default function SegmentPage({ slug, articles }: { slug: Segment['slug'];
             <p className="mt-2 text-slate-600">
               Cuéntanos cuántos alumnos y exámenes tenéis y te enseñamos Korrige con uno de vuestros exámenes. También puedes empezar por tu cuenta: el primero es gratis.
             </p>
+            <p className="mt-3 text-sm text-slate-600">
+              ¿Necesitáis integrarlo con vuestro Moodle, intranet o sistema de gestión? Lo hacemos a medida: cuéntanoslo en el formulario.
+            </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <a href="/#ventas" className="rounded-md bg-brand-700 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-800">
                 Hablar con ventas
