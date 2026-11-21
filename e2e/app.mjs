@@ -128,6 +128,26 @@ export async function testApp(baseUrl, outDir) {
     await page.getByRole('link', { name: 'Resumen' }).click();
     assert.match(await page.getByTestId('grading-formula').innerText(), /0,333 × errores − 0,1 × en blanco/);
 
+    // 8b) planes: con el plan gratis se puede crear 1 examen; el segundo lleva a la página de planes
+    await page.evaluate(() => localStorage.setItem('korrige-demo-plan', 'free'));
+    await page.goto(`${baseUrl}/app`);
+    assert.match(await page.getByTestId('plan-chip').innerText(), /Plan Gratis · 0 de 1/);
+    await page.getByRole('link', { name: 'Nuevo examen' }).click();
+    await page.getByLabel('Nombre del examen').fill('Mi examen gratuito');
+    await page.getByRole('button', { name: 'Crear examen' }).click();
+    await page.waitForURL(/\/hoja$/);
+    await page.getByRole('link', { name: 'Exámenes' }).first().click();
+    assert.match(await page.getByTestId('plan-chip').innerText(), /1 de 1/);
+    await page.getByRole('link', { name: 'Nuevo examen' }).click();
+    await page.waitForURL(/\/app\/plan\?limite=1/);
+    await page.getByText('Ya has usado tu examen gratuito').waitFor();
+    assert.match(await page.getByTestId('plan-status').innerText(), /plan Gratis: has usado 1 de 1/);
+    await page.getByRole('heading', { name: 'Korrige Plus' }).waitFor();
+    await page.getByRole('link', { name: 'Hablar con ventas' }).waitFor();
+    await shot('14-plan');
+    await page.evaluate(() => localStorage.removeItem('korrige-demo-plan'));
+    await page.goto(`${baseUrl}/app`);
+
     // 9) reiniciar la demo desde el aviso superior vuelve a crear el examen de ejemplo
     page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'Reiniciar demo' }).click();

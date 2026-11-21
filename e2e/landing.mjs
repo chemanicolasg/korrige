@@ -9,6 +9,11 @@ export async function testLanding(baseUrl, outDir) {
   assert.match(html, /<link rel="canonical" href="https:\/\/korrige\.es\/"/);
   assert.match(html, /property="og:title"/);
   assert.match(html, /application\/ld\+json/);
+  // precios visibles sin JavaScript: gratis, Plus con precio y Academy con contacto
+  assert.match(html, /id="precios"/);
+  assert.match(html, /Korrige Plus/);
+  assert.match(html, /9,90\s€/);
+  assert.match(html, /Korrige Academy/);
   assert.match(await (await fetch(`${baseUrl}/sitemap.xml`)).text(), /https:\/\/korrige\.es\/legal\/privacidad/);
   assert.match(await (await fetch(`${baseUrl}/robots.txt`)).text(), /Sitemap: https:\/\/korrige\.es\/sitemap\.xml/);
 

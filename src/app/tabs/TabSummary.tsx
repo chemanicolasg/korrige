@@ -213,8 +213,13 @@ export default function TabSummary() {
             disabled={busy}
             onClick={() =>
               run(async (d) => {
-                const copy = await duplicateExam(db, d, userId);
-                nav(`/app/examenes/${copy.id}/resumen`);
+                try {
+                  const copy = await duplicateExam(db, d, userId);
+                  nav(`/app/examenes/${copy.id}/resumen`);
+                } catch (e) {
+                  if (/LIMITE_(GRATIS|PLUS)/.test((e as Error).message)) return nav('/app/plan?limite=1');
+                  throw e;
+                }
               })
             }
           >

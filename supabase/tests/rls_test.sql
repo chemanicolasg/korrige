@@ -252,6 +252,47 @@ select tests.eq((select count(*) from public.sheets) + (select count(*) from pub
   + (select count(*) from public.review_items) + (select count(*) from public.answer_keys) + (select count(*) from public.exam_layouts), 0, 'el borrado elimina hojas, notas, alumnos, incidencias, plantillas y layout');
 select tests.eq((select count(*) from public.audit_log where org_id = '0a000000-0000-0000-0000-000000000000' and exam_id is null), (select count(*) from public.audit_log where org_id = '0a000000-0000-0000-0000-000000000000'), 'la auditoría se conserva (sin referencia al examen)');
 
+-- ---------------------------------------------------------------------------
+-- 6. Planes y límites de exámenes
+-- ---------------------------------------------------------------------------
+-- Bruno (plan gratis) ya creó su examen: no puede crear un segundo, ni borrando el primero
+select tests.login('b0000000-0000-0000-0000-000000000002');
+select tests.eq((public.my_plan() ->> 'used')::bigint, 1, 'plan gratis: el examen creado cuenta como usado');
+select tests.throws($$insert into public.exams (org_id, owner_id, title, sheet_config) values ('0b000000-0000-0000-0000-000000000000', auth.uid(), 'segundo', '{}')$$, 'plan gratis: no se puede crear un segundo examen');
+select tests.eq(tests.affected($$delete from public.exams where id = 'e2000000-0000-0000-0000-000000000000'$$), 1, 'Bruno borra su examen gratuito');
+select tests.throws($$insert into public.exams (org_id, owner_id, title, sheet_config) values ('0b000000-0000-0000-0000-000000000000', auth.uid(), 'otro', '{}')$$, 'plan gratis: borrar el examen no devuelve el examen gratuito');
+select tests.throws($$insert into public.subscriptions (user_id, status) values (auth.uid(), 'active')$$, 'nadie puede darse de alta en Plus a mano');
+select tests.throws($$update public.exam_usage set n = 0$$, 'nadie puede poner a cero su consumo');
+select tests.eq(tests.affected($$update public.organizations set name = name$$), 0, 'un profesor no toca la organización');
+select tests.login('b0000000-0000-0000-0000-000000000001'); -- Berta, admin de B
+select tests.throws($$update public.organizations set plan = 'academy' where id = '0b000000-0000-0000-0000-000000000000'$$, 'ni siquiera la admin puede ponerse el plan Academy');
+
+-- Con Korrige Plus (lo activa el webhook de Stripe): 5 exámenes al mes
+select tests.su();
+insert into public.subscriptions (user_id, status, current_period_end) values ('b0000000-0000-0000-0000-000000000002', 'active', now() + interval '20 days');
+update public.exam_usage set period = (date_trunc('month', now()) - interval '1 month')::date where user_id = 'b0000000-0000-0000-0000-000000000002';
+select tests.login('b0000000-0000-0000-0000-000000000002');
+select tests.eq((select count(*) from public.subscriptions), 1, 'Bruno ve su suscripción (y solo la suya)');
+insert into public.exams (org_id, owner_id, title, sheet_config) select '0b000000-0000-0000-0000-000000000000', auth.uid(), 'plus ' || g, '{}' from generate_series(1, 5) g;
+select tests.eq((public.my_plan() ->> 'used')::bigint, 5, 'Plus: los 5 exámenes del mes están usados (el del mes pasado no cuenta)');
+select tests.eq(tests.n($$select 1 where public.my_plan() ->> 'plan' = 'plus'$$), 1, 'my_plan() informa del plan Plus');
+select tests.throws($$insert into public.exams (org_id, owner_id, title, sheet_config) values ('0b000000-0000-0000-0000-000000000000', auth.uid(), 'sexto', '{}')$$, 'Plus: el sexto examen del mes se rechaza');
+
+-- Suscripción caducada: vuelve al plan gratis
+select tests.su();
+update public.subscriptions set status = 'canceled', current_period_end = now() - interval '10 days';
+select tests.login('b0000000-0000-0000-0000-000000000002');
+select tests.eq(tests.n($$select 1 where public.my_plan() ->> 'plan' = 'free'$$), 1, 'suscripción cancelada: vuelve al plan gratis');
+select tests.throws($$insert into public.exams (org_id, owner_id, title, sheet_config) values ('0b000000-0000-0000-0000-000000000000', auth.uid(), 'tras cancelar', '{}')$$, 'sin Plus y con el gratuito gastado no se crean exámenes');
+
+-- Organización Academy: sin límite para sus profesores y sin gastar su cuota personal
+select tests.su();
+update public.organizations set plan = 'academy' where id = '0b000000-0000-0000-0000-000000000000';
+select tests.login('b0000000-0000-0000-0000-000000000002');
+insert into public.exams (org_id, owner_id, title, sheet_config) select '0b000000-0000-0000-0000-000000000000', auth.uid(), 'academy ' || g, '{}' from generate_series(1, 8) g;
+select tests.eq(tests.n('select 1 from public.exams'), 13, 'Academy: exámenes sin límite');
+select tests.eq((select sum(n) from public.exam_usage)::bigint, 6, 'Academy: no consume la cuota personal');
+
 -- Todas las tablas públicas tienen RLS activado
 select tests.eq((select count(*) from pg_tables where schemaname = 'public' and not rowsecurity), 0, 'RLS activado en todas las tablas de public');
 

@@ -20,3 +20,15 @@ export const SUPABASE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const SALES_ENDPOINT =
   (import.meta.env?.VITE_SALES_ENDPOINT as string | undefined) ||
   (SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/sales-lead` : '');
+
+/**
+ * Planes y precios (IVA incluido). Los límites de exámenes se imponen en la base de
+ * datos (supabase/migrations/20261121100000_billing.sql): si cambian aquí, cámbialos allí.
+ * Los precios reales se cobran con los «prices» de Stripe; estos son los que se muestran.
+ */
+export const PLAN = {
+  freeExams: 1,
+  plusExamsPerMonth: 5,
+  plusMonthly: 9.9,
+  plusYearly: 89,
+} as const;

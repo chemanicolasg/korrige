@@ -39,6 +39,19 @@ export interface Invitation {
   accepted_at: string | null;
 }
 
+/** Plan y consumo del usuario (función my_plan() de la base de datos). */
+export interface PlanInfo {
+  plan: 'free' | 'plus';
+  used: number;
+  limit: number;
+  period_end: string | null;
+  cancel_at_period_end: boolean;
+  status: string | null;
+  interval: 'month' | 'year' | null;
+  /** Organizaciones del usuario con plan Academy (sin límite de exámenes). */
+  academy_orgs: string[];
+}
+
 export type Formula = 'none' | 'classic' | 'custom';
 export interface GradingConfig {
   /** none: sin penalización · classic: errores/(k−1) · custom: penalización fija por error */

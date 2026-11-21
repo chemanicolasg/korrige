@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Db, SessionUser, getDb } from '../lib/db';
-import { Membership, Organization, OrgRole, Profile } from '../lib/types';
+import { Membership, Organization, OrgRole, PlanInfo, Profile } from '../lib/types';
 
 interface AuthState {
   db: Db;
@@ -11,6 +11,12 @@ interface AuthState {
   /** Organización activa. */
   org: Organization | null;
   role: OrgRole | null;
+  /** Plan del usuario; null mientras carga o si no se pudo leer. */
+  plan: PlanInfo | null;
+  /** La organización activa tiene Academy: exámenes sin límite. */
+  unlimited: boolean;
+  /** Puede crear otro examen con su plan actual. */
+  canCreateExam: boolean;
   setOrgId: (id: string) => void;
   refresh: () => Promise<void>;
 }
@@ -25,6 +31,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [orgId, setOrgIdState] = useState<string | null>(() => localStorage.getItem(ORG_KEY));
   const [error, setError] = useState('');
 
@@ -46,6 +53,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
       setProfile(null);
       setOrgs([]);
       setMemberships([]);
+      setPlan(null);
       setReady(true);
       return;
     }
@@ -57,6 +65,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
       setProfile(p[0] ?? { id: user.id, email: user.email, full_name: '' });
       setMemberships(ms);
       setOrgs(os);
+      setPlan(await db.rpc<PlanInfo>('my_plan').catch(() => null));
       setError('');
     } catch (e) {
       setError((e as Error).message);
@@ -72,7 +81,12 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
   const value = useMemo<AuthState | null>(() => {
     if (!db) return null;
     const org = orgs.find((o) => o.id === orgId) ?? orgs[0] ?? null;
+    const unlimited = !!org && !!plan?.academy_orgs.includes(org.id);
     return {
+      plan,
+      unlimited,
+      // si no se conoce el plan no se bloquea aquí: decide la base de datos
+      canCreateExam: unlimited || !plan || plan.used < plan.limit,
       db,
       user,
       profile,
@@ -86,7 +100,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
       },
       refresh: load,
     };
-  }, [db, user, profile, orgs, memberships, orgId, load]);
+  }, [db, user, profile, orgs, memberships, orgId, load, plan]);
 
   if (error && !value?.user) return <div className="p-8 text-sm text-red-700">No se pudo conectar: {error}</div>;
   if (!value || !ready) return <>{fallback}</>;

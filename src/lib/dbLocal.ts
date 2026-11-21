@@ -123,6 +123,20 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     if (!e) throw new Error('Examen inexistente');
     if (e.status === 'cerrado') throw new Error('El examen está cerrado: reábrelo para modificarlo');
   };
+  // Plan de la demo: sin límite salvo que se fuerce con localStorage (para probar el muro de pago)
+  const demoPlan = (): 'academy' | 'free' | 'plus' => {
+    try {
+      const v = persist ? localStorage.getItem('korrige-demo-plan') : null;
+      return v === 'free' || v === 'plus' ? v : 'academy';
+    } catch {
+      return 'academy';
+    }
+  };
+  const usage = () => {
+    const mine = T('exam_usage').filter((u) => u.user_id === user?.id);
+    const month = new Date().toISOString().slice(0, 7);
+    return { total: mine.reduce((a, u) => a + Number(u.n), 0), month: mine.filter((u) => u.period === month).reduce((a, u) => a + Number(u.n), 0) };
+  };
   const genCode = () => {
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     for (;;) {
@@ -136,6 +150,16 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     if (!NO_ID.has(table) && table !== 'audit_log') row.id ??= uuid();
     row.created_at ??= now();
     if (table === 'exams') {
+      const plan = demoPlan();
+      if (plan !== 'academy') {
+        const u = usage();
+        if (plan === 'plus' && u.month >= 5) throw new Error('LIMITE_PLUS: has creado los 5 exámenes de este mes incluidos en Korrige Plus');
+        if (plan === 'free' && u.total >= 1) throw new Error('LIMITE_GRATIS: ya has usado tu examen gratuito. Pasa a Korrige Plus para crear más');
+        const month = new Date().toISOString().slice(0, 7);
+        const rowU = T('exam_usage').find((x) => x.user_id === user?.id && x.period === month);
+        if (rowU) rowU.n = Number(rowU.n) + 1;
+        else T('exam_usage').push({ user_id: user?.id, period: month, n: 1 });
+      }
       row.code ||= genCode();
       row.status ??= 'borrador';
       row.model_map ??= {};
@@ -281,6 +305,20 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
         return id as T;
       }
       if (fn === 'accept_invitations') return 0 as T;
+      if (fn === 'my_plan') {
+        const plan = demoPlan();
+        const u = usage();
+        return {
+          plan: plan === 'plus' ? 'plus' : 'free',
+          used: plan === 'plus' ? u.month : u.total,
+          limit: plan === 'plus' ? 5 : 1,
+          period_end: null,
+          cancel_at_period_end: false,
+          status: plan === 'plus' ? 'active' : null,
+          interval: plan === 'plus' ? 'month' : null,
+          academy_orgs: plan === 'academy' ? T('organizations').map((o) => o.id) : [],
+        } as T;
+      }
       if (fn === 'share_exam') {
         const e = exam(args.p_exam);
         const email = String(args.p_email).trim().toLowerCase();

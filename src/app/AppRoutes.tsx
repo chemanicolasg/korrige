@@ -9,6 +9,7 @@ import Login from './Login';
 
 const ExamPage = lazy(() => import('./ExamPage'));
 const OrgPage = lazy(() => import('./OrgPage'));
+const PlanPage = lazy(() => import('./PlanPage'));
 const Demo = lazy(() => import('./Demo'));
 const DevOmr = lazy(() => import('./DevOmr'));
 
@@ -33,6 +34,7 @@ function Private() {
           <Route path="examenes/nuevo" element={<ExamNew />} />
           <Route path="examenes/:id/*" element={<ExamPage />} />
           <Route path="organizacion" element={<OrgPage />} />
+          <Route path="plan" element={<PlanPage />} />
           <Route path="guia" element={<Guide />} />
         </Route>
         <Route path="*" element={<NotFound />} />

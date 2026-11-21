@@ -21,7 +21,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
-  if (user && mode !== 'nueva') return <Navigate to="/app" replace />;
+  // quien llega desde «Empezar con Plus» va directo a la página del plan tras entrar
+  if (user && mode !== 'nueva') return <Navigate to={params.get('plan') === 'plus' ? '/app/plan' : '/app'} replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();

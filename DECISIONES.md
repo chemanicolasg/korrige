@@ -49,6 +49,11 @@ Donde el encargo era ambiguo se ha elegido la opción más simple que cumple el 
 31. **Preguntas en blanco.** Por defecto no restan. Se puede configurar que cada blanco reste una cantidad fija, además de lo que resten los errores (nada, 1/(k−1) o una cantidad fija). Nota = (aciertos − a × errores − b × blancos) ÷ preguntas válidas × escala.
 32. **Lectura de los KPIs.** Dificultad: fácil ≥ 80 % de acierto, media 50–80 %, difícil < 50 %, muy difícil < 20 %. Discriminación: buena ≥ 0,30, aceptable 0,20–0,30, baja < 0,20, negativa < 0. Son los umbrales habituales en análisis de ítems; están en `src/lib/stats.ts`.
 
+33. **Planes y precios.** Gratis: 1 examen por cuenta, completo y sin tarjeta. **Korrige Plus:** 5 exámenes nuevos al mes por usuario, 9,90 €/mes o 89 €/año (IVA incluido; precio propuesto, se cambia en `src/config.ts` y en Stripe). **Korrige Academy:** organización completa sin límites, a medida, con «Hablar con ventas»; se activa a mano poniendo `organizations.plan = 'academy'`.
+34. **Cómo se cuentan los exámenes.** Cuenta cada examen creado (también al duplicar). Borrar un examen no devuelve el cupo: así el examen gratis no se recupera borrando y creando otro. En Plus el contador es por mes natural. Los exámenes creados dentro de una organización Academy no gastan el cupo personal. Los límites los impone la base de datos (trigger `exams_quota`), no solo la interfaz.
+35. **Al superar el límite no se pierde nada.** Los exámenes existentes siguen accesibles y editables; solo se impide crear otro. Si una suscripción Plus caduca, se vuelve al plan gratis con el mismo criterio. Hay 3 días de margen si falla un cobro.
+36. **Cobro con Stripe Checkout** (Edge Functions `create-checkout`, `billing-portal` y `stripe-webhook`). El alta, las renovaciones y las bajas llegan por webhook firmado; la tabla `subscriptions` solo la escribe el servicio. El usuario gestiona tarjeta, facturas y cancelación en el portal de Stripe.
+
 ## Verificado contra el proyecto real de Supabase
 
 Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado el 20/11/2026:

@@ -72,6 +72,9 @@ export default function AppShell() {
               <NavLink to="/app/organizacion" className={nav}>
                 Organización
               </NavLink>
+              <NavLink to="/app/plan" className={nav}>
+                Plan
+              </NavLink>
               <NavLink to="/app/guia" className={nav}>
                 Guía de impresión y escaneo
               </NavLink>

@@ -127,6 +127,31 @@ Para recibir correo en `ventas@korrige.es` necesitas además un buzón o redirec
 
 Cada organización configura en **Organización** cuántos meses se conservan las imágenes tras cerrar un examen. La función `retention-purge` hace el borrado; prográmala a diario (Dashboard → Integrations → Cron → *HTTP request* a `https://TU_PROJECT_REF.supabase.co/functions/v1/retention-purge` con la cabecera `x-cron-secret: <CRON_SECRET>`).
 
+## 4b. Cobro de Korrige Plus con Stripe
+
+Los planes y sus límites están en la migración `20261121100000_billing.sql` (se imponen en la base de datos) y los precios mostrados en `src/config.ts` (`PLAN`).
+
+1. En Stripe crea el producto **Korrige Plus** con dos precios recurrentes en EUR, con «el precio incluye impuestos»: 9,90 € al mes y 89 € al año. Copia sus identificadores (`price_…`).
+2. Activa el **portal de cliente** (Settings → Billing → Customer portal) permitiendo cancelar y cambiar el método de pago.
+3. Crea un **webhook** hacia `https://TU_PROJECT_REF.supabase.co/functions/v1/stripe-webhook` con los eventos `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated` y `customer.subscription.deleted`. Copia su secreto de firma (`whsec_…`).
+4. Guarda los secretos y despliega las funciones:
+
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_live_xxx STRIPE_WEBHOOK_SECRET=whsec_xxx STRIPE_PRICE_PLUS_MONTH=price_xxx STRIPE_PRICE_PLUS_YEAR=price_xxx
+```
+
+```bash
+supabase functions deploy create-checkout billing-portal stripe-webhook
+```
+
+5. Para dar de alta una organización en **Korrige Academy** (tras cerrar la venta):
+
+```sql
+update public.organizations set plan = 'academy' where id = '<id de la organización>';
+```
+
+Prueba primero con las claves de test de Stripe (`sk_test_…`) y la tarjeta `4242 4242 4242 4242`.
+
 ## 5. Desplegar en Netlify y conectar korrige.es
 
 1. En https://app.netlify.com → **Add new site → Import an existing project** → elige este repositorio. `netlify.toml` ya define el build (`npm run build`), la carpeta (`dist`), las cabeceras y la redirección de la SPA.

@@ -4,6 +4,7 @@ import { CONTACT_EMAIL, SALES_EMAIL } from '../config';
 import { Logo } from '../components/ui';
 import { ENABLED_LOCALES, LOCALE_NAMES, Locale, detectLocale, getDict } from '../i18n';
 import { ARTICLES } from './articles';
+import { PricingCards } from './Pricing';
 import { SalesForm } from './SalesForm';
 
 /**
@@ -73,6 +74,7 @@ export default function Landing() {
   const links: [string, string][] = [
     ['#como-funciona', t.nav.how],
     ['#funcionalidades', t.nav.features],
+    ['#precios', t.pricing.nav],
     ['#privacidad', t.nav.privacy],
     ['#faq', t.nav.faq],
   ];
@@ -281,11 +283,43 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Precios */}
+        <section id="precios" className="scroll-mt-20 border-b border-bone-200 bg-bone-100 py-16 sm:py-24">
+          <div className={wrap}>
+            <Eyebrow n="04">{t.pricing.nav}</Eyebrow>
+            <h2 className={h2}>{t.pricing.title}</h2>
+            <p className="mt-4 max-w-2xl text-lg text-slate-600">{t.pricing.subtitle}</p>
+            <div className="mt-12">
+              <PricingCards
+                t={t.pricing}
+                actions={{
+                  free: (
+                    <Link to="/acceso?modo=crear" className={`${secondary} w-full`}>
+                      {t.pricing.free.cta}
+                    </Link>
+                  ),
+                  plus: (
+                    <Link to="/acceso?modo=crear&plan=plus" className={`${primary} w-full`}>
+                      {t.pricing.plus.cta}
+                    </Link>
+                  ),
+                  academy: (
+                    <a href="#ventas" className={`${secondary} w-full`}>
+                      {t.pricing.academy.cta}
+                    </a>
+                  ),
+                }}
+              />
+            </div>
+            <p className="mt-6 text-sm text-slate-500">{t.pricing.vat}</p>
+          </div>
+        </section>
+
         {/* 5. Privacidad */}
         <section id="privacidad" className="scroll-mt-20 border-b border-bone-200 bg-brand-50 py-16 sm:py-24">
           <div className={`${wrap} grid gap-10 lg:grid-cols-[0.8fr_1.2fr]`}>
             <div>
-              <Eyebrow n="04">{t.nav.privacy}</Eyebrow>
+              <Eyebrow n="05">{t.nav.privacy}</Eyebrow>
               <h2 className={h2}>{t.privacy.title}</h2>
               <p className="mt-4 text-lg text-slate-600">{t.privacy.subtitle}</p>
             </div>
@@ -304,7 +338,7 @@ export default function Landing() {
         <section id="faq" className="scroll-mt-20 border-b border-bone-200 py-16 sm:py-24">
           <div className={`${wrap} grid gap-10 lg:grid-cols-[0.8fr_1.2fr]`}>
             <div>
-              <Eyebrow n="05">{t.nav.faq}</Eyebrow>
+              <Eyebrow n="06">{t.nav.faq}</Eyebrow>
               <h2 className={h2}>{t.faq.title}</h2>
             </div>
             <div className="border-t-[1.5px] border-ink">
@@ -349,7 +383,7 @@ export default function Landing() {
         <section id="ventas" className="scroll-mt-16 bg-bone-100 py-16 sm:py-24">
           <div className={`${wrap} grid gap-12 lg:grid-cols-[0.85fr_1.15fr]`}>
             <div>
-              <Eyebrow n="06">{t.sales.title}</Eyebrow>
+              <Eyebrow n="07">{t.sales.title}</Eyebrow>
               <h2 className={h2}>{t.cta.title}</h2>
               <p className="mt-4 text-lg text-slate-600">{t.sales.subtitle}</p>
               <ul className="mt-7 space-y-3">

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Empty, ErrorBox, Field, Spinner, StatusBadge, fmtDate } from '../components/ui';
 import { createExam } from '../lib/service';
 import { DEFAULT_GRADING, Exam, ExamStatus, Profile, STATUS_LABEL } from '../lib/types';
@@ -8,7 +8,7 @@ import { useSession } from './AuthContext';
 import { SheetConfigForm } from './SheetConfigForm';
 
 export function ExamList() {
-  const { db, org, user } = useSession();
+  const { db, org, user, plan, unlimited, canCreateExam } = useSession();
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [owners, setOwners] = useState<Record<string, Profile>>({});
   const [error, setError] = useState('');
@@ -67,8 +67,13 @@ export function ExamList() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Exámenes</h1>
-        <div className="flex gap-3">
-          <Link to="/app/examenes/nuevo" className="btn-primary">
+        <div className="flex flex-wrap items-center gap-3">
+          {plan && !unlimited && (
+            <Link to="/app/plan" className="text-sm text-slate-600 underline-offset-4 hover:underline" data-testid="plan-chip">
+              {plan.plan === 'plus' ? `Korrige Plus · ${plan.used} de ${plan.limit} exámenes este mes` : `Plan Gratis · ${plan.used} de ${plan.limit} examen usado`}
+            </Link>
+          )}
+          <Link to={canCreateExam ? '/app/examenes/nuevo' : '/app/plan?limite=1'} className="btn-primary">
             Nuevo examen
           </Link>
         </div>
@@ -80,7 +85,7 @@ export function ExamList() {
           <Empty
             title="Aún no tienes exámenes"
             action={
-              <Link to="/app/examenes/nuevo" className="btn-primary">
+              <Link to={canCreateExam ? '/app/examenes/nuevo' : '/app/plan?limite=1'} className="btn-primary">
                 Crear mi primer examen
               </Link>
             }
@@ -184,7 +189,7 @@ export function ExamList() {
 }
 
 export function ExamNew() {
-  const { db, org, user } = useSession();
+  const { db, org, user, refresh, canCreateExam } = useSession();
   const nav = useNavigate();
   const [f, setF] = useState({ title: '', subject: '', group_name: '', session: '', exam_date: '' });
   // los valores por defecto de la organización (logotipo, identificador, fórmula) se aplican a cada examen nuevo
@@ -209,8 +214,11 @@ export function ExamNew() {
     try {
       const subtitle = cfg.subtitle && cfg.subtitle !== DEFAULT_SHEET_CONFIG.subtitle ? cfg.subtitle : [f.subject || f.title, f.session].filter(Boolean).join('  ·  ');
       const exam = await createExam(db, org.id, user.id, { ...f, exam_date: f.exam_date || null }, { ...cfg, subtitle }, { ...DEFAULT_GRADING, ...(def.grading ?? {}) });
+      void refresh(); // actualiza el consumo del plan
       nav(`/app/examenes/${exam.id}/hoja`);
     } catch (err) {
+      // límite del plan alcanzado (lo decide la base de datos)
+      if (/LIMITE_(GRATIS|PLUS)/.test((err as Error).message)) return nav('/app/plan?limite=1');
       setError((err as Error).message);
       setBusy(false);
     }
@@ -220,6 +228,7 @@ export function ExamNew() {
       <input className="input" type={opts.type ?? 'text'} required={opts.required} maxLength={160} value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} />
     </Field>
   );
+  if (!canCreateExam) return <Navigate to="/app/plan?limite=1" replace />;
   return (
     <form onSubmit={submit} className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-semibold">Nuevo examen</h1>
