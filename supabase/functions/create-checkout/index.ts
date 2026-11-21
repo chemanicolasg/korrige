@@ -16,7 +16,10 @@ Deno.serve(async (req) => {
 
   const key = Deno.env.get('STRIPE_SECRET_KEY');
   const { interval } = await req.json().catch(() => ({ interval: 'month' }));
-  const price = Deno.env.get(interval === 'year' ? 'STRIPE_PRICE_PLUS_YEAR' : 'STRIPE_PRICE_PLUS_MONTH');
+  // los identificadores de precio no son secretos: valores de producción por defecto
+  const price = interval === 'year'
+    ? Deno.env.get('STRIPE_PRICE_PLUS_YEAR') ?? 'price_1UeDZSLzkykEzxyQakBeK7bh'
+    : Deno.env.get('STRIPE_PRICE_PLUS_MONTH') ?? 'price_1UeDZALzkykEzxyQGKsx4wnV';
   if (!key || !price) return json(503, { error: 'billing_not_configured' });
 
   const auth = req.headers.get('authorization') ?? '';
