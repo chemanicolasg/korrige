@@ -1,12 +1,32 @@
 // Edge Function «create-checkout»: abre el pago de Korrige Plus en Stripe Checkout.
 // Devuelve { url } para redirigir al usuario. Exige sesión (verify_jwt).
 //
-// Secretos: STRIPE_SECRET_KEY, STRIPE_PRICE_PLUS_MONTH, STRIPE_PRICE_PLUS_YEAR, APP_URL (opcional).
+// Secretos: STRIPE_SECRET_KEY. Opcionales: STRIPE_PRICE_PLUS_MONTH, STRIPE_PRICE_PLUS_YEAR, STRIPE_TAX_RATE, APP_URL.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders, stripe } from '../_shared/stripe.ts';
 
 const APP_URL = (Deno.env.get('APP_URL') ?? 'https://korrige.es').replace(/\/$/, '');
 const ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://korrige.es,https://www.korrige.es').split(',').map((s) => s.trim());
+
+/**
+ * Tipo de IVA (21 %, incluido en el precio) para que la factura lo muestre desglosado.
+ * Se busca en la cuenta de Stripe y, si no existe, se crea una vez. STRIPE_TAX_RATE permite fijar otro.
+ * Si falla, se cobra igual (mismo importe) pero sin desglose.
+ */
+async function vatRateId(key: string): Promise<string | null> {
+  const fixed = Deno.env.get('STRIPE_TAX_RATE');
+  if (fixed) return fixed;
+  try {
+    const list = await stripe<{ data: { id: string; percentage: number; inclusive: boolean; country: string | null }[] }>(key, 'GET', 'tax_rates?active=true&limit=100');
+    const found = list.data.find((r) => r.inclusive && r.percentage === 21 && r.country === 'ES');
+    if (found) return found.id;
+    const created = await stripe<{ id: string }>(key, 'POST', 'tax_rates', { display_name: 'IVA', description: 'IVA España 21 %', percentage: 21, inclusive: true, country: 'ES', tax_type: 'vat' });
+    return created.id;
+  } catch (e) {
+    console.error('create-checkout: no se pudo preparar el tipo de IVA', e);
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   const cors = corsHeaders(req, ORIGINS);
@@ -32,10 +52,11 @@ Deno.serve(async (req) => {
   if (sub && ['active', 'trialing'].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end) > new Date())) {
     return json(409, { error: 'already_subscribed' });
   }
+  const vat = await vatRateId(key);
   try {
     const session = await stripe<{ url: string }>(key, 'POST', 'checkout/sessions', {
       mode: 'subscription',
-      line_items: { 0: { price, quantity: 1 } },
+      line_items: { 0: { price, quantity: 1, ...(vat ? { tax_rates: { 0: vat } } : {}) } },
       success_url: `${APP_URL}/app/plan?pago=ok`,
       cancel_url: `${APP_URL}/app/plan?pago=cancelado`,
       client_reference_id: u.user.id,
