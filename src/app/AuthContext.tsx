@@ -30,6 +30,8 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
   const [db, setDb] = useState<Db | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [ready, setReady] = useState(false);
+  /** Usuario cuyos datos (perfil, organizaciones, plan) están cargados; undefined = ninguno todavía. */
+  const [loadedFor, setLoadedFor] = useState<string | null | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
@@ -56,6 +58,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
       setOrgs([]);
       setMemberships([]);
       setPlan(null);
+      setLoadedFor(null);
       setReady(true);
       return;
     }
@@ -74,6 +77,7 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      setLoadedFor(user.id);
       setReady(true);
     }
   }, [db, user]);
@@ -113,7 +117,8 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
   }, [db, user, profile, orgs, memberships, orgId, load, plan]);
 
   if (error && !value?.user) return <div className="p-8 text-sm text-red-700">No se pudo conectar: {error}</div>;
-  if (!value || !ready) return <>{fallback}</>;
+  // tras iniciar sesión se espera a tener sus datos: evita mostrar un instante la pantalla «sin organización»
+  if (!value || !ready || loadedFor !== (user?.id ?? null)) return <>{fallback}</>;
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
