@@ -83,7 +83,7 @@ export const ca: Record<string, string> = {
   'Tu primer examen es gratis y completo ({n} examen, sin tarjeta).': 'El teu primer examen és gratuït i complet ({n} examen, sense targeta).',
   'Saltar tutorial': 'Saltar el tutorial',
   Anterior: 'Anterior',
-  'Crear mi primer examen': 'Crear el meu primer examen',
+  'Crear mi primer examen': 'Crea el meu primer examen',
   Empezar: 'Començar',
   Siguiente: 'Següent',
   'Guía rápida: imprimir y escanear': 'Guia ràpida: imprimir i escanejar',

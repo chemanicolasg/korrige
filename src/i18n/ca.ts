@@ -21,7 +21,7 @@ export const ca: Dict = {
     statsCaption: 'Estadístiques · distribució de notes',
     writeUs: 'T’estimes més escriure’ns?',
     student: 'Soc alumne: comprovar respostes',
-    appNote: 'De moment, l’aplicació del professorat està en castellà. El full de respostes i la pàgina per als alumnes sí que estan en català.',
+    appNote: '',
   },
   nav: { how: 'Com funciona', features: 'Funcionalitats', privacy: 'Privacitat', faq: 'Preguntes freqüents', sales: 'Parlar amb vendes', login: 'Accedir', demo: 'Provar la demo' },
   hero: {

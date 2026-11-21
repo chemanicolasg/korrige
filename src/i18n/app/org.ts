@@ -143,7 +143,7 @@ export const en: Record<string, string> = {
   'Conservación de las imágenes de las hojas': 'Sheet image retention',
   'Meses tras cerrar un examen. Pasado ese plazo se borran las imágenes y se conservan las notas. Vacío = no borrar automáticamente.':
     'Months after an exam is closed. After that the images are deleted and the grades are kept. Empty = never delete automatically.',
-  'Sin límite': 'No limit',
+  'Sin límite': 'Unlimited',
   'Las hojas contienen datos personales de los alumnos (RGPD). Cualquier examen se puede borrar por completo desde su pestaña Resumen.':
     'Sheets contain students’ personal data (GDPR). Any exam can be deleted completely from its Summary tab.',
   Guardar: 'Save',

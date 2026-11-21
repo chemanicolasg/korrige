@@ -74,7 +74,7 @@ export const ca: Record<string, string> = {
   Hoja: 'Full',
   Plantillas: 'Plantilles',
   Alumnos: 'Alumnes',
-  'Subir hojas': 'Puja fulls',
+  'Subir hojas': 'Pujar fulls',
   Revisión: 'Revisió',
   Notas: 'Notes',
   Estadísticas: 'Estadístiques',

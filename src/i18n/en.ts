@@ -21,7 +21,7 @@ export const en: Dict = {
     statsCaption: 'Statistics · grade distribution',
     writeUs: 'Prefer to email us?',
     student: 'I’m a student: check my answers',
-    appNote: 'For now, the teacher app is in Spanish. The answer sheet and the student page are available in English.',
+    appNote: '',
   },
   nav: { how: 'How it works', features: 'Features', privacy: 'Privacy', faq: 'FAQ', sales: 'Talk to sales', login: 'Sign in', demo: 'Try the demo' },
   hero: {
