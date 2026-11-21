@@ -22,6 +22,10 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string;
+  /** Cuándo se le envió el correo de bienvenida. */
+  welcomed_at?: string | null;
+  /** Cuándo vio el tutorial de inicio. */
+  onboarded_at?: string | null;
 }
 export interface Membership {
   org_id: string;

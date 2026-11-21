@@ -4,6 +4,7 @@ import { ErrorBox, Field, Logo, Notice } from '../components/ui';
 import { setDemoMode } from '../lib/db';
 import { SUPABASE_CONFIGURED } from '../config';
 import { useAuth } from './AuthContext';
+import { Tutorial } from './Tutorial';
 
 function Onboarding() {
   const { db, user, refresh } = useAuth();
@@ -49,9 +50,18 @@ function Onboarding() {
 }
 
 export default function AppShell() {
-  const { db, user, profile, orgs, org, role, setOrgId } = useAuth();
+  const { db, user, profile, orgs, org, role, setOrgId, canCreateExam, markOnboarded } = useAuth();
+  const [showTutorial, setShowTutorial] = useState(false);
   const loc = useLocation();
   if (!user) return <Navigate to={`/acceso?volver=${encodeURIComponent(loc.pathname)}`} replace />;
+
+  // primera visita: tutorial de inicio. En la demo no se muestra (salvo que se fuerce para las pruebas)
+  const forced = typeof localStorage !== 'undefined' && localStorage.getItem('korrige-tutorial') === '1';
+  const firstVisit = !!org && !!profile && !profile.onboarded_at && (db.kind === 'supabase' || forced);
+  const closeTutorial = () => {
+    setShowTutorial(false);
+    if (firstVisit) markOnboarded();
+  };
 
   const nav = ({ isActive }: { isActive: boolean }) => `rounded-md px-3 py-1.5 text-sm font-medium ${isActive ? 'bg-brand-50 text-brand-800' : 'text-slate-600 hover:bg-slate-100'}`;
   return (
@@ -131,10 +141,14 @@ export default function AppShell() {
       <main id="contenido" className="mx-auto max-w-7xl px-4 py-6">
         {org ? <Outlet /> : <Onboarding />}
       </main>
+      {(showTutorial || firstVisit) && <Tutorial canCreateExam={canCreateExam} onClose={closeTutorial} />}
       <footer className="mx-auto max-w-7xl px-4 pb-8 pt-4 text-xs text-slate-400">
         <Notice>
           <span className="text-xs">
-            Recuerda: las hojas se imprimen al <b>100 % («tamaño real»)</b>, nunca con «ajustar a página». ·{' '}
+            <button className="font-medium underline" onClick={() => setShowTutorial(true)}>
+              Ver el tutorial
+            </button>{' '}
+            · Recuerda: las hojas se imprimen al <b>100 % («tamaño real»)</b>, nunca con «ajustar a página». ·{' '}
             <Link className="underline" to="/app/guia">
               Guía de impresión y escaneo
             </Link>

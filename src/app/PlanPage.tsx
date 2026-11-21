@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ErrorBox, Notice, fmtDate } from '../components/ui';
-import { PLAN } from '../config';
+import { BILLING_ENABLED, PLAN, SALES_EMAIL } from '../config';
 import { getDict } from '../i18n';
 import { PricingCards, eur } from '../landing/Pricing';
 import { useSession } from './AuthContext';
@@ -15,7 +15,7 @@ const ERRORS: Record<string, string> = {
 
 /** Plan del usuario: consumo, cambio a Korrige Plus (Stripe Checkout) y gestión de la suscripción. */
 export default function PlanPage() {
-  const { db, plan, unlimited, org, refresh } = useSession();
+  const { db, plan, unlimited, org, refresh, user } = useSession();
   const [params] = useSearchParams();
   const [interval, setInterval_] = useState<'month' | 'year'>('month');
   const [busy, setBusy] = useState(false);
@@ -91,6 +91,16 @@ export default function PlanPage() {
             </button>
           ) : db.kind === 'local' ? (
             <p className="text-sm text-slate-500">El pago no está disponible en el modo demo.</p>
+          ) : !BILLING_ENABLED ? (
+            <div>
+              <a
+                className={`${btn} bg-brand-700 text-white hover:bg-brand-800`}
+                href={`mailto:${SALES_EMAIL}?subject=${encodeURIComponent('Quiero Korrige Plus')}&body=${encodeURIComponent(`Hola, quiero activar Korrige Plus en mi cuenta (${user.email}).`)}`}
+              >
+                Pedir Korrige Plus
+              </a>
+              <p className="mt-2 text-xs text-slate-500">El pago con tarjeta estará disponible en breve. Mientras tanto, escríbenos y te lo activamos.</p>
+            </div>
           ) : (
             <div>
               <div className="mb-3 flex rounded-md border border-bone-300 p-0.5 text-sm" role="radiogroup" aria-label="Periodicidad del pago">

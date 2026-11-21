@@ -19,6 +19,8 @@ interface AuthState {
   canCreateExam: boolean;
   setOrgId: (id: string) => void;
   refresh: () => Promise<void>;
+  /** Marca el tutorial de inicio como visto. */
+  markOnboarded: () => void;
 }
 
 const Ctx = createContext<AuthState | null>(null);
@@ -63,6 +65,8 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
       const [p, ms] = await Promise.all([db.select<Profile>('profiles', { id: user.id }), db.select<Membership>('memberships', { user_id: user.id })]);
       const os = ms.length ? await db.select<Organization>('organizations', { id: ms.map((m) => m.org_id) }, { order: 'name' }) : [];
       setProfile(p[0] ?? { id: user.id, email: user.email, full_name: '' });
+      // correo de bienvenida: una vez por cuenta (la función comprueba que el email está confirmado)
+      if (db.kind === 'supabase' && p[0] && !p[0].welcomed_at) void db.invoke('welcome', {}).catch(() => undefined);
       setMemberships(ms);
       setOrgs(os);
       setPlan(await db.rpc<PlanInfo>('my_plan').catch(() => null));
@@ -99,6 +103,12 @@ export function AuthProvider({ children, fallback }: { children: ReactNode; fall
         setOrgIdState(id);
       },
       refresh: load,
+      markOnboarded: () => {
+        if (!user) return;
+        const onboarded_at = new Date().toISOString();
+        setProfile((prev) => (prev ? { ...prev, onboarded_at } : prev));
+        void db.update('profiles', { id: user.id }, { onboarded_at }).catch(() => undefined);
+      },
     };
   }, [db, user, profile, orgs, memberships, orgId, load, plan]);
 

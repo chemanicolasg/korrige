@@ -37,3 +37,7 @@ verify_jwt = true
 # El webhook lo llama Stripe: no hay sesión, se valida la firma del evento.
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Correo de bienvenida (una vez por cuenta, tras confirmar el email)
+[functions.welcome]
+verify_jwt = true

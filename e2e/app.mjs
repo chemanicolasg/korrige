@@ -128,6 +128,23 @@ export async function testApp(baseUrl, outDir) {
     await page.getByRole('link', { name: 'Resumen' }).click();
     assert.match(await page.getByTestId('grading-formula').innerText(), /0,333 × errores − 0,1 × en blanco/);
 
+    // 8a) tutorial de inicio: aparece en la primera visita, se recorre y no vuelve a salir
+    await page.evaluate(() => localStorage.setItem('korrige-tutorial', '1'));
+    await page.goto(`${baseUrl}/app`);
+    const tut = page.getByTestId('tutorial');
+    await tut.getByText('Paso 1 de 4').waitFor();
+    await shot('15-tutorial');
+    for (let i = 0; i < 3; i++) await tut.getByRole('button', { name: 'Siguiente' }).click();
+    await tut.getByText('Paso 4 de 4').waitFor();
+    await page.getByRole('button', { name: 'Saltar tutorial' }).click();
+    await page.reload();
+    await page.getByRole('heading', { name: 'Exámenes' }).waitFor();
+    assert.equal(await page.getByTestId('tutorial').count(), 0, 'el tutorial solo sale la primera vez');
+    await page.getByRole('button', { name: 'Ver el tutorial' }).click(); // se puede volver a abrir a mano
+    await page.getByTestId('tutorial').waitFor();
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => localStorage.removeItem('korrige-tutorial'));
+
     // 8b) planes: con el plan gratis se puede crear 1 examen; el segundo lleva a la página de planes
     await page.evaluate(() => localStorage.setItem('korrige-demo-plan', 'free'));
     await page.goto(`${baseUrl}/app`);

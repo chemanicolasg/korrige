@@ -26,6 +26,12 @@ export const SALES_ENDPOINT =
  * datos (supabase/migrations/20261121100000_billing.sql): si cambian aquí, cámbialos allí.
  * Los precios reales se cobran con los «prices» de Stripe; estos son los que se muestran.
  */
+/**
+ * Pago con tarjeta activado (Stripe configurado y funciones desplegadas). Mientras no lo
+ * esté, Korrige Plus se solicita por correo. Se activa con VITE_BILLING_ENABLED=1 en Netlify.
+ */
+export const BILLING_ENABLED = (import.meta.env?.VITE_BILLING_ENABLED as string | undefined) === '1';
+
 export const PLAN = {
   freeExams: 1,
   plusExamsPerMonth: 5,

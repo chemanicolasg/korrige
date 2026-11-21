@@ -54,6 +54,9 @@ Donde el encargo era ambiguo se ha elegido la opción más simple que cumple el 
 35. **Al superar el límite no se pierde nada.** Los exámenes existentes siguen accesibles y editables; solo se impide crear otro. Si una suscripción Plus caduca, se vuelve al plan gratis con el mismo criterio. Hay 3 días de margen si falla un cobro.
 36. **Cobro con Stripe Checkout** (Edge Functions `create-checkout`, `billing-portal` y `stripe-webhook`). El alta, las renovaciones y las bajas llegan por webhook firmado; la tabla `subscriptions` solo la escribe el servicio. El usuario gestiona tarjeta, facturas y cancelación en el portal de Stripe.
 
+37. **Bienvenida y tutorial.** Al entrar por primera vez con el email confirmado se envía un correo de bienvenida (Edge Function `welcome`, una vez por cuenta) y se muestra un tutorial de cuatro pasos, que se puede saltar y volver a abrir desde el pie de la aplicación. A las cuentas anteriores no se les envía la bienvenida con retraso.
+38. **Pago con tarjeta aún sin activar.** Mientras Stripe no esté configurado (`VITE_BILLING_ENABLED`), el botón de Korrige Plus abre un correo a ventas y el alta se hace a mano insertando la fila en `subscriptions`.
+
 ## Verificado contra el proyecto real de Supabase
 
 Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado el 20/11/2026:
