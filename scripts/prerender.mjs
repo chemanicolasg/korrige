@@ -42,7 +42,7 @@ for (const page of pages) {
       .replace(/(<meta property="og:title" content=")[^"]*"/, `$1${esc(page.title)}"`)
       .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${esc(page.description)}"`);
   }
-  const file = page.path === '/' ? path.join(dist, 'index.html') : path.join(dist, page.path, 'index.html');
+  const file = page.path === '/' ? path.join(dist, 'index.html') : path.join(dist, `${page.path}.html`); // /guia → guia.html: Netlify la sirve en /guia sin redirigir a /guia/
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, html);
 }
