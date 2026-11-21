@@ -22,3 +22,7 @@ verify_jwt = false
 # La purga de retención comprueba ella misma el secreto (service role o CRON_SECRET).
 [functions.retention-purge]
 verify_jwt = false
+
+# Invitaciones: exige sesión (JWT) y comprueba dentro que quien llama es administrador.
+[functions.send-invite]
+verify_jwt = true

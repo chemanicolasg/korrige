@@ -314,6 +314,11 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
       throw new Error(`Función no disponible en modo demo: ${fn}`);
     },
 
+    async invoke<T>() {
+      throw new Error('No disponible en modo demo');
+      return undefined as T;
+    },
+
     async uploadImage(path, blob) {
       memImages.set(path, blob);
       await idbOp('readwrite', (s) => s.put(blob, path));

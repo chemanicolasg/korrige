@@ -103,13 +103,46 @@ export default function OrgPage() {
       if (logoFile.current) logoFile.current.value = '';
     }
   }
+  const INVITE_ERRORS: Record<string, string> = {
+    email_not_configured: 'El envío de correo no está configurado (falta la clave de Resend).',
+    email_failed: 'El servidor de correo ha rechazado el envío.',
+    accepted: 'Esta invitación ya se aceptó.',
+    forbidden: 'Solo un administrador puede enviar invitaciones.',
+  };
+  /** Envía (o reenvía) el correo de invitación. Si falla, la invitación sigue creada y se puede copiar el enlace. */
+  async function sendInviteEmail(id: string, mail: string): Promise<string> {
+    try {
+      await db.invoke('send-invite', { invitation_id: id });
+      return `Invitación enviada por correo a ${mail}.`;
+    } catch (e) {
+      const code = (e as Error).message;
+      throw new Error(`No se ha podido enviar el correo a ${mail}: ${INVITE_ERRORS[code] ?? code}. La invitación está creada: copia el enlace de registro y envíaselo tú.`);
+    }
+  }
   async function invite(e: FormEvent) {
     e.preventDefault();
-    await act(async () => {
-      await db.insert('invitations', { org_id: org.id, email: email.trim().toLowerCase(), role: invRole, invited_by: user.id });
-      await logAudit(db, org.id, null, 'invitacion_enviada', { email: email.trim().toLowerCase(), rol: invRole });
+    setError('');
+    setSaved('');
+    const mail = email.trim().toLowerCase();
+    try {
+      const [inv] = await db.insert<Invitation>('invitations', { org_id: org.id, email: mail, role: invRole, invited_by: user.id });
+      await logAudit(db, org.id, null, 'invitacion_enviada', { email: mail, rol: invRole });
       setEmail('');
-    }, 'Invitación creada. Envíale el enlace de registro.');
+      await load();
+      setSaved(await sendInviteEmail(inv.id, mail));
+    } catch (err) {
+      setError((err as Error).message);
+      await load();
+    }
+  }
+  async function resend(i: Invitation) {
+    setError('');
+    setSaved('');
+    try {
+      setSaved(await sendInviteEmail(i.id, i.email));
+    } catch (err) {
+      setError((err as Error).message);
+    }
   }
   const link = (mail: string) => `${location.origin}/acceso?modo=crear&email=${encodeURIComponent(mail)}`;
   const use = (id: string) => usage.find((u) => u.user_id === id);
@@ -181,7 +214,7 @@ export default function OrgPage() {
           <section className="card p-5">
             <h2 className="font-semibold">Invitar profesores</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Escribe su email y envíale el enlace de registro. Al crear su cuenta con ese mismo email (y confirmarlo) entrará directamente en {org.name}.
+              Escribe su email y le enviaremos un correo con el enlace de registro. Al crear su cuenta con ese mismo email (y confirmarlo) entrará directamente en {org.name}.
             </p>
             {db.kind === 'local' ? (
               <p className="mt-3 text-sm text-slate-500">Las invitaciones no están disponibles en el modo demo.</p>
@@ -203,9 +236,14 @@ export default function OrgPage() {
                         <span className="badge bg-slate-100 text-slate-600">{i.role}</span>
                         {i.accepted_at ? <span className="text-emerald-700">Aceptada el {fmtDate(i.accepted_at)}</span> : <span className="text-amber-700">Pendiente desde el {fmtDate(i.created_at)}</span>}
                         {!i.accepted_at && (
-                          <button className="btn btn-sm" onClick={() => void navigator.clipboard.writeText(link(i.email)).then(() => setSaved('Enlace copiado.'))}>
-                            Copiar enlace de registro
-                          </button>
+                          <>
+                            <button className="btn btn-sm" onClick={() => void resend(i)}>
+                              Reenviar correo
+                            </button>
+                            <button className="btn btn-sm" onClick={() => void navigator.clipboard.writeText(link(i.email)).then(() => setSaved('Enlace copiado.'))}>
+                              Copiar enlace de registro
+                            </button>
+                          </>
                         )}
                         <button className="ml-auto text-xs text-red-700 hover:underline" onClick={() => void act(() => db.remove('invitations', { id: i.id }))}>
                           Eliminar

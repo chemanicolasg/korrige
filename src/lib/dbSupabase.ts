@@ -145,6 +145,16 @@ export function createSupabaseDb(client?: SupabaseClient): Db {
       return data as T;
     },
 
+    async invoke<T>(fn: string, body: Record<string, unknown>) {
+      const { data, error } = await sb.functions.invoke(fn, { body });
+      if (error) {
+        // el cuerpo del error trae el motivo (p. ej. {"error":"email_not_configured"})
+        const detail = await (error as { context?: Response }).context?.json?.().catch(() => null);
+        throw new Error(detail?.error ?? error.message);
+      }
+      return data as T;
+    },
+
     async uploadImage(path, blob) {
       const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: true });
       if (error) fail(error, 'No se pudo subir la imagen de la hoja');

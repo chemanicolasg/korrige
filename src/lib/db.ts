@@ -41,6 +41,8 @@ export interface Db {
   upsert<T>(table: string, rows: object | object[], onConflict: string): Promise<T[]>;
   remove(table: string, filter: Filter): Promise<void>;
   rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T>;
+  /** Llama a una Edge Function con la sesión del usuario. Devuelve el cuerpo JSON de la respuesta. */
+  invoke<T>(fn: string, body: Record<string, unknown>): Promise<T>;
 
   uploadImage(path: string, blob: Blob): Promise<void>;
   /** URL temporal de una imagen (firmada en Supabase; blob: en local). */
