@@ -6,6 +6,7 @@ import { currentKeys, deleteExam, duplicateExam, isStudentSheet, logAudit, setEx
 import { GradingConfig, Profile } from '../../lib/types';
 import { modelLetters } from '../../omr/layout';
 import { APP_URL } from '../../config';
+import { tr, trn } from '../../i18n/app';
 import { useSession } from '../AuthContext';
 import { useExam } from '../ExamPage';
 import { GradingFields } from '../GradingFields';
@@ -17,16 +18,16 @@ function Steps() {
   const pending = data.items.filter((i) => i.status === 'pendiente').length;
   const nSheets = data.sheets.filter(isStudentSheet).length;
   const steps: [boolean, string, string, string][] = [
-    [data.exam.status !== 'borrador', 'Descarga e imprime la hoja de respuestas', 'hoja', 'Imprime al 100 % («tamaño real»).'],
-    [models.every((m) => keys[m]), 'Define la plantilla de respuestas correctas', 'plantillas', 'En la pestaña «Plantillas», marcando la respuesta correcta de cada pregunta.'],
-    [nSheets > 0, 'Escanea el taco y sube el PDF', 'subir', 'Escanea todas las hojas de golpe en la fotocopiadora y envíatelas por correo.'],
-    [nSheets > 0 && pending === 0, 'Revisa las incidencias', 'revision', pending ? `${pending} pendientes.` : 'Dobles marcas, marcas flojas, identificadores dudosos…'],
-    [data.exam.status === 'cerrado', 'Exporta las notas y cierra el examen', 'notas', 'Excel o CSV para Moodle.'],
+    [data.exam.status !== 'borrador', tr('Descarga e imprime la hoja de respuestas'), 'hoja', tr('Imprime al 100 % («tamaño real»).')],
+    [models.every((m) => keys[m]), tr('Define la plantilla de respuestas correctas'), 'plantillas', tr('En la pestaña «Plantillas», marcando la respuesta correcta de cada pregunta.')],
+    [nSheets > 0, tr('Escanea el taco y sube el PDF'), 'subir', tr('Escanea todas las hojas de golpe en la fotocopiadora y envíatelas por correo.')],
+    [nSheets > 0 && pending === 0, tr('Revisa las incidencias'), 'revision', pending ? tr('{n} pendientes.', { n: pending }) : tr('Dobles marcas, marcas flojas, identificadores dudosos…')],
+    [data.exam.status === 'cerrado', tr('Exporta las notas y cierra el examen'), 'notas', tr('Excel o CSV para Moodle.')],
   ];
   const next = steps.findIndex((s) => !s[0]);
   return (
     <section className="card p-5">
-      <h2 className="font-semibold">Siguientes pasos</h2>
+      <h2 className="font-semibold">{tr('Siguientes pasos')}</h2>
       <ol className="mt-3 space-y-2">
         {steps.map(([done, title, to, hint], i) => (
           <li key={to} className="flex items-start gap-3">
@@ -39,7 +40,7 @@ function Steps() {
             <div>
               <Link to={`../${to}`} className={`text-sm font-medium hover:underline ${done ? 'text-slate-500' : 'text-slate-900'}`}>
                 {title}
-                <span className="sr-only">{done ? ' (hecho)' : ''}</span>
+                <span className="sr-only">{done ? ' ' + tr('(hecho)') : ''}</span>
               </Link>
               <p className="text-xs text-slate-500">{hint}</p>
             </div>
@@ -57,13 +58,13 @@ function GradingForm() {
   const dirty = JSON.stringify(g) !== JSON.stringify(data.exam.grading_config);
   return (
     <section className="card p-5">
-      <h2 className="font-semibold">Corrección</h2>
+      <h2 className="font-semibold">{tr('Corrección')}</h2>
       <div className="mt-4">
         <GradingFields value={g} onChange={setG} disabled={readOnly} nOptions={data.exam.sheet_config.nOptions} />
       </div>
       {!readOnly && (
         <button className="btn-primary mt-4" disabled={!dirty || busy} onClick={() => run((d) => updateGrading(db, d, g))}>
-          Guardar y recalcular notas
+          {tr('Guardar y recalcular notas')}
         </button>
       )}
     </section>
@@ -109,27 +110,27 @@ function Sharing() {
   }
   return (
     <section className="card p-5">
-      <h2 className="font-semibold">Profesores con acceso</h2>
+      <h2 className="font-semibold">{tr('Profesores con acceso')}</h2>
       <ul className="mt-3 space-y-1.5 text-sm">
         <li>
-          {owner?.full_name || owner?.email || '…'} <span className="badge bg-slate-100 text-slate-600">propietario</span>
+          {owner?.full_name || owner?.email || '…'} <span className="badge bg-slate-100 text-slate-600">{tr('propietario')}</span>
         </li>
         {collabs.map((p) => (
           <li key={p.id} className="flex items-center gap-2">
-            {p.full_name || p.email} <span className="badge bg-brand-50 text-brand-800">coautor</span>
+            {p.full_name || p.email} <span className="badge bg-brand-50 text-brand-800">{tr('coautor')}</span>
             {canShare && (
               <button className="text-xs text-red-700 hover:underline" onClick={() => void unshare(p)}>
-                Quitar
+                {tr('Quitar')}
               </button>
             )}
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-slate-500">Los administradores de la organización ven todos los exámenes.</p>
+      <p className="mt-2 text-xs text-slate-500">{tr('Los administradores de la organización ven todos los exámenes.')}</p>
       {canShare && (
         <form onSubmit={share} className="mt-3 flex gap-2">
-          <input className="input" type="email" required placeholder="Email de otro profesor de tu organización" aria-label="Email del coautor" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button className="btn shrink-0">Compartir</button>
+          <input className="input" type="email" required placeholder={tr('Email de otro profesor de tu organización')} aria-label={tr('Email del coautor')} value={email} onChange={(e) => setEmail(e.target.value)} />
+          <button className="btn shrink-0">{tr('Compartir')}</button>
         </form>
       )}
       <div className="mt-2">
@@ -174,51 +175,61 @@ function PublishAnswers() {
   async function save() {
     setError('');
     const answers_code = own ? custom.trim().toUpperCase() : null;
-    if (answers_code && !/^[A-Z0-9]{5,16}$/.test(answers_code)) return setError('El código debe tener entre 5 y 16 letras o números, sin espacios ni acentos.');
-    if (on && when === 'at' && !at) return setError('Indica la fecha y la hora de publicación.');
+    if (answers_code && !/^[A-Z0-9]{5,16}$/.test(answers_code)) return setError(tr('El código debe tener entre 5 y 16 letras o números, sin espacios ni acentos.'));
+    if (on && when === 'at' && !at) return setError(tr('Indica la fecha y la hora de publicación.'));
     // «ahora»: si ya estaban publicadas se conserva la fecha original
     const answers_publish_at = !on ? (exam.answers_publish_at ?? null) : when === 'at' ? new Date(at).toISOString() : !future && exam.answers_publish_at ? exam.answers_publish_at : new Date().toISOString();
     const ok = await run((d) => updatePublication(db, d, { answers_published: on, answers_publish_at, answers_code, answers_calculator: calc }));
-    if (!ok) setError('No se ha podido guardar. Si has elegido un código propio, puede que ya esté en uso: prueba con otro.');
+    if (!ok) setError(tr('No se ha podido guardar. Si has elegido un código propio, puede que ya esté en uso: prueba con otro.'));
   }
 
   return (
     <section className="card p-5" data-testid="publish-answers">
-      <h2 className="font-semibold">Respuestas para los alumnos</h2>
+      <h2 className="font-semibold">{tr('Respuestas para los alumnos')}</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Publica las respuestas correctas para que cada alumno se compruebe en <span className="font-mono text-xs">korrige.es/comprobar</span> con un código. No se muestran notas ni datos de ningún alumno.
+        {trn('Publica las respuestas correctas para que cada alumno se compruebe en {url} con un código. No se muestran notas ni datos de ningún alumno.', {
+          url: <span className="font-mono text-xs">korrige.es/comprobar</span>,
+        })}
       </p>
       <label className="mt-4 flex items-center gap-2 text-sm font-medium">
         <input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} />
-        Publicar las respuestas correctas
+        {tr('Publicar las respuestas correctas')}
       </label>
       {on && (
         <div className="mt-3 space-y-4 border-l-2 border-slate-200 pl-4">
-          {missing.length > 0 && <Notice tone="warn">Falta completar la plantilla{missing.length > 1 ? ` de los modelos ${missing.join(', ')}` : exam.sheet_config.nModels > 1 ? ` del modelo ${missing[0]}` : ''}: los alumnos solo verán lo que esté introducido.</Notice>}
+          {missing.length > 0 && (
+            <Notice tone="warn">
+              {missing.length > 1
+                ? tr('Falta completar la plantilla de los modelos {models}: los alumnos solo verán lo que esté introducido.', { models: missing.join(', ') })
+                : exam.sheet_config.nModels > 1
+                  ? tr('Falta completar la plantilla del modelo {model}: los alumnos solo verán lo que esté introducido.', { model: missing[0] })
+                  : tr('Falta completar la plantilla: los alumnos solo verán lo que esté introducido.')}
+            </Notice>
+          )}
           <fieldset>
-            <legend className="label">¿Cuándo se ven?</legend>
+            <legend className="label">{tr('¿Cuándo se ven?')}</legend>
             <label className="flex items-center gap-2 text-sm">
               <input type="radio" name="pub-when" checked={when === 'now'} onChange={() => setWhen('now')} />
-              Desde ahora
+              {tr('Desde ahora')}
             </label>
             <label className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
               <input type="radio" name="pub-when" checked={when === 'at'} onChange={() => setWhen('at')} />
-              A partir de
-              <input className="input w-auto py-1" type="datetime-local" aria-label="Fecha y hora de publicación" value={at} onFocus={() => setWhen('at')} onChange={(e) => setAt(e.target.value)} />
+              {tr('A partir de')}
+              <input className="input w-auto py-1" type="datetime-local" aria-label={tr('Fecha y hora de publicación')} value={at} onFocus={() => setWhen('at')} onChange={(e) => setAt(e.target.value)} />
             </label>
           </fieldset>
           <fieldset>
-            <legend className="label">Código para los alumnos</legend>
+            <legend className="label">{tr('Código para los alumnos')}</legend>
             <label className="flex items-center gap-2 text-sm">
               <input type="radio" name="pub-code" checked={!own} onChange={() => setOwn(false)} />
-              El del examen: <span className="font-mono font-semibold">{exam.code}</span>
+              {tr('El del examen:')} <span className="font-mono font-semibold">{exam.code}</span>
             </label>
             <label className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
               <input type="radio" name="pub-code" checked={own} onChange={() => setOwn(true)} />
-              Elegir uno:
+              {tr('Elegir uno:')}
               <input
                 className="input w-44 py-1 font-mono uppercase"
-                aria-label="Código elegido"
+                aria-label={tr('Código elegido')}
                 placeholder="ANATOMIA26"
                 maxLength={16}
                 value={custom}
@@ -226,13 +237,13 @@ function PublishAnswers() {
                 onChange={(e) => setCustom(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
               />
             </label>
-            <p className="mt-1 text-xs text-slate-500">Entre 5 y 16 letras o números. Si eliges uno, el código del examen deja de servir para esto.</p>
+            <p className="mt-1 text-xs text-slate-500">{tr('Entre 5 y 16 letras o números. Si eliges uno, el código del examen deja de servir para esto.')}</p>
           </fieldset>
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-0.5" checked={calc} onChange={(e) => setCalc(e.target.checked)} />
             <span>
-              Ofrecer la calculadora de nota
-              <span className="block text-xs text-slate-500">El alumno marca lo que contestó y ve su nota estimada con la fórmula de este examen. No se guarda nada.</span>
+              {tr('Ofrecer la calculadora de nota')}
+              <span className="block text-xs text-slate-500">{tr('El alumno marca lo que contestó y ve su nota estimada con la fórmula de este examen. No se guarda nada.')}</span>
             </span>
           </label>
         </div>
@@ -241,12 +252,14 @@ function PublishAnswers() {
         <ErrorBox error={error} />
       </div>
       <button className="btn-primary mt-3" disabled={!dirty || busy} onClick={() => void save()}>
-        {on ? (exam.answers_published ? 'Guardar cambios' : 'Publicar') : 'Retirar la publicación'}
+        {on ? (exam.answers_published ? tr('Guardar cambios') : tr('Publicar')) : tr('Retirar la publicación')}
       </button>
       {exam.answers_published && (
         <div className="mt-4 rounded-lg bg-brand-50 p-3 text-sm" data-testid="publish-status">
           <p className="font-medium text-brand-800">
-            {future ? `Programadas para el ${fmtDateTime(exam.answers_publish_at ?? '')}` : 'Publicadas'} · código <span className="font-mono">{code}</span>
+            {future
+              ? trn('Programadas para el {date} · código {code}', { date: fmtDateTime(exam.answers_publish_at ?? ''), code: <span className="font-mono">{code}</span> })
+              : trn('Publicadas · código {code}', { code: <span className="font-mono">{code}</span> })}
           </p>
           <p className="mt-1 break-all font-mono text-xs text-slate-600">{link}</p>
           <div className="mt-2 flex gap-2">
@@ -258,10 +271,10 @@ function PublishAnswers() {
                 setTimeout(() => setCopied(false), 2000);
               }}
             >
-              {copied ? 'Copiado' : 'Copiar enlace'}
+              {copied ? tr('Copiado') : tr('Copiar enlace')}
             </button>
             <a className="btn btn-sm" href={`/comprobar/${code}`} target="_blank" rel="noreferrer">
-              Ver como alumno
+              {tr('Ver como alumno')}
             </a>
           </div>
         </div>
@@ -291,19 +304,24 @@ export default function TabSummary() {
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="space-y-4 lg:col-span-2">
         <section className="card p-5">
-          <h2 className="font-semibold">Ficha del examen</h2>
+          <h2 className="font-semibold">{tr('Ficha del examen')}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {input('title', 'Nombre del examen')}
-            {input('subject', 'Asignatura')}
-            {input('group_name', 'Grupo')}
-            {input('session', 'Convocatoria')}
-            {input('exam_date', 'Fecha', 'date')}
+            {input('title', tr('Nombre del examen'))}
+            {input('subject', tr('Asignatura'))}
+            {input('group_name', tr('Grupo'))}
+            {input('session', tr('Convocatoria'))}
+            {input('exam_date', tr('Fecha'), 'date')}
             <div className="text-sm text-slate-600">
-              <span className="label">Hoja de respuestas</span>
-              {exam.sheet_config.nQuestions} preguntas · {exam.sheet_config.nOptions} opciones · {exam.sheet_config.nModels} modelo(s) · {exam.sheet_config.idLabel} de{' '}
-              {exam.sheet_config.idDigits} dígitos.{' '}
+              <span className="label">{tr('Hoja de respuestas')}</span>
+              {tr('{questions} preguntas · {options} opciones · {models} modelo(s) · {id} de {digits} dígitos.', {
+                questions: exam.sheet_config.nQuestions,
+                options: exam.sheet_config.nOptions,
+                models: exam.sheet_config.nModels,
+                id: exam.sheet_config.idLabel,
+                digits: exam.sheet_config.idDigits,
+              })}{' '}
               <Link to="../hoja" className="text-brand-700 hover:underline">
-                Ver hoja
+                {tr('Ver hoja')}
               </Link>
             </div>
           </div>
@@ -313,13 +331,13 @@ export default function TabSummary() {
               disabled={!dirty || busy || !f.title.trim()}
               onClick={() => run(async (d) => ({ ...d, exam: { ...d.exam, ...(await updateExamFields(db, d.exam, { ...f, title: f.title.trim(), exam_date: f.exam_date || null })) } }))}
             >
-              Guardar cambios
+              {tr('Guardar cambios')}
             </button>
           )}
           <p className="mt-3 text-xs text-slate-500">
-            Creado el {fmtDateTime(exam.created_at)}
-            {exam.closed_at && ` · Cerrado el ${fmtDateTime(exam.closed_at)}`}
-            {exam.images_purged_at && ` · Imágenes borradas por retención el ${fmtDateTime(exam.images_purged_at)}`}
+            {tr('Creado el {date}', { date: fmtDateTime(exam.created_at) })}
+            {exam.closed_at && ' · ' + tr('Cerrado el {date}', { date: fmtDateTime(exam.closed_at) })}
+            {exam.images_purged_at && ' · ' + tr('Imágenes borradas por retención el {date}', { date: fmtDateTime(exam.images_purged_at) })}
           </p>
         </section>
         <GradingForm />
@@ -329,16 +347,16 @@ export default function TabSummary() {
         <PublishAnswers />
         <Sharing />
         <section className="card space-y-3 p-5">
-          <h2 className="font-semibold">Acciones</h2>
+          <h2 className="font-semibold">{tr('Acciones')}</h2>
           {readOnly ? (
             <button className="btn w-full" disabled={busy} onClick={() => run((d) => setExamClosed(db, d, false))}>
-              Reabrir examen
+              {tr('Reabrir examen')}
             </button>
           ) : (
             <>
-              {pending > 0 && <Notice tone="warn">Quedan {pending} incidencias por revisar. Puedes cerrar igualmente, pero las notas afectadas son provisionales.</Notice>}
+              {pending > 0 && <Notice tone="warn">{tr('Quedan {n} incidencias por revisar. Puedes cerrar igualmente, pero las notas afectadas son provisionales.', { n: pending })}</Notice>}
               <button className="btn w-full" disabled={busy} onClick={() => run((d) => setExamClosed(db, d, true))}>
-                Cerrar examen (solo lectura)
+                {tr('Cerrar examen (solo lectura)')}
               </button>
             </>
           )}
@@ -357,28 +375,30 @@ export default function TabSummary() {
               })
             }
           >
-            Duplicar examen
+            {tr('Duplicar examen')}
           </button>
           {canDelete && (
             <button className="btn w-full text-red-700" onClick={() => setConfirmDelete(true)}>
-              Eliminar examen…
+              {tr('Eliminar examen…')}
             </button>
           )}
-          <p className="text-xs text-slate-500">Duplicar copia la configuración y las plantillas, no las hojas ni los alumnos.</p>
+          <p className="text-xs text-slate-500">{tr('Duplicar copia la configuración y las plantillas, no las hojas ni los alumnos.')}</p>
         </section>
       </div>
       {confirmDelete && (
-        <Modal title="Eliminar examen" onClose={() => setConfirmDelete(false)}>
+        <Modal title={tr('Eliminar examen')} onClose={() => setConfirmDelete(false)}>
           <p className="text-sm text-slate-700">
-            Se borrarán definitivamente las {data.sheets.length} hojas con sus imágenes, las notas, la lista de alumnos, las plantillas y las incidencias de{' '}
-            <b>{exam.title}</b>. Solo quedará un apunte en el registro de actividad de la organización. Esta acción no se puede deshacer.
+            {trn(
+              'Se borrarán definitivamente las {n} hojas con sus imágenes, las notas, la lista de alumnos, las plantillas y las incidencias de {title}. Solo quedará un apunte en el registro de actividad de la organización. Esta acción no se puede deshacer.',
+              { n: data.sheets.length, title: <b>{exam.title}</b> },
+            )}
           </p>
-          <Field label={`Escribe el código del examen (${exam.code}) para confirmar`}>
+          <Field label={tr('Escribe el código del examen ({code}) para confirmar', { code: exam.code })}>
             <input className="input mt-3 font-mono" value={typed} onChange={(e) => setTyped(e.target.value.toUpperCase())} autoFocus />
           </Field>
           <div className="mt-4 flex justify-end gap-3">
             <button className="btn" onClick={() => setConfirmDelete(false)}>
-              Cancelar
+              {tr('Cancelar')}
             </button>
             <button
               className="btn-danger"
@@ -390,7 +410,7 @@ export default function TabSummary() {
                 })
               }
             >
-              Eliminar definitivamente
+              {tr('Eliminar definitivamente')}
             </button>
           </div>
         </Modal>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Field } from '../components/ui';
+import { tr } from '../i18n/app';
 import { fileToLogo } from '../lib/logoImage';
 import { SheetConfig, defaultFields, pageCount } from '../omr/layout';
 import { SHEET_LANGS, SHEET_LANG_NAMES, SheetLang, sheetLang } from '../omr/sheetText';
@@ -39,26 +40,26 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
   return (
     <div className="space-y-6">
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Nº de preguntas" hint={`Entre 10 y 200. ${pageCount(value.nQuestions) > 1 ? 'Más de 100: la hoja tendrá 2 páginas.' : 'Hasta 100 caben en una página.'}`}>
+      <Field label={tr('Nº de preguntas')} hint={pageCount(value.nQuestions) > 1 ? tr('Entre 10 y 200. Más de 100: la hoja tendrá 2 páginas.') : tr('Entre 10 y 200. Hasta 100 caben en una página.')}>
         {num('nQuestions', 10, 200)}
       </Field>
-      <Field label="Opciones por pregunta">
+      <Field label={tr('Opciones por pregunta')}>
         <select className="input" disabled={disabled} value={value.nOptions} onChange={(e) => set('nOptions', Number(e.target.value))}>
           <option value={3}>3 (A–C)</option>
           <option value={4}>4 (A–D)</option>
           <option value={5}>5 (A–E)</option>
         </select>
       </Field>
-      <Field label="Modelos de examen" hint="Versiones del examen con las preguntas en distinto orden.">
+      <Field label={tr('Modelos de examen')} hint={tr('Versiones del examen con las preguntas en distinto orden.')}>
         <select className="input" disabled={disabled} value={value.nModels} onChange={(e) => set('nModels', Number(e.target.value))}>
-          <option value={1}>1 (sin modelos)</option>
-          <option value={2}>2 (A y B)</option>
-          <option value={3}>3 (A, B y C)</option>
-          <option value={4}>4 (A, B, C y D)</option>
+          <option value={1}>{tr('1 (sin modelos)')}</option>
+          <option value={2}>{tr('2 (A y B)')}</option>
+          <option value={3}>{tr('3 (A, B y C)')}</option>
+          <option value={4}>{tr('4 (A, B, C y D)')}</option>
         </select>
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Identificador" hint="El de tu centro: NIA, NIUB, NIU, DNI…">
+        <Field label={tr('Identificador')} hint={tr('El de tu centro: NIA, NIUB, NIU, DNI…')}>
           <input className="input" list="korrige-id-labels" disabled={disabled} maxLength={12} value={value.idLabel} onChange={(e) => set('idLabel', e.target.value)} />
           <datalist id="korrige-id-labels">
             {ID_LABELS.map((l) => (
@@ -66,45 +67,45 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
             ))}
           </datalist>
         </Field>
-        <Field label="Nº de dígitos" hint="Entre 6 y 10.">
+        <Field label={tr('Nº de dígitos')} hint={tr('Entre 6 y 10.')}>
           {num('idDigits', 6, 10)}
         </Field>
       </div>
-      <Field label="Título de la hoja" hint="Primera línea de la cabecera (institución).">
+      <Field label={tr('Título de la hoja')} hint={tr('Primera línea de la cabecera (institución).')}>
         <input className="input" disabled={disabled} maxLength={60} value={value.title} onChange={(e) => set('title', e.target.value)} />
       </Field>
-      <Field label="Subtítulo" hint="Asignatura, convocatoria…">
+      <Field label={tr('Subtítulo')} hint={tr('Asignatura, convocatoria…')}>
         <input className="input" disabled={disabled} maxLength={80} value={value.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
       </Field>
     </div>
 
     <fieldset className="border-t border-slate-200 pt-5">
-      <legend className="pr-3 text-sm font-semibold text-slate-800">Personalización</legend>
+      <legend className="pr-3 text-sm font-semibold text-slate-800">{tr('Personalización')}</legend>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <span className="label">Logotipo en la cabecera</span>
+          <span className="label">{tr('Logotipo en la cabecera')}</span>
           <div className="flex items-center gap-3">
             <div className="flex h-16 w-32 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white p-1.5">
-              {value.logo ? <img src={value.logo} alt="Logotipo de la hoja" className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-slate-400">Sin logotipo</span>}
+              {value.logo ? <img src={value.logo} alt={tr('Logotipo de la hoja')} className="max-h-full max-w-full object-contain" /> : <span className="text-xs text-slate-400">{tr('Sin logotipo')}</span>}
             </div>
             {!disabled && (
               <div className="flex flex-col items-start gap-1.5">
                 <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="hidden" data-testid="logo-input" onChange={(e) => void onLogo(e.target.files?.[0])} />
                 <button type="button" className="btn btn-sm" onClick={() => file.current?.click()}>
-                  {value.logo ? 'Cambiar logotipo' : 'Subir logotipo'}
+                  {value.logo ? tr('Cambiar logotipo') : tr('Subir logotipo')}
                 </button>
                 {value.logo && (
                   <button type="button" className="text-xs text-red-700 hover:underline" onClick={() => onChange({ ...value, logo: undefined })}>
-                    Quitar
+                    {tr('Quitar')}
                   </button>
                 )}
               </div>
             )}
           </div>
-          <span className="mt-1 block text-xs text-slate-500">PNG, JPG o SVG. Se imprime arriba a la izquierda, junto al título. Mejor en negro o colores oscuros sobre fondo claro.</span>
+          <span className="mt-1 block text-xs text-slate-500">{tr('PNG, JPG o SVG. Se imprime arriba a la izquierda, junto al título. Mejor en negro o colores oscuros sobre fondo claro.')}</span>
           {logoError && <span className="mt-1 block text-xs text-red-700">{logoError}</span>}
         </div>
-        <Field label="Idioma de la hoja" hint="Idioma de los textos impresos: instrucciones, cabecera y campos. No afecta a la corrección.">
+        <Field label={tr('Idioma de la hoja')} hint={tr('Idioma de los textos impresos: instrucciones, cabecera y campos. No afecta a la corrección.')}>
           <select
             className="input"
             disabled={disabled}
@@ -124,17 +125,17 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
             ))}
           </select>
         </Field>
-        <Field label="Nota junto a «Respuestas»" hint="Opcional. Por ejemplo: «Duración: 90 min · Cada error resta 1/3».">
+        <Field label={tr('Nota junto a «Respuestas»')} hint={tr('Opcional. Por ejemplo: «Duración: 90 min · Cada error resta 1/3».')}>
           <input className="input" disabled={disabled} maxLength={90} value={value.note ?? ''} onChange={(e) => set('note', e.target.value)} />
         </Field>
         <div className="sm:col-span-2">
-          <span className="label">Campos que el alumno rellena a mano</span>
+          <span className="label">{tr('Campos que el alumno rellena a mano')}</span>
           <div className="grid gap-3 sm:grid-cols-3">
             {fields.map((f, i) => (
               <input
                 key={i}
                 className="input"
-                aria-label={`Campo manuscrito ${i + 1}`}
+                aria-label={tr('Campo manuscrito {n}', { n: i + 1 })}
                 disabled={disabled}
                 maxLength={22}
                 value={f}
@@ -142,7 +143,7 @@ export function SheetConfigForm({ value, onChange, disabled }: { value: SheetCon
               />
             ))}
           </div>
-          <span className="mt-1 block text-xs text-slate-500">Son las tres líneas de la cabecera. La zona de burbujas, las marcas de esquina y el QR no se pueden cambiar: de ellas depende la lectura.</span>
+          <span className="mt-1 block text-xs text-slate-500">{tr('Son las tres líneas de la cabecera. La zona de burbujas, las marcas de esquina y el QR no se pueden cambiar: de ellas depende la lectura.')}</span>
         </div>
       </div>
     </fieldset>

@@ -4,6 +4,7 @@ import { Empty, ErrorBox, Field, Spinner, StatusBadge, fmtDate } from '../compon
 import { createExam } from '../lib/service';
 import { DEFAULT_GRADING, Exam, ExamFolder, ExamFolderItem, ExamStatus, Profile, STATUS_LABEL } from '../lib/types';
 import { DEFAULT_SHEET_CONFIG, SheetConfig } from '../omr/layout';
+import { tr } from '../i18n/app';
 import { useSession } from './AuthContext';
 import { SheetConfigForm } from './SheetConfigForm';
 
@@ -61,7 +62,7 @@ export function ExamList() {
   }, [db, orgKey, user.id]);
 
   const all = exams ?? [];
-  const ownerName = (id: string) => (id === user.id ? 'Tú' : owners[id]?.full_name || owners[id]?.email || '—');
+  const ownerName = (id: string) => (id === user.id ? tr('Tú') : owners[id]?.full_name || owners[id]?.email || '—');
   const orgName = (id: string) => orgs.find((o) => o.id === id)?.name ?? '—';
   const sortedFolders = [...folders].sort((x, y) => x.name.localeCompare(y.name, 'es', { numeric: true }));
   const folderOf = (e: Exam) => (folders.some((f) => f.id === placed[e.id]) ? placed[e.id] : '');
@@ -124,7 +125,7 @@ export function ExamList() {
     if (!form) return;
     const name = form.name.trim();
     if (!name) return;
-    if (folders.some((f) => f.name.toLowerCase() === name.toLowerCase() && !(form.mode === 'rename' && f.id === fFolder))) return setError('Ya tienes una carpeta con ese nombre.');
+    if (folders.some((f) => f.name.toLowerCase() === name.toLowerCase() && !(form.mode === 'rename' && f.id === fFolder))) return setError(tr('Ya tienes una carpeta con ese nombre.'));
     setBusy(true);
     try {
       if (form.mode === 'rename') {
@@ -148,7 +149,7 @@ export function ExamList() {
 
   async function removeFolder() {
     const f = folders.find((x) => x.id === fFolder);
-    if (!f || !confirm(`¿Eliminar la carpeta «${f.name}»? Los exámenes no se borran: vuelven a «Sin carpeta».`)) return;
+    if (!f || !confirm(tr('¿Eliminar la carpeta «{name}»? Los exámenes no se borran: vuelven a «Sin carpeta».', { name: f.name }))) return;
     try {
       await db.remove('exam_folders', { id: f.id });
       setFolders((fs) => fs.filter((x) => x.id !== f.id));
@@ -162,42 +163,44 @@ export function ExamList() {
   const pill = (active: boolean) =>
     `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${active ? 'border-brand-700 bg-brand-50 font-semibold text-brand-800' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`;
   const count = (n: number) => <span className="text-xs font-normal text-slate-400">{n}</span>;
-  const headers = ['Examen', 'Asignatura', 'Grupo', 'Convocatoria', 'Fecha', 'Estado', ...(everywhere ? ['Organización'] : []), 'Profesor', 'Carpeta'];
+  const headers = [tr('Examen'), tr('Asignatura'), tr('Grupo'), tr('Convocatoria'), tr('Fecha'), tr('Estado'), ...(everywhere ? [tr('Organización')] : []), tr('Profesor'), tr('Carpeta')];
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Exámenes</h1>
+        <h1 className="text-2xl font-semibold">{tr('Exámenes')}</h1>
         <div className="flex flex-wrap items-center gap-3">
           {plan && !unlimited && (
             <Link to="/app/plan" className="text-sm text-slate-600 underline-offset-4 hover:underline" data-testid="plan-chip">
-              {plan.plan === 'plus' ? `Korrige Plus · ${plan.used} de ${plan.limit} exámenes este mes` : `Plan Gratis · ${plan.used} de ${plan.limit} examen usado`}
+              {plan.plan === 'plus'
+                ? tr('Korrige Plus · {used} de {limit} exámenes este mes', { used: plan.used, limit: plan.limit })
+                : tr('Plan Gratis · {used} de {limit} examen usado', { used: plan.used, limit: plan.limit })}
             </Link>
           )}
           <Link to={canCreateExam ? '/app/examenes/nuevo' : '/app/plan?limite=1'} className="btn-primary">
-            Nuevo examen
+            {tr('Nuevo examen')}
           </Link>
         </div>
       </div>
       <div className="mt-5">
         <ErrorBox error={error} />
-        {!exams && !error && <Spinner label="Cargando exámenes…" />}
+        {!exams && !error && <Spinner label={tr('Cargando exámenes…')} />}
         {exams && exams.length === 0 && !everywhere && (
           <Empty
-            title={multi ? `Aún no tienes exámenes en ${org.name}` : 'Aún no tienes exámenes'}
+            title={multi ? tr('Aún no tienes exámenes en {org}', { org: org.name }) : tr('Aún no tienes exámenes')}
             action={
               <Link to={canCreateExam ? '/app/examenes/nuevo' : '/app/plan?limite=1'} className="btn-primary">
-                Crear mi primer examen
+                {tr('Crear mi primer examen')}
               </Link>
             }
           >
-            Crea el examen, descarga e imprime la hoja de respuestas y, después del examen, escanea todo el taco en la fotocopiadora y sube el PDF.
+            {tr('Crea el examen, descarga e imprime la hoja de respuestas y, después del examen, escanea todo el taco en la fotocopiadora y sube el PDF.')}
           </Empty>
         )}
         {exams && (exams.length > 0 || multi) && (
-          <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="exam-folders" aria-label="Carpetas">
+          <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="exam-folders" aria-label={tr('Carpetas')}>
             <button className={pill(fFolder === '')} onClick={() => setFFolder('')}>
-              Todos {count(all.length)}
+              {tr('Todos')} {count(all.length)}
             </button>
             {sortedFolders.map((f) => (
               <button key={f.id} className={pill(fFolder === f.id)} onClick={() => setFFolder(f.id)}>
@@ -209,21 +212,21 @@ export function ExamList() {
             ))}
             {folders.length > 0 && (
               <button className={pill(fFolder === 'none')} onClick={() => setFFolder('none')}>
-                Sin carpeta {count(inFolder(''))}
+                {tr('Sin carpeta')} {count(inFolder(''))}
               </button>
             )}
             {form && !form.examId ? null : (
               <button className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-white" onClick={() => setForm({ mode: 'new', name: '' })}>
-                + Nueva carpeta
+                {tr('+ Nueva carpeta')}
               </button>
             )}
             {folders.some((f) => f.id === fFolder) && !form && (
               <span className="ml-auto flex gap-1">
                 <button className="btn-ghost btn-sm" onClick={() => setForm({ mode: 'rename', name: folders.find((f) => f.id === fFolder)?.name ?? '' })}>
-                  Renombrar
+                  {tr('Renombrar')}
                 </button>
                 <button className="btn-ghost btn-sm text-red-700" onClick={() => void removeFolder()}>
-                  Eliminar carpeta
+                  {tr('Eliminar carpeta')}
                 </button>
               </span>
             )}
@@ -236,26 +239,26 @@ export function ExamList() {
               autoFocus
               maxLength={60}
               required
-              placeholder="Nombre de la carpeta (p. ej. Curso 2026-27)"
-              aria-label="Nombre de la carpeta"
+              placeholder={tr('Nombre de la carpeta (p. ej. Curso 2026-27)')}
+              aria-label={tr('Nombre de la carpeta')}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
             <button className="btn-primary btn-sm" disabled={busy}>
-              {form.mode === 'rename' ? 'Guardar nombre' : form.examId ? 'Crear y guardar el examen' : 'Crear carpeta'}
+              {form.mode === 'rename' ? tr('Guardar nombre') : form.examId ? tr('Crear y guardar el examen') : tr('Crear carpeta')}
             </button>
             <button type="button" className="btn-ghost btn-sm" onClick={() => setForm(null)}>
-              Cancelar
+              {tr('Cancelar')}
             </button>
-            <span className="text-xs text-slate-500">Las carpetas son tuyas: tus compañeros no las ven.</span>
+            <span className="text-xs text-slate-500">{tr('Las carpetas son tuyas: tus compañeros no las ven.')}</span>
           </form>
         )}
         {exams && (exams.length > 0 || multi) && (
-          <div className="mb-3 flex flex-wrap items-center gap-2" role="search" aria-label="Filtrar exámenes" data-testid="exam-filters">
-            <input className="input w-full sm:w-64" type="search" placeholder="Buscar por nombre, asignatura, grupo o código…" aria-label="Buscar examen" value={q} onChange={(e) => setQ(e.target.value)} />
+          <div className="mb-3 flex flex-wrap items-center gap-2" role="search" aria-label={tr('Filtrar exámenes')} data-testid="exam-filters">
+            <input className="input w-full sm:w-64" type="search" placeholder={tr('Buscar por nombre, asignatura, grupo o código…')} aria-label={tr('Buscar examen')} value={q} onChange={(e) => setQ(e.target.value)} />
             {multi && (
-              <select className="input w-auto max-w-64" aria-label="Filtrar por organización" value={everywhere ? 'all' : org.id} onChange={(e) => chooseOrg(e.target.value)}>
-                <option value="all">Todas mis organizaciones</option>
+              <select className="input w-auto max-w-64" aria-label={tr('Filtrar por organización')} value={everywhere ? 'all' : org.id} onChange={(e) => chooseOrg(e.target.value)}>
+                <option value="all">{tr('Todas mis organizaciones')}</option>
                 {orgs.map((o) => (
                   <option key={o.id} value={o.id}>
                     {o.name}
@@ -263,8 +266,8 @@ export function ExamList() {
                 ))}
               </select>
             )}
-            <select className="input w-auto" aria-label="Filtrar por estado" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
-              <option value="">Todos los estados</option>
+            <select className="input w-auto" aria-label={tr('Filtrar por estado')} value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
+              <option value="">{tr('Todos los estados')}</option>
               {(Object.keys(STATUS_LABEL) as ExamStatus[]).map((st) => (
                 <option key={st} value={st}>
                   {STATUS_LABEL[st]}
@@ -272,24 +275,24 @@ export function ExamList() {
               ))}
             </select>
             {subjects.length > 1 && (
-              <select className="input w-auto max-w-56" aria-label="Filtrar por asignatura" value={fSubject} onChange={(e) => setFSubject(e.target.value)}>
-                <option value="">Todas las asignaturas</option>
+              <select className="input w-auto max-w-56" aria-label={tr('Filtrar por asignatura')} value={fSubject} onChange={(e) => setFSubject(e.target.value)}>
+                <option value="">{tr('Todas las asignaturas')}</option>
                 {subjects.map((x) => (
                   <option key={x}>{x}</option>
                 ))}
               </select>
             )}
             {sessions.length > 1 && (
-              <select className="input w-auto max-w-48" aria-label="Filtrar por convocatoria" value={fSession} onChange={(e) => setFSession(e.target.value)}>
-                <option value="">Todas las convocatorias</option>
+              <select className="input w-auto max-w-48" aria-label={tr('Filtrar por convocatoria')} value={fSession} onChange={(e) => setFSession(e.target.value)}>
+                <option value="">{tr('Todas las convocatorias')}</option>
                 {sessions.map((x) => (
                   <option key={x}>{x}</option>
                 ))}
               </select>
             )}
             {ownerIds.length > 1 && (
-              <select className="input w-auto max-w-56" aria-label="Filtrar por profesor" value={fOwner} onChange={(e) => setFOwner(e.target.value)}>
-                <option value="">Todos los profesores</option>
+              <select className="input w-auto max-w-56" aria-label={tr('Filtrar por profesor')} value={fOwner} onChange={(e) => setFOwner(e.target.value)}>
+                <option value="">{tr('Todos los profesores')}</option>
                 {ownerIds.map((id) => (
                   <option key={id} value={id}>
                     {ownerName(id)}
@@ -299,15 +302,15 @@ export function ExamList() {
             )}
             {(needle || fStatus || fSubject || fSession || fOwner) && (
               <button className="btn-ghost btn-sm" onClick={clear}>
-                Quitar filtros
+                {tr('Quitar filtros')}
               </button>
             )}
             <span className="ml-auto text-sm text-slate-500" aria-live="polite">
-              {filtering ? `${shown.length} de ${all.length} exámenes` : `${all.length} ${all.length === 1 ? 'examen' : 'exámenes'}`}
+              {filtering ? tr('{n} de {total} exámenes', { n: shown.length, total: all.length }) : all.length === 1 ? tr('1 examen') : tr('{n} exámenes', { n: all.length })}
             </span>
           </div>
         )}
-        {exams && exams.length === 0 && everywhere && <p className="card p-4 text-sm text-slate-500">Aún no tienes exámenes en ninguna de tus organizaciones.</p>}
+        {exams && exams.length === 0 && everywhere && <p className="card p-4 text-sm text-slate-500">{tr('Aún no tienes exámenes en ninguna de tus organizaciones.')}</p>}
         {exams && exams.length > 0 && (
           <div className="card overflow-x-auto">
             <table className="w-full">
@@ -342,17 +345,17 @@ export function ExamList() {
                     <td className="td">
                       <select
                         className="max-w-40 rounded-md border border-transparent bg-transparent py-1 pl-1 pr-6 text-sm text-slate-600 hover:border-slate-200 focus:border-slate-300"
-                        aria-label={`Carpeta de ${e.title}`}
+                        aria-label={tr('Carpeta de {title}', { title: e.title })}
                         value={folderOf(e)}
                         onChange={(ev) => (ev.target.value === '+' ? setForm({ mode: 'new', name: '', examId: e.id }) : void move(e.id, ev.target.value))}
                       >
-                        <option value="">Sin carpeta</option>
+                        <option value="">{tr('Sin carpeta')}</option>
                         {sortedFolders.map((f) => (
                           <option key={f.id} value={f.id}>
                             {f.name}
                           </option>
                         ))}
-                        <option value="+">+ Nueva carpeta…</option>
+                        <option value="+">{tr('+ Nueva carpeta…')}</option>
                       </select>
                     </td>
                   </tr>
@@ -362,10 +365,10 @@ export function ExamList() {
             {shown.length === 0 && (
               <p className="p-4 text-sm text-slate-500">
                 {fFolder && fFolder !== 'none' && !needle && !fStatus && !fSubject && !fSession && !fOwner
-                  ? 'Esta carpeta está vacía. Usa la columna «Carpeta» de la lista para guardar exámenes en ella. '
-                  : 'Ningún examen coincide con los filtros. '}
+                  ? tr('Esta carpeta está vacía. Usa la columna «Carpeta» de la lista para guardar exámenes en ella.')
+                  : tr('Ningún examen coincide con los filtros.')}{' '}
                 <button className="font-medium text-brand-700 underline" onClick={clear}>
-                  {fFolder && !needle ? 'Ver todos' : 'Quitar filtros'}
+                  {fFolder && !needle ? tr('Ver todos') : tr('Quitar filtros')}
                 </button>
               </p>
             )}
@@ -420,22 +423,22 @@ export function ExamNew() {
   if (!canCreateExam) return <Navigate to="/app/plan?limite=1" replace />;
   return (
     <form onSubmit={submit} className="mx-auto max-w-3xl">
-      <h1 className="text-2xl font-semibold">Nuevo examen</h1>
+      <h1 className="text-2xl font-semibold">{tr('Nuevo examen')}</h1>
       <section className="card mt-5 p-5">
-        <h2 className="font-semibold">Datos del examen</h2>
+        <h2 className="font-semibold">{tr('Datos del examen')}</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {txt('title', 'Nombre del examen', { required: true, hint: 'Por ejemplo: «Anatomía I – Parcial 1».' })}
-          {txt('subject', 'Asignatura')}
-          {txt('group_name', 'Grupo')}
-          {txt('session', 'Convocatoria', { hint: 'Enero, junio, extraordinaria…' })}
-          {txt('exam_date', 'Fecha', { type: 'date' })}
+          {txt('title', tr('Nombre del examen'), { required: true, hint: tr('Por ejemplo: «Anatomía I – Parcial 1».') })}
+          {txt('subject', tr('Asignatura'))}
+          {txt('group_name', tr('Grupo'))}
+          {txt('session', tr('Convocatoria'), { hint: tr('Enero, junio, extraordinaria…') })}
+          {txt('exam_date', tr('Fecha'), { type: 'date' })}
         </div>
       </section>
       <section className="card mt-5 p-5">
-        <h2 className="font-semibold">Hoja de respuestas</h2>
+        <h2 className="font-semibold">{tr('Hoja de respuestas')}</h2>
         <p className="mb-4 mt-1 text-sm text-slate-600">
-          Podrás cambiarla y ver la vista previa después, mientras no hayas subido hojas escaneadas.
-          {(def.logo || def.idLabel || def.grading) && ' Se han aplicado los valores por defecto de tu organización (logotipo, identificador y fórmula de corrección).'}
+          {tr('Podrás cambiarla y ver la vista previa después, mientras no hayas subido hojas escaneadas.')}
+          {(def.logo || def.idLabel || def.grading) && ' ' + tr('Se han aplicado los valores por defecto de tu organización (logotipo, identificador y fórmula de corrección).')}
         </p>
         <SheetConfigForm value={cfg} onChange={setCfg} />
       </section>
@@ -443,10 +446,10 @@ export function ExamNew() {
         <ErrorBox error={error} />
         <div className="flex gap-3">
           <button className="btn-primary" disabled={busy}>
-            {busy ? 'Creando…' : 'Crear examen'}
+            {busy ? tr('Creando…') : tr('Crear examen')}
           </button>
           <Link to="/app" className="btn">
-            Cancelar
+            {tr('Cancelar')}
           </Link>
         </div>
       </div>

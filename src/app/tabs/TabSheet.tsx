@@ -4,6 +4,7 @@ import { Field, Notice } from '../../components/ui';
 import { downloadBlob, fileSlug } from '../../lib/exportData';
 import { markDownloaded, updateSheetConfig } from '../../lib/service';
 import { SheetConfig, clampConfig, computeLayout } from '../../omr/layout';
+import { tr, trn } from '../../i18n/app';
 import { useExam } from '../ExamPage';
 import { SheetConfigForm } from '../SheetConfigForm';
 
@@ -48,13 +49,13 @@ export default function TabSheet() {
     <div className="grid gap-4 lg:grid-cols-2">
       <div className="space-y-4">
         <section className="card p-5">
-          <h2 className="font-semibold">Configuración de la hoja</h2>
+          <h2 className="font-semibold">{tr('Configuración de la hoja')}</h2>
           {locked ? (
             <div className="mt-3">
-              <Notice>Ya hay hojas subidas, así que la hoja queda bloqueada. Si necesitas otra configuración, duplica el examen desde Resumen.</Notice>
+              <Notice>{tr('Ya hay hojas subidas, así que la hoja queda bloqueada. Si necesitas otra configuración, duplica el examen desde Resumen.')}</Notice>
             </div>
           ) : (
-            <p className="mt-1 text-sm text-slate-600">El diseño se recalcula solo. Si cambias algo después de imprimir, tendrás que volver a imprimir las hojas.</p>
+            <p className="mt-1 text-sm text-slate-600">{tr('El diseño se recalcula solo. Si cambias algo después de imprimir, tendrás que volver a imprimir las hojas.')}</p>
           )}
           <div className="mt-4">
             <SheetConfigForm value={cfg} onChange={setCfg} disabled={locked || readOnly} />
@@ -62,40 +63,39 @@ export default function TabSheet() {
           {!locked && !readOnly && (
             <div className="mt-4 flex gap-3">
               <button className="btn-primary" disabled={!dirty || busy} onClick={() => run((d) => updateSheetConfig(db, d, cfg))}>
-                Guardar configuración
+                {tr('Guardar configuración')}
               </button>
               {dirty && (
                 <button className="btn" onClick={() => setCfg(data.exam.sheet_config)}>
-                  Descartar
+                  {tr('Descartar')}
                 </button>
               )}
             </div>
           )}
         </section>
         <section className="card p-5">
-          <h2 className="font-semibold">Descargar e imprimir</h2>
+          <h2 className="font-semibold">{tr('Descargar e imprimir')}</h2>
           <div className="mt-3">
             <Notice tone="warn">
-              <b>Imprime al 100 % («tamaño real»), nunca con «ajustar a página».</b> Papel A4 blanco, una cara. No escribas sobre las marcas negras de las esquinas ni
-              sobre el código QR.
+              {trn('<b>Imprime al 100 % («tamaño real»), nunca con «ajustar a página».</b> Papel A4 blanco, una cara. No escribas sobre las marcas negras de las esquinas ni sobre el código QR.')}
             </Notice>
           </div>
           <div className="mt-4 flex flex-wrap items-end gap-3">
-            <Field label="Copias en el PDF" hint="1 = una hoja para fotocopiar; o tantas como alumnos.">
+            <Field label={tr('Copias en el PDF')} hint={tr('1 = una hoja para fotocopiar; o tantas como alumnos.')}>
               <input className="input w-28" type="number" min={1} max={1000} value={copies} onChange={(e) => setCopies(Math.max(1, Math.min(1000, Number(e.target.value) || 1)))} />
             </Field>
             <button className="btn-primary mb-5" disabled={dirty || downloading} onClick={download}>
-              {downloading ? 'Generando PDF…' : 'Descargar hojas en PDF'}
+              {downloading ? tr('Generando PDF…') : tr('Descargar hojas en PDF')}
             </button>
           </div>
-          {dirty && <p className="text-xs text-amber-700">Guarda la configuración antes de descargar.</p>}
+          {dirty && <p className="text-xs text-amber-700">{tr('Guarda la configuración antes de descargar.')}</p>}
           <p className="mt-2 text-xs text-slate-500">
-            Código del examen en el QR: <span className="font-mono">{data.layout.pages.map((p) => p.qr_text).join('  ·  ')}</span>
+            {tr('Código del examen en el QR:')} <span className="font-mono">{data.layout.pages.map((p) => p.qr_text).join('  ·  ')}</span>
           </p>
         </section>
       </div>
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-slate-600">Vista previa{dirty && ' (cambios sin guardar)'}</h2>
+        <h2 className="mb-2 text-sm font-semibold text-slate-600">{dirty ? tr('Vista previa (cambios sin guardar)') : tr('Vista previa')}</h2>
         <PdfPreview bytes={pdf} />
       </section>
     </div>

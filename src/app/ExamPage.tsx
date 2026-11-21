@@ -3,6 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useParams } from 'react-router-
 import { ErrorBox, Spinner, StatusBadge } from '../components/ui';
 import { Db } from '../lib/db';
 import { ExamData, isStudentSheet, loadExam } from '../lib/service';
+import { tr, trn } from '../i18n/app';
 import { useSession } from './AuthContext';
 
 const TabSummary = lazy(() => import('./tabs/TabSummary'));
@@ -112,48 +113,49 @@ export default function ExamPage() {
   if (missing) {
     return (
       <div className="py-16 text-center">
-        <h1 className="text-xl font-semibold">Examen no encontrado</h1>
-        <p className="mt-2 text-sm text-slate-600">Puede que se haya eliminado o que no tengas acceso.</p>
+        <h1 className="text-xl font-semibold">{tr('Examen no encontrado')}</h1>
+        <p className="mt-2 text-sm text-slate-600">{tr('Puede que se haya eliminado o que no tengas acceso.')}</p>
         <Link to="/app" className="btn mt-4">
-          Volver a exámenes
+          {tr('Volver a exámenes')}
         </Link>
       </div>
     );
   }
-  if (!ctx || !data) return error ? <ErrorBox error={error} onRetry={reload} /> : <Spinner label="Cargando examen…" />;
+  if (!ctx || !data) return error ? <ErrorBox error={error} onRetry={reload} /> : <Spinner label={tr('Cargando examen…')} />;
 
   const pending = data.items.filter((i) => i.status === 'pendiente').length;
   const nSheets = data.sheets.filter(isStudentSheet).length;
   const tabs: [string, ReactNode][] = [
-    ['resumen', 'Resumen'],
-    ['hoja', 'Hoja'],
-    ['plantillas', 'Plantillas'],
-    ['alumnos', 'Alumnos'],
-    ['subir', 'Subir hojas'],
+    ['resumen', tr('Resumen')],
+    ['hoja', tr('Hoja')],
+    ['plantillas', tr('Plantillas')],
+    ['alumnos', tr('Alumnos')],
+    ['subir', tr('Subir hojas')],
     [
       'revision',
       <>
-        Revisión{pending > 0 && <span className="badge ml-1.5 bg-amber-100 text-amber-800">{pending}</span>}
+        {tr('Revisión')}
+        {pending > 0 && <span className="badge ml-1.5 bg-amber-100 text-amber-800">{pending}</span>}
       </>,
     ],
-    ['notas', <>Notas{nSheets > 0 && <span className="ml-1.5 text-xs text-slate-400">{nSheets}</span>}</>],
-    ['estadisticas', 'Estadísticas'],
-    ['actividad', 'Actividad'],
+    ['notas', <>{tr('Notas')}{nSheets > 0 && <span className="ml-1.5 text-xs text-slate-400">{nSheets}</span>}</>],
+    ['estadisticas', tr('Estadísticas')],
+    ['actividad', tr('Actividad')],
   ];
   const { exam } = data;
   return (
     <Ctx.Provider value={ctx}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Link to="/app" className="text-sm text-slate-500 hover:underline">
-          Exámenes
+          {tr('Exámenes')}
         </Link>
         <span className="text-slate-300">/</span>
         <h1 className="text-xl font-semibold">{exam.title}</h1>
         <StatusBadge status={exam.status} />
         <span className="font-mono text-xs text-slate-400">{exam.code}</span>
-        {busy && <span className="text-xs text-slate-500">Guardando…</span>}
+        {busy && <span className="text-xs text-slate-500">{tr('Guardando…')}</span>}
       </div>
-      <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-slate-200" aria-label="Secciones del examen">
+      <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={tr('Secciones del examen')}>
         {tabs.map(([path, label]) => (
           <NavLink
             key={path}
@@ -168,7 +170,13 @@ export default function ExamPage() {
       </nav>
       {ctx.readOnly && (
         <div className="mt-4 rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm text-slate-700">
-          Examen cerrado: está en solo lectura. Puedes reabrirlo desde <Link className="underline" to="resumen">Resumen</Link> (queda registrado).
+          {trn('Examen cerrado: está en solo lectura. Puedes reabrirlo desde {link} (queda registrado).', {
+            link: (
+              <Link className="underline" to="resumen">
+                {tr('Resumen')}
+              </Link>
+            ),
+          })}
         </div>
       )}
       <div className="mt-4 space-y-4">
