@@ -24,6 +24,11 @@ const STEPS: { title: string; text: string; tip: string }[] = [
     text: 'En segundos tienes las notas. Las dobles marcas, las marcas flojas o los identificadores incompletos quedan en «Revisión» con la imagen, para que decidas con un clic.',
     tip: 'Después: estadísticas por pregunta y exportación a Excel o Moodle.',
   },
+  {
+    title: 'Publica las respuestas para tus alumnos (opcional)',
+    text: 'Desde el resumen del examen puedes publicar las respuestas correctas, al momento o a partir de una fecha y hora. Los alumnos entran en korrige.es/comprobar con el código que les des y se comprueban con lo que anotaron en su cuadernillo.',
+    tip: 'Tú decides el código y si pueden calcular su nota. No se muestran notas ni datos de ningún alumno.',
+  },
 ];
 
 /** Tutorial de inicio: se muestra la primera vez que alguien entra en la aplicación. */

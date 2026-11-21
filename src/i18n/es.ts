@@ -52,7 +52,7 @@ export const es = {
       ['Exporta a Excel y a Moodle', 'Notas listas para el acta: .xlsx completo y CSV que Moodle importa directamente.'],
       ['Registro de cambios', 'Cada corrección manual queda anotada: quién, cuándo, valor anterior y nuevo. Ideal para revisiones y reclamaciones.'],
       ['Pensado para equipos', 'Organizaciones con administradores y profesores. Comparte un examen con otro profesor como coautor.'],
-      ['Hasta 200 preguntas', 'De 10 a 200 preguntas, de 3 a 5 opciones, identificador de 6 a 10 dígitos (NIA, DNI, expediente…).'],
+      ['Respuestas para los alumnos', 'Publica la plantilla correcta el día y la hora que elijas. Cada alumno la consulta con un código y, si quieres, calcula su nota.'],
     ],
   },
   privacy: {
@@ -71,6 +71,7 @@ export const es = {
       ['¿Qué escáner necesito?', 'Cualquier fotocopiadora o multifunción con alimentador automático que escanee a PDF (Xerox, Canon, Ricoh, Konica Minolta, HP…). Recomendamos 300 ppp en blanco y negro o escala de grises. También sirve un escáner de sobremesa.'],
       ['¿Bolígrafo o lápiz?', 'Bolígrafo azul o negro, rellenando la burbuja entera. El lápiz blando suele funcionar, pero las marcas flojas se envían a revisión para que decidas tú.'],
       ['¿Qué pasa si un alumno marca dos respuestas?', 'La pregunta va a la cola de revisión con el recorte de la imagen. Decides con un clic si cuenta una de las dos, se deja en blanco o es nula, y queda registrado.'],
+      ['¿Pueden los alumnos comprobar sus respuestas?', 'Sí, si tú quieres. Publicas las respuestas correctas, desde ya o a partir de una fecha y hora, y das a los alumnos un código. Ellos entran en korrige.es/comprobar, eligen su modelo y se comprueban con lo que anotaron en su cuadernillo; opcionalmente pueden calcular su nota estimada. No necesitan cuenta, y no se muestran notas ni datos de nadie.'],
       ['¿Puedo usar mis propias hojas?', 'No: la hoja la genera Korrige para cada examen, con su código QR y sus marcas de esquina. A cambio puedes configurar preguntas, opciones, modelos, identificador y cabecera, e imprimirla donde quieras.'],
       ['¿Cuántas preguntas admite?', 'De 10 a 200 por examen. Hasta 100 caben en una página; a partir de ahí la hoja tiene dos páginas y Korrige las empareja por alumno.'],
       ['¿Se integra con Moodle?', 'Exporta un CSV que se importa directamente en el calificador de Moodle (por número de ID o por email). También un Excel completo con las respuestas de cada alumno. Si necesitáis una conexión directa con vuestro Moodle, la intranet o el sistema de gestión académica, la hacemos a medida con Korrige Academy: habla con ventas.'],

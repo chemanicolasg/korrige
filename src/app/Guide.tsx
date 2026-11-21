@@ -58,6 +58,22 @@ export default function Guide() {
         </li>
       </ul>
 
+      <H>5. Publicar las respuestas para los alumnos (opcional)</H>
+      <ul className="mt-2 list-disc space-y-1.5 pl-6">
+        <li>
+          Diles durante el examen que anoten sus respuestas en el cuadernillo de preguntas, que se llevan. Para la nota solo cuenta la hoja de respuestas que entregan.
+        </li>
+        <li>
+          En <b>Resumen → Respuestas para los alumnos</b>, publica las respuestas correctas: desde ahora o a partir de una fecha y hora.
+        </li>
+        <li>
+          Elige el código que les darás (el del examen o uno tuyo) y si pueden usar la <b>calculadora de nota</b>.
+        </li>
+        <li>
+          Los alumnos entran en <b>korrige.es/comprobar</b>, escriben el código y eligen su modelo. No necesitan cuenta y no ven notas ni datos de nadie.
+        </li>
+      </ul>
+
       <H>Si algo sale mal</H>
       <ul className="mt-2 list-disc space-y-1.5 pl-6">
         <li>

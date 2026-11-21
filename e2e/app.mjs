@@ -132,10 +132,10 @@ export async function testApp(baseUrl, outDir) {
     await page.evaluate(() => localStorage.setItem('korrige-tutorial', '1'));
     await page.goto(`${baseUrl}/app`);
     const tut = page.getByTestId('tutorial');
-    await tut.getByText('Paso 1 de 4').waitFor();
+    await tut.getByText('Paso 1 de 5').waitFor();
     await shot('15-tutorial');
-    for (let i = 0; i < 3; i++) await tut.getByRole('button', { name: 'Siguiente' }).click();
-    await tut.getByText('Paso 4 de 4').waitFor();
+    for (let i = 0; i < 4; i++) await tut.getByRole('button', { name: 'Siguiente' }).click();
+    await tut.getByText('Paso 5 de 5').waitFor();
     await page.getByRole('button', { name: 'Saltar tutorial' }).click();
     await page.reload();
     await page.getByRole('heading', { name: 'Exámenes' }).waitFor();

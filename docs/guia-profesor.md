@@ -30,6 +30,19 @@
 - En **Revisión** aparece solo lo dudoso, con el recorte de la imagen. Atajos: `A`–`E` elegir respuesta, `0` en blanco, `X` nula, `Enter` aceptar, `Supr` excluir la hoja, `↑` `↓` moverse.
 - En **Notas** puedes abrir cualquier hoja, exportar a Excel o a Moodle y, al terminar, cerrar el examen desde **Resumen**.
 
+## 5. Publicar las respuestas para los alumnos (opcional)
+
+Si quieres que los alumnos se comprueben por su cuenta:
+
+1. Diles durante el examen que anoten sus respuestas en el cuadernillo de preguntas, que se llevan. Lo que cuenta para la nota es la hoja de respuestas que entregan.
+2. En el **Resumen** del examen, en «Respuestas para los alumnos», marca **Publicar las respuestas correctas**.
+3. Elige si se ven **desde ahora** o **a partir de una fecha y hora**.
+4. Elige el **código**: el del examen o uno tuyo (de 5 a 16 letras o números, por ejemplo `ANATOMIA26`).
+5. Decide si ofreces la **calculadora de nota**: el alumno marca lo que contestó y ve su nota estimada con la fórmula del examen.
+6. Da a los alumnos el código, o copia el enlace directo.
+
+Los alumnos entran en `korrige.es/comprobar`, escriben el código y eligen su modelo. No necesitan cuenta y no ven notas ni datos de nadie. Si corriges la plantilla o anulas una pregunta después de publicar, verán la versión actualizada con un aviso. Puedes retirar la publicación cuando quieras, también con el examen cerrado.
+
 ## Si algo sale mal
 
 | Aviso | Qué hacer |
