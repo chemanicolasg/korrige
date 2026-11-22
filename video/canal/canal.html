@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<!-- Imágenes del canal de YouTube de Korrige. Se exportan con: node video/canal/exportar.mjs -->
+<style>
+  @font-face { font-family: 'Fraunces'; src: url('../../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2') format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: 'Fraunces'; src: url('../../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2') format('woff2'); font-weight: 100 900; font-style: italic; }
+  @font-face { font-family: 'Archivo'; src: url('../../node_modules/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex Mono'; src: url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); font-weight: 600; }
+  :root { --brand: #2439b0; --brand-800: #1f318d; --brand-900: #1c2c70; --rose: #d6336c; --rose-300: #f3a3bd; --ink: #14161b; --bone: #f8f7f3; --bone-200: #ece9e1; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #777; font-family: 'Archivo', sans-serif; -webkit-font-smoothing: antialiased; }
+  .art { position: relative; overflow: hidden; margin: 40px; }
+  .wordmark { font-family: 'Fraunces', serif; font-weight: 600; font-variation-settings: 'opsz' 144, 'wght' 600; letter-spacing: -0.02em; display: inline-flex; align-items: baseline; }
+  .wordmark svg { width: 0.62em; height: 0.62em; margin: 0 0.04em; transform: translateY(0.02em); }
+
+  /* ── banner 2048×1152 (zona segura central 1235×338) ── */
+  #banner { width: 2048px; height: 1152px; background: var(--brand); }
+  #banner .safe { position: absolute; left: 406px; top: 407px; width: 1235px; height: 338px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  #banner .wordmark { font-size: 168px; color: #fff; line-height: 0.9; }
+  #banner .tag { margin-top: 26px; font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-variation-settings: 'opsz' 96, 'wght' 400; font-size: 46px; color: var(--rose-300); letter-spacing: -0.01em; }
+  #banner .chips { margin-top: 26px; display: flex; gap: 14px; }
+  #banner .chips span { font-family: 'Plex Mono'; font-weight: 600; font-size: 21px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand); background: #fff; border-radius: 8px; padding: 7px 14px; }
+  #banner .chips span.o { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.7); }
+  /* hojas de respuestas de adorno (fuera de la zona segura) */
+  .sheet { position: absolute; background: #fff; border-radius: 6px; box-shadow: 18px 18px 0 rgba(18, 26, 67, 0.35); }
+  .sheet .corner { position: absolute; width: 26px; height: 26px; background: var(--ink); }
+  .sheet svg { position: absolute; }
+  .grade { position: absolute; background: var(--ink); color: #fff; font-weight: 700; font-size: 38px; padding: 14px 24px 16px; border-radius: 16px; letter-spacing: -0.01em; box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+  .grade b { color: #ffd84d; }
+
+  /* ── perfil 800×800 ── */
+  #perfil { width: 800px; height: 800px; background: #fff; }
+  #perfil svg { position: absolute; left: 130px; top: 130px; width: 540px; height: 540px; }
+
+  /* ── marca de agua 150×150 (fondo transparente) ── */
+  #agua { width: 150px; height: 150px; background: transparent; }
+  #agua svg { width: 150px; height: 150px; }
+</style>
+</head>
+<body>
+  <div id="banner" class="art">
+    <div class="sheet" style="left:-40px;top:190px;width:400px;height:560px;transform:rotate(-6deg)">
+      <i class="corner" style="left:24px;top:24px"></i><i class="corner" style="right:24px;top:24px"></i><i class="corner" style="left:24px;bottom:24px"></i><i class="corner" style="right:24px;bottom:24px"></i>
+      <svg id="bub1" style="left:60px;top:90px" width="300" height="420"></svg>
+    </div>
+    <div class="sheet" style="left:1700px;top:330px;width:400px;height:560px;transform:rotate(7deg)">
+      <i class="corner" style="left:24px;top:24px"></i><i class="corner" style="right:24px;top:24px"></i><i class="corner" style="left:24px;bottom:24px"></i><i class="corner" style="right:24px;bottom:24px"></i>
+      <svg id="bub2" style="left:60px;top:90px" width="300" height="420"></svg>
+    </div>
+    <div class="grade" style="left:250px;top:830px;transform:rotate(-3deg)">Nota: <b>8,42</b></div>
+    <div class="grade" style="left:1480px;top:230px;transform:rotate(3deg);font-size:32px">Doble marca · <b>P8</b></div>
+
+    <div class="safe">
+      <div class="wordmark"><span>k</span><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.4" fill="#ffffff" stroke="#d6336c" stroke-width="2.2"/></svg><span>rrige</span></div>
+      <p class="tag">Corrige exámenes tipo test en minutos, con tu fotocopiadora</p>
+      <div class="chips"><span>Tutoriales</span><span class="o">Menos de 1 minuto</span><span class="o">korrige.es</span></div>
+    </div>
+  </div>
+
+  <div id="perfil" class="art">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.4" fill="#2439b0" stroke="#d6336c" stroke-width="2.2"/></svg>
+  </div>
+  <div id="agua" class="art">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="9.4" fill="#ffffff"/><circle cx="10" cy="10" r="7.6" fill="#2439b0" stroke="#d6336c" stroke-width="2"/></svg>
+  </div>
+
+<script>
+  // filas de burbujas A–D, algunas rellenas con boli azul
+  const fill = (id, seed) => {
+    const svg = document.getElementById(id);
+    let g = '', r = seed;
+    for (let q = 0; q < 12; q++) {
+      r = (r * 9301 + 49297) % 233280; const pick = r % 4;
+      g += `<text x="0" y="${q * 34 + 22}" font-family="Plex Mono" font-size="16" fill="#14161b">${q + 1}</text>`;
+      for (let o = 0; o < 4; o++) {
+        const cx = 50 + o * 40, cy = q * 34 + 16;
+        g += o === pick ? `<circle cx="${cx}" cy="${cy}" r="13" fill="#2439b0"/>` : `<circle cx="${cx}" cy="${cy}" r="13" fill="none" stroke="#d6336c" stroke-width="2"/><text x="${cx}" y="${cy + 5}" text-anchor="middle" font-family="Plex Mono" font-size="12" fill="#d6336c">${'ABCD'[o]}</text>`;
+      }
+    }
+    svg.innerHTML = g;
+  };
+  fill('bub1', 7); fill('bub2', 21);
+</script>
+</body>
+</html>
