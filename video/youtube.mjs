@@ -42,9 +42,6 @@ const sizes = [];
 TUTORIALS.forEach((t, i) => {
   const n = i + 1;
   const starts = sceneStarts(t.slug);
-  const steps = t.scenes
-    .map((s, k) => (s.type ? null : `${mmss(starts[k])} ${t.chapters[s.ch][1]}: ${plain(s)}`))
-    .filter(Boolean);
   const next = TUTORIALS[i + 1];
   const desc = [
     `${t.summary}`,
