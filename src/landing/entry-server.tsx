@@ -10,7 +10,7 @@ import Landing from './Landing';
 import Legal from './Legal';
 import PublicGuide from './PublicGuide';
 import PublicTutorials from './PublicTutorials';
-import { TUTORIALS } from '../tutorials';
+import { TUTORIALS, USE_YOUTUBE } from '../tutorials';
 import ResourcePage from './Resources';
 import { SEGMENTS, segmentJsonLd } from './segmentData';
 import SegmentPage from './segments';
@@ -47,8 +47,8 @@ export const pages: { path: string; title?: string; description?: string; jsonLd
           inLanguage: 'es',
           duration: `PT${Math.floor(t.seconds / 60)}M${t.seconds % 60}S`,
           uploadDate: '2026-11-22',
-          thumbnailUrl: t.youtubeId ? `https://i.ytimg.com/vi/${t.youtubeId}/hqdefault.jpg` : `${APP_URL}/tutoriales/${t.slug}.jpg`,
-          ...(t.youtubeId ? { embedUrl: `https://www.youtube-nocookie.com/embed/${t.youtubeId}` } : { contentUrl: `${APP_URL}/tutoriales/${t.slug}.mp4` }),
+          thumbnailUrl: USE_YOUTUBE && t.youtubeId ? `https://i.ytimg.com/vi/${t.youtubeId}/hqdefault.jpg` : `${APP_URL}/tutoriales/${t.slug}.jpg`,
+          ...(USE_YOUTUBE && t.youtubeId ? { embedUrl: `https://www.youtube-nocookie.com/embed/${t.youtubeId}` } : { contentUrl: `${APP_URL}/tutoriales/${t.slug}.mp4` }),
           url: `${APP_URL}/tutoriales#${t.slug}`,
         },
       })),

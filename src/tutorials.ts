@@ -2,8 +2,8 @@
  * Vídeos tutoriales (página pública /tutoriales y /app/tutoriales dentro de la aplicación).
  *
  * Los vídeos se generan con video/ (ver video/README.md) y se sirven desde public/tutoriales/:
- * <slug>.mp4, <slug>.jpg (póster) y <slug>.vtt (subtítulos). Cuando se suban a YouTube, basta con
- * rellenar `youtubeId`: la página pasa a incrustar el vídeo de YouTube en lugar del MP4.
+ * <slug>.mp4, <slug>.jpg (póster) y <slug>.vtt (subtítulos). Con USE_YOUTUBE = true la página incrusta
+ * en su lugar el vídeo de YouTube de cada `youtubeId`.
  * El orden y los textos coinciden con video/tutoriales.mjs.
  */
 export type Tutorial = {
@@ -18,6 +18,12 @@ export type Tutorial = {
   steps: string[];
 };
 
+/**
+ * true = la web reproduce los vídeos desde YouTube; false = desde public/tutoriales/ (MP4 propio).
+ * Ponlo a true cuando los 8 vídeos estén en «Público» (si siguen en borrador, YouTube no deja incrustarlos).
+ */
+export const USE_YOUTUBE = false;
+
 /** Lista de reproducción de YouTube con toda la serie (vacío hasta que se publique). */
 export const TUTORIALS_PLAYLIST = '';
 
@@ -28,7 +34,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'y su hoja de respuestas',
     summary: 'Crea un examen tipo test, configura la hoja de respuestas (preguntas, opciones, modelos e identificador) y descárgala para imprimir.',
     seconds: 57,
-    youtubeId: '',
+    youtubeId: 'z6yr1sEGPXM',
     steps: ['Datos del examen', 'Preguntas y opciones', 'Modelos e identificador', 'Personaliza la hoja', 'La hoja, al momento', 'Descarga e imprime'],
   },
   {
@@ -37,7 +43,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'plantillas y modelos',
     summary: 'Introduce la plantilla de respuestas correctas, acepta varias respuestas o anula preguntas, y relaciona los modelos A y B.',
     seconds: 56,
-    youtubeId: '',
+    youtubeId: 'B_R2fuZgPrs',
     steps: ['Abre «Plantillas»', 'Marca las correctas', 'Varias válidas o anular', 'Cada modelo, la suya', 'Correspondencia', 'Guarda y recalcula'],
   },
   {
@@ -46,7 +52,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'escanea y sube el PDF',
     summary: 'Importa la lista de clase, escanea todo el taco en la fotocopiadora y sube el PDF: Korrige lee las hojas y calcula las notas en segundos.',
     seconds: 55,
-    youtubeId: '',
+    youtubeId: 'VYHTc1bzdV8',
     steps: ['Lista de alumnos', 'Escanea el taco', 'Sube el PDF', 'Lectura en segundos', 'Resumen y guardar', 'Notas al momento'],
   },
   {
@@ -55,7 +61,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'solo lo dudoso',
     summary: 'Resuelve dobles marcas, marcas flojas e identificadores dudosos con el recorte de la hoja delante y atajos de teclado.',
     seconds: 54,
-    youtubeId: '',
+    youtubeId: '6xoi5Chf8oA',
     steps: ['Cola de revisión', 'Filtra por tipo', 'Doble marca', 'Identificador dudoso', 'Atajos de teclado', 'Todo queda registrado'],
   },
   {
@@ -64,7 +70,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'Excel y Moodle',
     summary: 'Consulta las notas, abre la hoja escaneada de cada alumno, corrige a mano, exporta a Excel o Moodle y cierra el examen.',
     seconds: 50,
-    youtubeId: '',
+    youtubeId: '8o-ZsPsJvUw',
     steps: ['Tabla de notas', 'Busca y filtra', 'La hoja de cada alumno', 'Corrige a mano', 'Excel y Moodle', 'Cierra el examen'],
   },
   {
@@ -73,7 +79,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'qué preguntas funcionan',
     summary: 'Lee el resultado del examen, la distribución de notas y la dificultad y discriminación de cada pregunta; anula las que fallan.',
     seconds: 50,
-    youtubeId: '',
+    youtubeId: 'E2KkTNZyr8o',
     steps: ['Resultado del examen', 'Distribución de notas', 'Calidad de las preguntas', 'Análisis por pregunta', 'Revisa la clave', 'Anula y recalcula'],
   },
   {
@@ -82,7 +88,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'publica las respuestas',
     summary: 'Publica las respuestas correctas con un código para que cada alumno se compruebe en korrige.es/comprobar, con calculadora de nota opcional.',
     seconds: 59,
-    youtubeId: '',
+    youtubeId: 'yjRqiWmQQ5Q',
     steps: ['Que anoten sus respuestas', 'Publica las respuestas', '¿Cuándo se ven?', 'Código para los alumnos', 'Calculadora de nota', 'Comparte el enlace', 'El alumno se comprueba'],
   },
   {
@@ -91,7 +97,7 @@ export const TUTORIALS: Tutorial[] = [
     kicker: 'profesores y valores por defecto',
     summary: 'Invita a los profesores de tu centro o academia, define los valores por defecto de los exámenes y comparte exámenes entre colegas.',
     seconds: 57,
-    youtubeId: '',
+    youtubeId: 'KR1S2nWsKXE',
     steps: ['Profesores', 'Invita por email', 'Roles', 'Valores por defecto', 'Fórmula de corrección', 'Comparte un examen', 'Protección de datos'],
   },
 ];

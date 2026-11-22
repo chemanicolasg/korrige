@@ -7,12 +7,12 @@ que YouTube no admite). Para cada vídeo: `<slug>.mp4`, la miniatura
 En todos: audiencia «No, no está hecho para niños», idioma Español (España), categoría Educación,
 lista de reproducción «Aprende Korrige» y pantalla final al siguiente vídeo.
 
-Cuando estén publicados, añade sus ids en `YT` (arriba de `video/youtube.mjs`) y vuelve a generar este
-archivo para que la lista de la serie enlace a YouTube; y ponlos también en `src/tutorials.ts` (`youtubeId`).
+Los enlaces «Siguiente» usan los ids de YouTube de `YT` (arriba de `video/youtube.mjs`). Cuando los vídeos
+estén en «Público», pon `USE_YOUTUBE = true` en `src/tutorials.ts` para que la web los reproduzca desde YouTube.
 
 ## 1. Crear un examen
 
-**Archivo:** `01-crear-examen.mp4` · descripción de 535 caracteres
+**Archivo:** `01-crear-examen.mp4` · descripción de 510 caracteres
 
 **Título**
 ```
@@ -30,7 +30,7 @@ Crea un examen tipo test, configura la hoja de respuestas (preguntas, opciones, 
 0:36 La hoja, al momento
 0:42 Descarga e imprime
 
-▶ Siguiente: Añadir las respuestas → https://korrige.es/tutoriales#02-plantilla-respuestas
+▶ Siguiente: Añadir las respuestas → https://youtu.be/B_R2fuZgPrs
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -43,7 +43,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 2. Añadir las respuestas
 
-**Archivo:** `02-plantilla-respuestas.mp4` · descripción de 496 caracteres
+**Archivo:** `02-plantilla-respuestas.mp4` · descripción de 480 caracteres
 
 **Título**
 ```
@@ -60,7 +60,7 @@ Introduce la plantilla de respuestas correctas, acepta varias respuestas o anula
 0:32 Correspondencia
 0:41 Guarda y recalcula
 
-▶ Siguiente: Corregir las hojas → https://korrige.es/tutoriales#03-subir-hojas
+▶ Siguiente: Corregir las hojas → https://youtu.be/VYHTc1bzdV8
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -73,7 +73,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 3. Corregir las hojas
 
-**Archivo:** `03-subir-hojas.mp4` · descripción de 502 caracteres
+**Archivo:** `03-subir-hojas.mp4` · descripción de 478 caracteres
 
 **Título**
 ```
@@ -90,7 +90,7 @@ Importa la lista de clase, escanea todo el taco en la fotocopiadora y sube el PD
 0:37 Resumen y guardar
 0:41 Notas al momento
 
-▶ Siguiente: Revisar incidencias → https://korrige.es/tutoriales#04-revisar-incidencias
+▶ Siguiente: Revisar incidencias → https://youtu.be/6xoi5Chf8oA
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -103,7 +103,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 4. Revisar incidencias
 
-**Archivo:** `04-revisar-incidencias.mp4` · descripción de 484 caracteres
+**Archivo:** `04-revisar-incidencias.mp4` · descripción de 465 caracteres
 
 **Título**
 ```
@@ -120,7 +120,7 @@ Resuelve dobles marcas, marcas flojas e identificadores dudosos con el recorte d
 0:33 Atajos de teclado
 0:41 Todo queda registrado
 
-▶ Siguiente: Notas y exportación → https://korrige.es/tutoriales#05-notas-exportar
+▶ Siguiente: Notas y exportación → https://youtu.be/8o-ZsPsJvUw
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -133,7 +133,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 5. Notas y exportación
 
-**Archivo:** `05-notas-exportar.mp4` · descripción de 470 caracteres
+**Archivo:** `05-notas-exportar.mp4` · descripción de 453 caracteres
 
 **Título**
 ```
@@ -150,7 +150,7 @@ Consulta las notas, abre la hoja escaneada de cada alumno, corrige a mano, expor
 0:29 Excel y Moodle
 0:35 Cierra el examen
 
-▶ Siguiente: Estadísticas → https://korrige.es/tutoriales#06-estadisticas
+▶ Siguiente: Estadísticas → https://youtu.be/E2KkTNZyr8o
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -163,7 +163,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 6. Estadísticas
 
-**Archivo:** `06-estadisticas.mp4` · descripción de 520 caracteres
+**Archivo:** `06-estadisticas.mp4` · descripción de 497 caracteres
 
 **Título**
 ```
@@ -180,7 +180,7 @@ Lee el resultado del examen, la distribución de notas y la dificultad y discrim
 0:31 Revisa la clave
 0:36 Anula y recalcula
 
-▶ Siguiente: Los alumnos se comprueban → https://korrige.es/tutoriales#07-alumnos-comprueban
+▶ Siguiente: Los alumnos se comprueban → https://youtu.be/yjRqiWmQQ5Q
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 
@@ -193,7 +193,7 @@ Korrige, corregir exámenes tipo test, corrección automática de exámenes, hoj
 
 ## 7. Los alumnos se comprueban
 
-**Archivo:** `07-alumnos-comprueban.mp4` · descripción de 564 caracteres
+**Archivo:** `07-alumnos-comprueban.mp4` · descripción de 547 caracteres
 
 **Título**
 ```
@@ -212,7 +212,7 @@ Publica las respuestas correctas con un código para que cada alumno se comprueb
 0:39 Entra con el código
 0:45 Se comprueba
 
-▶ Siguiente: Tu organización → https://korrige.es/tutoriales#08-organizacion
+▶ Siguiente: Tu organización → https://youtu.be/KR1S2nWsKXE
 🎬 Todos los tutoriales: https://korrige.es/tutoriales
 🎁 Tu primer examen es gratis: https://korrige.es
 

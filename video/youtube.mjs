@@ -8,6 +8,13 @@ import { TUTORIALS } from './tutoriales.mjs';
 // Ids de YouTube de los vídeos ya subidos (lo que va tras youtu.be/). Los que falten enlazan a la web.
 const YT = {
   '01-crear-examen': 'z6yr1sEGPXM',
+  '02-plantilla-respuestas': 'B_R2fuZgPrs',
+  '03-subir-hojas': 'VYHTc1bzdV8',
+  '04-revisar-incidencias': '6xoi5Chf8oA',
+  '05-notas-exportar': '8o-ZsPsJvUw',
+  '06-estadisticas': 'E2KkTNZyr8o',
+  '07-alumnos-comprueban': 'yjRqiWmQQ5Q',
+  '08-organizacion': 'KR1S2nWsKXE',
 };
 const LEAD = 0.8; // igual que en render.mjs
 
@@ -34,8 +41,8 @@ const out = [
   'En todos: audiencia «No, no está hecho para niños», idioma Español (España), categoría Educación,',
   'lista de reproducción «Aprende Korrige» y pantalla final al siguiente vídeo.',
   '',
-  'Cuando estén publicados, añade sus ids en `YT` (arriba de `video/youtube.mjs`) y vuelve a generar este',
-  'archivo para que la lista de la serie enlace a YouTube; y ponlos también en `src/tutorials.ts` (`youtubeId`).',
+  'Los enlaces «Siguiente» usan los ids de YouTube de `YT` (arriba de `video/youtube.mjs`). Cuando los vídeos',
+  'estén en «Público», pon `USE_YOUTUBE = true` en `src/tutorials.ts` para que la web los reproduzca desde YouTube.',
   '',
 ];
 const sizes = [];

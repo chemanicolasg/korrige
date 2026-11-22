@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { appLocale, tr } from '../i18n/app';
-import { TUTORIALS, TUTORIALS_PLAYLIST, Tutorial, fmtDuration } from '../tutorials';
+import { TUTORIALS, TUTORIALS_PLAYLIST, Tutorial, USE_YOUTUBE, fmtDuration } from '../tutorials';
 
-const poster = (t: Tutorial) => (t.youtubeId ? `https://i.ytimg.com/vi/${t.youtubeId}/hqdefault.jpg` : `/tutoriales/${t.slug}.jpg`);
+/** id de YouTube si la web reproduce desde YouTube (USE_YOUTUBE); vacío = MP4 propio */
+const yt = (t: Tutorial) => (USE_YOUTUBE ? t.youtubeId : '');
+
+const poster = (t: Tutorial) => (yt(t) ? `https://i.ytimg.com/vi/${yt(t)}/hqdefault.jpg` : `/tutoriales/${t.slug}.jpg`);
 
 function Player({ t }: { t: Tutorial }) {
-  if (t.youtubeId)
+  if (yt(t))
     return (
       <iframe
         key={t.slug}
         className="h-full w-full"
-        src={`https://www.youtube-nocookie.com/embed/${t.youtubeId}?rel=0&cc_load_policy=1&hl=es`}
+        src={`https://www.youtube-nocookie.com/embed/${yt(t)}?rel=0&cc_load_policy=1&hl=es`}
         title={t.title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
@@ -104,7 +107,7 @@ export default function Tutorials({ heading = 'h1' }: { heading?: 'h1' | 'h2' })
           </li>
         ))}
       </ul>
-      {TUTORIALS_PLAYLIST && (
+      {USE_YOUTUBE && TUTORIALS_PLAYLIST && (
         <p className="mt-8 text-sm">
           <a className="font-semibold text-brand-700 underline underline-offset-4" href={`https://www.youtube.com/playlist?list=${TUTORIALS_PLAYLIST}`} target="_blank" rel="noreferrer">
             {tr('Ver la lista completa en YouTube')}

@@ -44,5 +44,6 @@ voz y captura de cada paso).
 4. **Web**: `bash video/publish-web.sh` deja en `public/tutoriales/` una versión ligera de cada vídeo,
    su póster y sus subtítulos. Los textos de la página están en `src/tutorials.ts`.
 5. **YouTube**: `node video/youtube.mjs` genera `youtube.md` con título, descripción y etiquetas.
-   Tras subirlos, pon el id de cada vídeo en `youtubeId` (`src/tutorials.ts`) y la web incrustará
-   YouTube (`youtube-nocookie.com`, ya permitido en la CSP de `netlify.toml`) en lugar del MP4.
+   Los ids de YouTube ya están en `YT` (`video/youtube.mjs`) y en `youtubeId` (`src/tutorials.ts`). Cuando los
+   vídeos estén en «Público», pon `USE_YOUTUBE = true` en `src/tutorials.ts` y la web incrustará YouTube
+   (`youtube-nocookie.com`, ya permitido en la CSP de `netlify.toml`) en lugar del MP4.
