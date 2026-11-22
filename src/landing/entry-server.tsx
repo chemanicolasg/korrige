@@ -9,6 +9,8 @@ import { ARTICLES } from './articles';
 import Landing from './Landing';
 import Legal from './Legal';
 import PublicGuide from './PublicGuide';
+import PublicTutorials from './PublicTutorials';
+import { TUTORIALS } from '../tutorials';
 import ResourcePage from './Resources';
 import { SEGMENTS, segmentJsonLd } from './segmentData';
 import SegmentPage from './segments';
@@ -25,6 +27,32 @@ export const pages: { path: string; title?: string; description?: string; jsonLd
     path: '/guia',
     title: `Guía de impresión y escaneo de hojas de respuestas — ${APP_NAME}`,
     description: 'Cómo imprimir las hojas de respuestas y escanear el taco en la fotocopiadora (Xerox y similares) para corregir exámenes tipo test con Korrige.',
+  },
+  {
+    path: '/tutoriales',
+    title: `Vídeos tutoriales: cómo corregir exámenes con ${APP_NAME}`,
+    description: 'Ocho vídeos de menos de un minuto: crear el examen, la plantilla, subir las hojas, revisar, notas, estadísticas y publicar las respuestas.',
+    priority: '0.8',
+    jsonLd: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `Vídeos tutoriales de ${APP_NAME}`,
+      itemListElement: TUTORIALS.map((t, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'VideoObject',
+          name: `${t.title} ${t.kicker} — tutorial de ${APP_NAME}`,
+          description: t.summary,
+          inLanguage: 'es',
+          duration: `PT${Math.floor(t.seconds / 60)}M${t.seconds % 60}S`,
+          uploadDate: '2026-11-22',
+          thumbnailUrl: t.youtubeId ? `https://i.ytimg.com/vi/${t.youtubeId}/hqdefault.jpg` : `${APP_URL}/tutoriales/${t.slug}.jpg`,
+          ...(t.youtubeId ? { embedUrl: `https://www.youtube-nocookie.com/embed/${t.youtubeId}` } : { contentUrl: `${APP_URL}/tutoriales/${t.slug}.mp4` }),
+          url: `${APP_URL}/tutoriales#${t.slug}`,
+        },
+      })),
+    }),
   },
   {
     path: '/recursos',
@@ -64,6 +92,7 @@ export function render(path = '/'): string {
           <Route path="/ca" element={<Landing locale="ca" />} />
           <Route path="/en" element={<Landing locale="en" />} />
           <Route path="/guia" element={<PublicGuide />} />
+          <Route path="/tutoriales" element={<PublicTutorials />} />
           <Route path="/academias" element={<SegmentPage slug="academias" articles={ARTICLES} />} />
           <Route path="/universidades" element={<SegmentPage slug="universidades" articles={ARTICLES} />} />
           <Route path="/legal/:doc" element={<Legal />} />

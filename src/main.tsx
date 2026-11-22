@@ -10,6 +10,7 @@ const Legal = lazy(() => import('./landing/Legal'));
 const PublicGuide = lazy(() => import('./landing/PublicGuide'));
 const ResourcePage = lazy(() => import('./landing/Resources'));
 const SegmentPage = lazy(() => import('./landing/SegmentRoutes'));
+const PublicTutorials = lazy(() => import('./landing/PublicTutorials'));
 
 const Loading = () => <div className="p-8 text-sm text-slate-500">Cargando…</div>;
 
@@ -29,6 +30,7 @@ const app = (
         >
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/guia" element={<PublicGuide />} />
+          <Route path="/tutoriales" element={<PublicTutorials />} />
           <Route path="/academias" element={<SegmentPage slug="academias" />} />
           <Route path="/universidades" element={<SegmentPage slug="universidades" />} />
           <Route path="/recursos" element={<ResourcePage />} />

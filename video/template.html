@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: 'Fraunces'; src: url('../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2') format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: 'Fraunces'; src: url('../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2') format('woff2'); font-weight: 100 900; font-style: italic; }
+  @font-face { font-family: 'Archivo'; src: url('../node_modules/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex Mono'; src: url('../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); font-weight: 500; }
+  @font-face { font-family: 'Plex Mono'; src: url('../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); font-weight: 600; }
+
+  :root {
+    --brand: #2439b0; --brand-800: #1f318d; --brand-900: #1c2c70; --brand-50: #eff3ff; --brand-100: #dfe7ff;
+    --bone: #f8f7f3; --bone-200: #ece9e1; --bone-300: #dbd6ca; --ink: #14161b; --rose: #d6336c; --rose-100: #fde8ef; --rose-300: #f3a3bd;
+    --muted: #8b877d; --hl: #ffd84d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bone); }
+  body { font-family: 'Archivo', system-ui, sans-serif; color: var(--ink); position: relative; -webkit-font-smoothing: antialiased; }
+
+  /* ── columna izquierda ── */
+  #left { position: absolute; left: 96px; top: 0; width: 700px; height: 1080px; display: flex; flex-direction: column; }
+  .wordmark { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.02em; font-variation-settings: 'opsz' 96, 'wght' 600; display: inline-flex; align-items: baseline; }
+  .wordmark svg { width: 0.62em; height: 0.62em; margin: 0 0.04em; transform: translateY(0.02em); }
+  #logo { font-size: 64px; margin-top: 78px; color: var(--ink); }
+  .chip { font-family: 'Plex Mono', monospace; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; white-space: nowrap; }
+  #tag { margin-top: 62px; align-self: flex-start; background: var(--brand); color: #fff; font-size: 19px; padding: 9px 16px; }
+  #title { margin-top: 20px; font-family: 'Fraunces', serif; font-weight: 560; font-size: 74px; line-height: 0.98; letter-spacing: -0.025em; font-variation-settings: 'opsz' 144, 'wght' 560; }
+  #kicker { margin-top: 10px; font-family: 'Fraunces', serif; font-style: italic; font-weight: 420; font-size: 40px; color: var(--brand); letter-spacing: -0.01em; }
+  #chapters { margin-top: 34px; display: flex; flex-direction: column; gap: 6px; }
+  .ch { display: flex; align-items: center; gap: 20px; height: 54px; padding: 0 16px; border-radius: 12px; position: relative; }
+  .ch .chip { min-width: 132px; height: 34px; font-size: 15px; background: var(--bone-200); color: var(--muted); }
+  .ch .lab { font-size: 27px; font-weight: 500; color: #a7a297; letter-spacing: -0.005em; }
+  .ch.past .lab { color: #5d5a53; }
+  .ch.past .chip { color: #6f6b62; }
+  .ch .bg { position: absolute; inset: 0; border-radius: 12px; background: #fff; box-shadow: 0 10px 30px rgba(20,22,27,0.08), 0 1px 0 rgba(20,22,27,0.04); opacity: 0; z-index: -1; }
+  .ch.on .bg { opacity: 1; }
+  .ch.on .chip { background: var(--brand); color: #fff; }
+  .ch.on .lab { color: var(--ink); font-weight: 600; }
+  body.compact #logo { margin-top: 58px; }
+  body.compact #tag { margin-top: 40px; }
+  body.compact #title { font-size: 64px; }
+  body.compact #kicker { font-size: 36px; }
+  body.compact #chapters { margin-top: 26px; gap: 4px; }
+  body.compact .ch { height: 48px; }
+  body.compact .ch .lab { font-size: 25px; }
+  #cta { position: absolute; bottom: 82px; left: 0; display: flex; align-items: center; gap: 26px; }
+  #cta .pill { background: var(--ink); color: #fff; font-size: 30px; font-weight: 650; padding: 20px 32px; border-radius: 999px; }
+  #cta .url { font-size: 32px; font-weight: 600; }
+
+  /* ── columna derecha ── */
+  #right { position: absolute; left: 840px; top: 0; width: 1000px; height: 1080px; }
+  #head { position: absolute; left: 0; top: 64px; display: flex; align-items: center; gap: 20px; height: 64px; }
+  #head .chip { background: var(--brand); color: #fff; font-size: 24px; height: 50px; padding: 0 18px; }
+  #head .lab { font-size: 46px; font-weight: 650; letter-spacing: -0.02em; }
+  #frame { position: absolute; left: 0; top: 176px; width: 1000px; height: 671px; border-radius: 18px; background: #fff; box-shadow: 0 30px 70px rgba(20,22,27,0.16), 0 0 0 1px rgba(20,22,27,0.06); overflow: hidden; }
+  #bar { height: 46px; background: #f1efe9; display: flex; align-items: center; gap: 9px; padding: 0 18px; border-bottom: 1px solid var(--bone-200); }
+  #bar i { width: 13px; height: 13px; border-radius: 50%; background: #d8d4ca; display: block; }
+  #bar .addr { margin-left: 14px; flex: 1; height: 30px; border-radius: 999px; background: #fff; font-size: 17px; color: #555; display: flex; align-items: center; padding: 0 18px; font-family: 'Archivo'; }
+  #view { position: absolute; left: 0; top: 46px; width: 1000px; height: 625px; overflow: hidden; background: #f8f7f3; }
+  .layer { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; }
+  .layer img { width: 1440px; height: 900px; display: block; }
+  .hl { position: absolute; border: 4px solid var(--rose); border-radius: 12px; background: rgba(214, 51, 108, 0.07); box-shadow: 0 0 0 6px rgba(214, 51, 108, 0.16); }
+  #cursor { position: absolute; width: 34px; height: 34px; left: 0; top: 0; z-index: 5; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.3)); }
+  #ripple { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--rose); z-index: 4; opacity: 0; }
+
+  /* subtítulos */
+  #cap { position: absolute; left: 1340px; top: 884px; transform: translateX(-50%); max-width: 1040px; background: var(--ink); color: #fff; font-size: 44px; font-weight: 650; line-height: 1.16; padding: 18px 30px 20px; border-radius: 16px; text-align: center; letter-spacing: -0.012em; box-shadow: 0 14px 34px rgba(20,22,27,0.25); white-space: nowrap; }
+  #cap b { color: var(--hl); font-weight: 700; }
+
+  /* intro / outro */
+  #card { position: absolute; left: 0; top: 64px; width: 1000px; height: 900px; border-radius: 26px; background: var(--brand); color: #fff; overflow: hidden; padding: 70px 80px; display: flex; flex-direction: column; justify-content: center; }
+  #card .sheet { position: absolute; right: -60px; top: -40px; width: 460px; opacity: 0.18; }
+  #card .tagw { align-self: flex-start; background: #fff; color: var(--brand); font-size: 20px; padding: 9px 16px; }
+  #card h1 { font-family: 'Fraunces', serif; font-weight: 560; font-size: 116px; line-height: 0.95; letter-spacing: -0.03em; margin-top: 26px; font-variation-settings: 'opsz' 144, 'wght' 560; }
+  #card h2 { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-size: 64px; color: var(--rose-300); margin-top: 18px; letter-spacing: -0.015em; }
+  #card .ep { margin-top: 50px; font-family: 'Plex Mono'; font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
+  #card .bigmark { font-size: 120px; color: #fff; }
+  #card .free { margin-top: 30px; background: var(--ink); color: #fff; align-self: flex-start; font-size: 26px; padding: 10px 20px; border-radius: 10px; font-weight: 600; }
+  #card .btn { margin-top: 40px; align-self: flex-start; background: #fff; color: var(--brand); font-size: 46px; font-weight: 700; padding: 22px 40px; border-radius: 999px; }
+  #card .site { margin-top: 30px; font-size: 40px; font-weight: 600; }
+  #card .sub { margin-top: 36px; font-size: 28px; opacity: 0.85; display: flex; align-items: center; gap: 14px; }
+  #card .sub span { background: var(--ink); color: #fff; padding: 8px 16px; border-radius: 10px; font-weight: 650; }
+
+  #progress { position: absolute; left: 0; bottom: 0; height: 9px; background: var(--brand); }
+  #progress2 { position: absolute; left: 0; bottom: 0; height: 9px; width: 1920px; background: var(--bone-200); }
+</style>
+</head>
+<body>
+  <div id="left">
+    <div id="logo" class="wordmark"></div>
+    <span id="tag" class="chip">Tutorial</span>
+    <div id="title"></div>
+    <div id="kicker"></div>
+    <div id="chapters"></div>
+    <div id="cta"><span class="pill">Pruébalo gratis</span><span class="url">korrige.es</span></div>
+  </div>
+  <div id="right">
+    <div id="head"><span class="chip"></span><span class="lab"></span></div>
+    <div id="frame">
+      <div id="bar"><i></i><i></i><i></i><div class="addr"></div></div>
+      <div id="view"><div id="ripple"></div>
+        <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2.5 L4 19.5 L8.6 15.4 L11.6 22 L14.6 20.7 L11.7 14.2 L18 14.2 Z" fill="#14161b" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div id="card"></div>
+  </div>
+  <div id="cap"></div>
+  <div id="progress2"></div><div id="progress"></div>
+
+<script>
+const MARK = (color = '#2439b0', ring = '#d6336c') => `<span>k</span><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.4" fill="${color}" stroke="${ring}" stroke-width="2.2"/></svg><span>rrige</span>`;
+const $ = (s) => document.querySelector(s);
+const BUBBLES = (() => { // filas de burbujas de la hoja de respuestas, como adorno
+  const rows = [[1, 'C'], [2, 'A'], [3, 'D'], [4, 'B']];
+  let g = '';
+  rows.forEach(([n, ok], r) => {
+    g += `<text x="0" y="${r * 64 + 34}" font-family="Plex Mono" font-size="26" fill="#fff" opacity="0.7">${n}</text>`;
+    'ABCD'.split('').forEach((o, c) => {
+      const cx = 60 + c * 64, cy = r * 64 + 25;
+      g += o === ok ? `<circle cx="${cx}" cy="${cy}" r="22" fill="#fff" stroke="#f3a3bd" stroke-width="4"/>` : `<circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="#f3a3bd" stroke-width="3" opacity="0.75"/><text x="${cx}" y="${cy + 8}" text-anchor="middle" font-family="Plex Mono" font-size="20" fill="#f3a3bd" opacity="0.8">${o}</text>`;
+    });
+  });
+  return `<svg style="position:absolute;right:70px;top:64px;width:240px;height:208px" viewBox="0 0 300 260">${g}</svg>`;
+})();
+const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const VW = 1000, VH = 625, IW = 1440, IH = 900;
+
+let D, layers = [], capChunks = [];
+
+function camFor(shot) {
+  if (!shot) return { s: VW / IW, x: 0, y: 0 };
+  const a = shot.area;
+  const fit = Math.min(VW / a.w, VH / a.h);
+  const MIN = 0.95; // por debajo de esto el texto de la aplicación no se lee
+  let s = Math.max(VW / IW, Math.min(fit, 1.45));
+  let cx = a.x + a.w / 2, cy = a.y + a.h / 2;
+  if (fit < MIN) {
+    s = MIN;
+    const f = shot.hl ?? a;
+    // centrado en lo resaltado, pero sin perder su esquina superior izquierda
+    cx = Math.min(f.x + f.w / 2, f.x - 30 + VW / (2 * s));
+    cy = Math.min(f.y + f.h / 2, f.y - 30 + VH / (2 * s));
+  }
+  let x = VW / 2 - cx * s, y = VH / 2 - cy * s;
+  x = Math.min(0, Math.max(VW - IW * s, x));
+  y = Math.min(0, Math.max(VH - IH * s, y));
+  return { s, x, y };
+}
+const mixCam = (a, b, k) => ({ s: lerp(a.s, b.s, k), x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k) });
+const zoomAround = (c, f) => { // zoom f alrededor del centro de la vista, sin salirse de la imagen
+  const s = c.s * f; const cx = (VW / 2 - c.x) / c.s, cy = (VH / 2 - c.y) / c.s;
+  let x = VW / 2 - cx * s, y = VH / 2 - cy * s;
+  x = Math.min(0, Math.max(VW - IW * s, x)); y = Math.min(0, Math.max(VH - IH * s, y));
+  return { s, x, y };
+};
+
+function rich(t) { return t.replace(/\*([^*]+)\*/g, '<b>$1</b>'); }
+
+/** Trocea el subtítulo de una escena en frases cortas, respetando los *resaltados*. */
+function chunk(text, max = 42) {
+  const words = text.split(/\s+/);
+  const out = []; let cur = []; let len = 0;
+  const flush = () => { if (cur.length) out.push(cur); cur = []; len = 0; };
+  words.forEach((w, i) => {
+    const plain = w.replaceAll('*', '');
+    if (len + plain.length > max && cur.length) flush();
+    cur.push(w); len += plain.length + 1;
+    const end = plain.replace(/[»]+$/, '');
+    const next = (words[i + 1] || '').replaceAll('*', '');
+    if (/[.:;!?]$/.test(end) && len > 10) flush();
+    else if (/,$/.test(end) && len > 20) flush();
+    else if (next && len + next.length > max - 4 && len > max * 0.6 && /,$/.test(end)) flush();
+  });
+  flush();
+  let carry = false;
+  return out.map((ws) => {
+    let s = (carry ? '*' : '') + ws.join(' ');
+    const n = (s.match(/\*/g) || []).length;
+    if (n % 2) { s += '*'; carry = true; } else carry = false;
+    return s.replace(/\*\*/g, '');
+  });
+}
+
+function init(data) {
+  D = data;
+  $('#logo').innerHTML = MARK();
+  $('#title').textContent = D.title;
+  if (D.title.length > 20 || D.chapters.length > 7) document.body.classList.add('compact');
+  $('#kicker').textContent = D.kicker;
+  $('#chapters').innerHTML = D.chapters.map(([c, l]) => `<div class="ch"><div class="bg"></div><span class="chip">${c}</span><span class="lab">${l}</span></div>`).join('');
+  const view = $('#view');
+  D.scenes.forEach((sc, i) => {
+    sc.shotData = sc.shot ? D.shots[sc.shot] : null;
+    sc.cam = camFor(sc.shotData);
+    if (sc.shotData) {
+      const L = document.createElement('div');
+      L.className = 'layer';
+      L.innerHTML = `<img src="${D.shotsBase}${sc.shotData.file}">` + (sc.shotData.hl ? `<div class="hl" style="left:${sc.shotData.hl.x}px;top:${sc.shotData.hl.y}px;width:${sc.shotData.hl.w}px;height:${sc.shotData.hl.h}px"></div>` : '');
+      L.style.opacity = 0;
+      view.insertBefore(L, $('#ripple'));
+      sc.layer = L;
+    }
+    // subtítulos: reparto proporcional al número de letras dentro del tramo hablado
+    const parts = chunk(sc.text);
+    const total = parts.reduce((a, p) => a + p.replaceAll('*', '').length + 6, 0);
+    let acc = sc.v0;
+    parts.forEach((p) => {
+      const d = ((p.replaceAll('*', '').length + 6) / total) * (sc.v1 - sc.v0);
+      capChunks.push({ t0: acc, t1: acc + d, html: rich(p), scene: i });
+      acc += d;
+    });
+  });
+  // posición del cursor (en coordenadas de la vista) al centro de lo resaltado
+  D.scenes.forEach((sc) => {
+    if (sc.shotData?.hl && sc.shotData.cursor !== false) {
+      const h = sc.shotData.hl; const c = sc.cam;
+      sc.cur = { x: c.x + (h.x + h.w * 0.62) * c.s, y: c.y + (h.y + h.h * 0.62) * c.s };
+    }
+  });
+}
+
+function sceneAt(t) {
+  let i = 0;
+  while (i < D.scenes.length - 1 && t >= D.scenes[i + 1].t0) i++;
+  return i;
+}
+
+let lastCard = null;
+function renderCard(sc) {
+  const key = sc ? sc.type : null;
+  if (key === lastCard) return; lastCard = key;
+  const c = $('#card');
+  if (sc?.type === 'intro') {
+    c.innerHTML = `<span class="chip tagw">Tutorial ${D.index} de ${D.total}</span><h1>${D.title}</h1><h2>${D.kicker}</h2>${BUBBLES}`;
+  } else if (sc?.type === 'outro') {
+    c.innerHTML = `<div class="wordmark bigmark">${MARK('#ffffff', '#f3a3bd')}</div><span class="free">Tu primer examen es gratis</span><span class="btn">Pruébalo en korrige.es →</span><div class="sub"><span>Suscríbete</span> para ver el resto de tutoriales</div>`;
+  }
+}
+
+function seek(t) {
+  const i = sceneAt(t); const sc = D.scenes[i];
+  const special = sc.type === 'intro' || sc.type === 'outro';
+  // tarjeta intro/outro
+  renderCard(special ? sc : null);
+  const cardK = special ? ease(clamp01((t - sc.t0) / 0.6)) : 0;
+  const prevSpecial = i > 0 && (D.scenes[i - 1].type);
+  let cardOp = special ? (sc.type === 'intro' ? 1 : cardK) : 0;
+  if (!special && i > 0 && D.scenes[i - 1].type === 'intro') cardOp = 1 - ease(clamp01((t - sc.t0) / 0.5));
+  if (!special && i > 0 && D.scenes[i - 1].type === 'intro') renderCard(D.scenes[i - 1]);
+  $('#card').style.opacity = cardOp;
+  $('#card').style.transform = `translateY(${(1 - (special && sc.type === 'outro' ? cardK : 1)) * 30}px)`;
+  const showFrame = !special || cardOp < 1;
+  $('#frame').style.opacity = special ? 1 - cardOp : 1;
+  $('#head').style.opacity = special ? 0 : clamp01((t - sc.t0) / 0.35);
+
+  // capítulos
+  const chIdx = special ? (sc.type === 'outro' ? D.chapters.length : -1) : sc.ch;
+  document.querySelectorAll('.ch').forEach((el, k) => {
+    el.classList.toggle('on', k === chIdx);
+    el.classList.toggle('past', k < chIdx);
+  });
+  if (!special) {
+    const [c, l] = D.chapters[sc.ch];
+    $('#head .chip').textContent = c; $('#head .lab').textContent = l;
+    $('#head').style.transform = `translateY(${(1 - ease(clamp01((t - sc.t0) / 0.35))) * 10}px)`;
+    $('#bar .addr').textContent = sc.shotData?.url ?? 'korrige.es/app';
+  }
+
+  // capas de capturas
+  D.scenes.forEach((s2, k) => {
+    if (!s2.layer) return;
+    if (k !== i && !(k === i - 1 && t - sc.t0 < 0.45)) { s2.layer.style.opacity = 0; return; }
+    const local = t - s2.t0;
+    const fade = k === i ? ease(clamp01(local / 0.45)) : 1;
+    const prevCam = k > 0 && D.scenes[k - 1].layer ? D.scenes[k - 1].cam : zoomAround(s2.cam, 0.9);
+    const startCam = s2.shotData.file === D.scenes[k - 1]?.shotData?.file ? prevCam : zoomAround(s2.cam, 0.94);
+    let cam = mixCam(startCam, s2.cam, ease(clamp01(local / 0.9)));
+    const dur = s2.t1 - s2.t0;
+    cam = zoomAround(cam, 1 + 0.035 * clamp01((local - 0.9) / Math.max(1, dur - 0.9)));
+    s2.layer.style.opacity = fade;
+    s2.layer.style.zIndex = k === i ? 2 : 1;
+    s2.layer.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.s})`;
+    const hl = s2.layer.querySelector('.hl');
+    if (hl) {
+      const k2 = ease(clamp01((local - 0.75) / 0.4));
+      hl.style.opacity = k2;
+      hl.style.transform = `scale(${1.06 - 0.06 * k2})`;
+    }
+  });
+
+  // cursor
+  const cur = $('#cursor'), rip = $('#ripple');
+  if (!special && sc.cur) {
+    const local = t - sc.t0;
+    let from = D.scenes[i - 1]?.cur ?? { x: VW * 0.75, y: VH * 0.9 };
+    const k = ease(clamp01((local - 0.15) / 0.75));
+    const p = { x: lerp(from.x, sc.cur.x, k), y: lerp(from.y, sc.cur.y, k) };
+    cur.style.opacity = 1;
+    const press = local > 0.95 && local < 1.15 ? 0.85 : 1;
+    cur.style.transform = `translate(${p.x - 6}px, ${p.y - 3}px) scale(${press})`;
+    const r = clamp01((local - 0.95) / 0.5);
+    rip.style.opacity = r > 0 && r < 1 ? 1 - r : 0;
+    rip.style.transform = `translate(${sc.cur.x - 30}px, ${sc.cur.y - 30}px) scale(${0.3 + r})`;
+  } else { cur.style.opacity = 0; rip.style.opacity = 0; }
+
+  // subtítulo
+  const ch = capChunks.find((c) => t >= c.t0 - 0.05 && t < c.t1 + 0.35) ;
+  const cap = $('#cap');
+  if (ch) {
+    if (cap.dataset.k !== String(capChunks.indexOf(ch))) { cap.innerHTML = ch.html; cap.dataset.k = capChunks.indexOf(ch); }
+    const k = ease(clamp01((t - ch.t0 + 0.05) / 0.18));
+    cap.style.opacity = k;
+    cap.style.transform = `translateX(-50%) translateY(${(1 - k) * 12}px)`;
+  } else cap.style.opacity = 0;
+
+  $('#progress').style.width = `${(t / D.duration) * 1920}px`;
+}
+window.init = init; window.seek = seek;
+window.capChunksForExport = () => capChunks.map((c) => ({ t0: c.t0, t1: c.t1, text: c.html.replace(/<[^>]+>/g, "") }));
+</script>
+</body>
+</html>

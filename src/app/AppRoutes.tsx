@@ -15,6 +15,7 @@ const PlanPage = lazy(() => import('./PlanPage'));
 const CheckAnswers = lazy(() => import('./CheckAnswers'));
 const Demo = lazy(() => import('./Demo'));
 const DevOmr = lazy(() => import('./DevOmr'));
+const Tutorials = lazy(() => import('./Tutorials'));
 
 function NotFound() {
   return (
@@ -40,6 +41,7 @@ function Private() {
           <Route path="plan" element={<PlanPage />} />
           <Route path="cuenta" element={<AccountPage />} />
           <Route path="guia" element={<Guide />} />
+          <Route path="tutoriales" element={<Tutorials />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

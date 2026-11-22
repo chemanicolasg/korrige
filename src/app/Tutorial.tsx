@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Modal } from '../components/ui';
 import { PLAN } from '../config';
-import { tr } from '../i18n/app';
+import { tr, trn } from '../i18n/app';
 
 const STEPS: { title: string; text: string; tip: string }[] = [
   {
@@ -48,6 +48,15 @@ export function Tutorial({ canCreateExam, onClose }: { canCreateExam: boolean; o
         <p className="mt-3 text-[15px] leading-relaxed text-slate-700">{s.text}</p>
         <p className="mt-3 border-l-[3px] border-brand-700 bg-brand-50 px-4 py-2.5 text-sm text-slate-700">{s.tip}</p>
         {last && canCreateExam && <p className="mt-3 text-sm font-medium text-ink">{tr('Tu primer examen es gratis y completo ({n} examen, sin tarjeta).', { n: PLAN.freeExams })}</p>}
+        <p className="mt-3 text-sm text-slate-600">
+          {trn('¿Prefieres verlo en vídeo? {link}', {
+            link: (
+              <Link className="font-medium text-brand-700 underline underline-offset-2" to="/app/tutoriales" onClick={onClose}>
+                {tr('Ver los vídeos tutoriales')}
+              </Link>
+            ),
+          })}
+        </p>
         <div className="mt-5 flex justify-center gap-1.5" aria-hidden>
           {STEPS.map((_, j) => (
             <span key={j} className={`h-2.5 w-2.5 rounded-full border-[1.5px] ${j === i ? 'border-brand-700 bg-brand-700' : 'border-rose-500'}`} />

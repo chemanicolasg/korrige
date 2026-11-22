@@ -23,6 +23,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link to="/recursos" className="text-slate-600 underline-offset-4 hover:text-ink hover:underline">
               Recursos
             </Link>
+            <Link to="/tutoriales" className="hidden text-slate-600 underline-offset-4 hover:text-ink hover:underline sm:inline">
+              Tutoriales
+            </Link>
             <Link to="/demo" className="hidden text-slate-600 underline-offset-4 hover:text-ink hover:underline sm:inline">
               Probar la demo
             </Link>
@@ -39,6 +42,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Link to="/academias">Para academias</Link>
           <Link to="/universidades">Para universidades</Link>
           <Link to="/recursos">Recursos</Link>
+          <Link to="/tutoriales">Vídeos tutoriales</Link>
           <Link to="/guia">Guía de impresión y escaneo</Link>
           <Link to="/legal/privacidad">Privacidad</Link>
         </div>

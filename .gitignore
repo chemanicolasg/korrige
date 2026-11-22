@@ -12,3 +12,6 @@ public/pdfjs-wasm
 # Ofertas comerciales: contienen datos de clientes y precios, no se suben al repositorio
 ofertas/
 scripts/oferta-*.mjs
+
+# Vídeos tutoriales: capturas, fotogramas y renders intermedios (se regeneran con video/)
+video/build/

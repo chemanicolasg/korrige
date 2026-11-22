@@ -488,6 +488,11 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
                   Recursos para profesores
                 </Link>
               </li>
+              <li>
+                <Link className="underline-offset-4 hover:underline" to="/tutoriales">
+                  Vídeos tutoriales
+                </Link>
+              </li>
                 </>
               )}
             </ul>

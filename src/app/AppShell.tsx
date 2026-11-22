@@ -90,6 +90,9 @@ export default function AppShell() {
               <NavLink to="/app/guia" className={nav}>
                 {tr('Guía de impresión y escaneo')}
               </NavLink>
+              <NavLink to="/app/tutoriales" className={nav}>
+                {tr('Tutoriales')}
+              </NavLink>
             </nav>
           )}
           <div className="ml-auto flex items-center gap-3 text-sm">
@@ -138,6 +141,10 @@ export default function AppShell() {
             {trn('· Recuerda: las hojas se imprimen al <b>100 % («tamaño real»)</b>, nunca con «ajustar a página». ·')}{' '}
             <Link className="underline" to="/app/guia">
               {tr('Guía de impresión y escaneo')}
+            </Link>{' '}
+            ·{' '}
+            <Link className="underline" to="/app/tutoriales">
+              {tr('Vídeos tutoriales')}
             </Link>
           </span>
         </Notice>
