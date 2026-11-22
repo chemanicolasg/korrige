@@ -69,7 +69,7 @@ Proyecto **Korrige** (`cjjwxnotywppigmdrkyq`, región eu-west-3, París), creado
 
 **Sigue sin probar:** el envío real con Resend (falta `RESEND_API_KEY`), el enlace mágico y los correos de confirmación (dependen de la configuración de Auth/SMTP), la ejecución programada de `retention-purge` y el despliegue en Netlify.
 
-39. **Sin burbuja «P» en las hojas nuevas:** la hoja ya no imprime el recuadro «Solo profesorado»; la plantilla se introduce en la plataforma. El lector no cambia: los exámenes creados antes conservan su layout guardado (con la burbuja) y sus hojas-plantilla se siguen detectando. `computeLayout(…, { keyBubble: true })` reproduce la hoja de referencia para los tests.
+39. **Sin burbuja «P» en las hojas nuevas:** la hoja ya no imprime el recuadro «Solo profesorado»; la plantilla se introduce en la plataforma. El lector no cambia: los exámenes creados antes conservan su layout guardado (con la burbuja) y sus hojas-plantilla se siguen detectando. `computeLayout(…, { keyBubble: true })` reproduce la hoja de referencia para los tests. Los textos siguen la misma regla: el aviso de la pestaña Plantillas solo ofrece la hoja-plantilla si el layout del examen tiene la burbuja, y la guía la presenta como nota para los exámenes antiguos.
 
 40. **Idiomas (castellano, catalán, inglés):** están traducidas la portada (cada idioma con su dirección: `/`, `/ca`, `/en`, con `hreflang`), la página de alumnos `/comprobar` (elige el idioma del navegador, con selector) y la hoja de respuestas (idioma por examen, con valor por defecto en la organización; solo cambian los textos, no la geometría). Las páginas de segmento, las guías públicas, los textos legales y los correos siguen solo en castellano.
 

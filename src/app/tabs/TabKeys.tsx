@@ -72,6 +72,8 @@ export default function TabKeys() {
   const n = cfg.nQuestions;
   const models = modelLetters(cfg);
   const options = optionLetters(cfg);
+  // solo los exámenes antiguos conservan en su layout la burbuja «P» de hoja-plantilla
+  const hasKeyBubble = data.layout.pages.some((p) => p.plantilla);
   const cur = currentKeys(data.keys);
   const [model, setModel] = useState(models[0]);
   const saved = cur[model]?.answers ?? emptyKey(n);
@@ -139,9 +141,12 @@ export default function TabKeys() {
       </div>
 
       <Notice>
-        {trn(
-          'Haz clic en la respuesta correcta de cada pregunta (puedes marcar varias si aceptas más de una) o marca «Anular» para que no puntúe para nadie. Otra forma: rellena una hoja con las respuestas correctas, marca la burbuja <b>«P»</b> (y su modelo) y escanéala con las demás: se detecta sola.',
-        )}
+        {/* La vía de la hoja-plantilla solo existe en exámenes antiguos, cuya hoja lleva la burbuja «P» (DECISIONES 39). */}
+        {hasKeyBubble
+          ? trn(
+              'Haz clic en la respuesta correcta de cada pregunta (puedes marcar varias si aceptas más de una) o marca «Anular» para que no puntúe para nadie. Otra forma: rellena una hoja con las respuestas correctas, marca la burbuja <b>«P»</b> (y su modelo) y escanéala con las demás: se detecta sola.',
+            )
+          : tr('Haz clic en la respuesta correcta de cada pregunta (puedes marcar varias si aceptas más de una) o marca «Anular» para que no puntúe para nadie.')}
       </Notice>
 
       <div className="card p-4">

@@ -28,7 +28,7 @@ export default function Guide() {
         <li>{tr('No escribir sobre las cuatro marcas negras de las esquinas ni sobre el QR. No doblar ni grapar la hoja.')}</li>
         <li>
           {trn(
-            'Plantilla de respuestas: puedes rellenar una hoja con las respuestas correctas, marcar la burbuja <b>«P» (solo profesorado)</b> y su modelo, y escanearla con las demás. Se detecta sola y no cuenta como alumno.',
+            'Plantilla de respuestas: se introduce en la pestaña <b>Plantillas</b> del examen. Solo en los exámenes creados cuando la hoja aún llevaba la burbuja <b>«P» (solo profesorado)</b> puedes, además, rellenar una hoja con las respuestas correctas, marcar esa burbuja y su modelo, y escanearla con las demás: se detecta sola y no cuenta como alumno.',
           )}
         </li>
       </ul>

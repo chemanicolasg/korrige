@@ -15,7 +15,7 @@
 - Para rectificar: corrector (típex) y volver a marcar.
 - El identificador (NIA, DNI…) se escribe en las casillas **y** se marca en las burbujas de debajo. Si hay modelos, hay que marcar el modelo.
 - No escribir sobre las marcas negras de las esquinas ni sobre el QR. No doblar ni grapar.
-- Plantilla: rellena una hoja con las respuestas correctas, marca la burbuja **«P»** y su modelo, y escanéala con las demás.
+- Plantilla: se introduce en la pestaña **Plantillas** del examen. Solo en los exámenes creados cuando la hoja aún llevaba la burbuja **«P»** (solo profesorado) puedes, además, rellenar una hoja con las respuestas correctas, marcar esa burbuja y su modelo, y escanearla con las demás.
 
 ## 3. Escanear en la Xerox (AltaLink y similares)
 
