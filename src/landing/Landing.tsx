@@ -125,7 +125,7 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
             <Link to="/acceso" className="hidden px-3 py-2 text-sm font-semibold text-ink underline-offset-4 hover:underline sm:inline-flex">
               {t.nav.login}
             </Link>
-            <a href="#ventas" className="inline-flex whitespace-nowrap rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
+            <a href="#ventas" className="inline-flex rounded-md sm:whitespace-nowrap bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
               {t.nav.sales}
             </a>
             <button className="rounded-md p-2 text-ink hover:bg-bone-100 xl:hidden" aria-label={t.ui.menu} aria-expanded={menu} onClick={() => setMenu(!menu)}>
