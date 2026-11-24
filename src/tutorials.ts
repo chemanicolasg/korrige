@@ -22,7 +22,7 @@ export type Tutorial = {
  * true = la web reproduce los vídeos desde YouTube; false = desde public/tutoriales/ (MP4 propio).
  * Ponlo a true cuando los 8 vídeos estén en «Público» (si siguen en borrador, YouTube no deja incrustarlos).
  */
-export const USE_YOUTUBE = false;
+export const USE_YOUTUBE = true;
 
 /** Lista de reproducción de YouTube con toda la serie (vacío hasta que se publique). */
 export const TUTORIALS_PLAYLIST = '';
