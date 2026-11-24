@@ -23,7 +23,7 @@ export const en: Dict = {
     student: 'I’m a student: check my answers',
     appNote: '',
   },
-  nav: { how: 'How it works', features: 'Features', privacy: 'Privacy', faq: 'FAQ', sales: 'Talk to sales', login: 'Sign in', demo: 'Try the demo' },
+  nav: { how: 'How it works', features: 'Features', privacy: 'Privacy', faq: 'FAQ', sales: 'Talk to sales', login: 'Sign in', demo: 'Try the demo', tutorials: 'Tutorials', tutorialsCta: 'Watch it: 8 tutorials under a minute each (in Spanish) →' },
   hero: {
     kicker: 'For universities, faculties and exam-prep schools',
     title: 'Grade hundreds of multiple-choice exams in minutes with the printer you already have',

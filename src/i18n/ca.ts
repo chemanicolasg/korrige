@@ -23,7 +23,7 @@ export const ca: Dict = {
     student: 'Soc alumne: comprovar respostes',
     appNote: '',
   },
-  nav: { how: 'Com funciona', features: 'Funcionalitats', privacy: 'Privacitat', faq: 'Preguntes freqüents', sales: 'Parlar amb vendes', login: 'Accedir', demo: 'Provar la demo' },
+  nav: { how: 'Com funciona', features: 'Funcionalitats', privacy: 'Privacitat', faq: 'Preguntes freqüents', sales: 'Parlar amb vendes', login: 'Accedir', demo: 'Provar la demo', tutorials: 'Tutorials', tutorialsCta: 'Mira-ho en vídeo: 8 tutorials de menys d’un minut (en castellà) →' },
   hero: {
     kicker: 'Per a universitats, facultats i acadèmies',
     title: 'Corregeix centenars d’exàmens tipus test en minuts amb la impressora que ja tens',

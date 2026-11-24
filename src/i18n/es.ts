@@ -21,7 +21,7 @@ export const es = {
     student: 'Soy alumno: comprobar respuestas',
     appNote: '',
   },
-  nav: { how: 'Cómo funciona', features: 'Funcionalidades', privacy: 'Privacidad', faq: 'Preguntas frecuentes', sales: 'Hablar con ventas', login: 'Acceder', demo: 'Probar la demo' },
+  nav: { how: 'Cómo funciona', features: 'Funcionalidades', privacy: 'Privacidad', faq: 'Preguntas frecuentes', sales: 'Hablar con ventas', login: 'Acceder', demo: 'Probar la demo', tutorials: 'Tutoriales', tutorialsCta: 'Míralo en vídeo: 8 tutoriales de menos de un minuto →' },
   hero: {
     kicker: 'Para universidades, facultades y academias',
     title: 'Corrige cientos de exámenes tipo test en minutos con la impresora que ya tienes',

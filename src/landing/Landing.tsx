@@ -77,6 +77,7 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
     ['#precios', t.pricing.nav],
     ['#privacidad', t.nav.privacy],
     ['#faq', t.nav.faq],
+    ['/tutoriales', t.nav.tutorials],
   ];
   const primary = 'inline-flex items-center justify-center rounded-md bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800';
   const secondary = 'inline-flex items-center justify-center rounded-md border-[1.5px] border-ink px-5 py-3 text-sm font-semibold text-ink transition hover:bg-ink hover:text-white';
@@ -94,7 +95,7 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
           <a href="#top" className="text-[1.7rem] leading-none">
             <Logo />
           </a>
-          <nav className="hidden items-center gap-6 text-sm text-slate-600 lg:flex" aria-label={t.ui.sections}>
+          <nav className="hidden items-center gap-5 whitespace-nowrap text-sm text-slate-600 xl:flex" aria-label={t.ui.sections}>
             {links.map(([href, label]) => (
               <a key={href} href={href} className="underline-offset-4 hover:text-ink hover:underline">
                 {label}
@@ -124,10 +125,10 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
             <Link to="/acceso" className="hidden px-3 py-2 text-sm font-semibold text-ink underline-offset-4 hover:underline sm:inline-flex">
               {t.nav.login}
             </Link>
-            <a href="#ventas" className="inline-flex rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
+            <a href="#ventas" className="inline-flex whitespace-nowrap rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
               {t.nav.sales}
             </a>
-            <button className="rounded-md p-2 text-ink hover:bg-bone-100 lg:hidden" aria-label={t.ui.menu} aria-expanded={menu} onClick={() => setMenu(!menu)}>
+            <button className="rounded-md p-2 text-ink hover:bg-bone-100 xl:hidden" aria-label={t.ui.menu} aria-expanded={menu} onClick={() => setMenu(!menu)}>
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                 <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
@@ -135,7 +136,7 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
           </div>
         </div>
         {menu && (
-          <nav className="border-t border-bone-200 bg-white px-5 py-3 lg:hidden" aria-label={t.ui.sections}>
+          <nav className="border-t border-bone-200 bg-white px-5 py-3 xl:hidden" aria-label={t.ui.sections}>
             {[...links, ['/acceso', t.nav.login] as [string, string]].map(([href, label]) => (
               <a key={href} href={href} className="block py-2 text-sm font-medium text-ink" onClick={() => setMenu(false)}>
                 {label}
@@ -251,6 +252,9 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
                 </li>
               ))}
             </ol>
+            <Link to="/tutoriales" className="mt-8 inline-block text-sm font-semibold text-brand-700 underline decoration-rose-500 decoration-2 underline-offset-4 hover:text-brand-900">
+              {t.nav.tutorialsCta}
+            </Link>
           </div>
         </section>
 
