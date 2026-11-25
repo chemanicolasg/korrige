@@ -1,5 +1,8 @@
 /** Traducciones de la aplicación del profesor (módulo «exams»). Clave = texto en castellano. */
 export const ca: Record<string, string> = {
+  'Descargar {n} hojas en PDF': 'Descarrega {n} fulls en PDF',
+  'Pon 1 para tener una hoja que fotocopiar, o tantas como alumnos. Las hojas de distintos idiomas son del mismo examen: se escanean juntas y se corrigen igual.': 'Posa 1 per tenir un full per fotocopiar, o tants com alumnes. Els fulls d’idiomes diferents són del mateix examen: s’escanegen junts i es corregeixen igual.',
+  'Copias en el PDF, por idioma': 'Còpies al PDF, per idioma',
   Tú: 'Tu',
   'Ya tienes una carpeta con ese nombre.': 'Ja tens una carpeta amb aquest nom.',
   '¿Eliminar la carpeta «{name}»? Los exámenes no se borran: vuelven a «Sin carpeta».': 'Vols eliminar la carpeta «{name}»? Els exàmens no s’esborren: tornen a «Sense carpeta».',
@@ -218,6 +221,9 @@ export const ca: Record<string, string> = {
 };
 
 export const en: Record<string, string> = {
+  'Descargar {n} hojas en PDF': 'Download {n} sheets as PDF',
+  'Pon 1 para tener una hoja que fotocopiar, o tantas como alumnos. Las hojas de distintos idiomas son del mismo examen: se escanean juntas y se corrigen igual.': 'Enter 1 to get one sheet to photocopy, or as many as you have students. Sheets in different languages belong to the same exam: scan them together and they are graded the same way.',
+  'Copias en el PDF, por idioma': 'Copies in the PDF, by language',
   Tú: 'You',
   'Ya tienes una carpeta con ese nombre.': 'You already have a folder with that name.',
   '¿Eliminar la carpeta «{name}»? Los exámenes no se borran: vuelven a «Sin carpeta».': 'Delete the folder ‘{name}’? The exams are not deleted: they go back to ‘No folder’.',

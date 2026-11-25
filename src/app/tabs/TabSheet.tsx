@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PdfPreview } from '../../components/PdfPreview';
-import { Field, Notice } from '../../components/ui';
+import { Notice } from '../../components/ui';
 import { downloadBlob, fileSlug } from '../../lib/exportData';
 import { markDownloaded, updateSheetConfig } from '../../lib/service';
 import { SheetConfig, clampConfig, computeLayout } from '../../omr/layout';
+import { SHEET_LANGS, SHEET_LANG_NAMES, SheetLang, sheetLang } from '../../omr/sheetText';
 import { tr, trn } from '../../i18n/app';
 import { useExam } from '../ExamPage';
 import { SheetConfigForm } from '../SheetConfigForm';
@@ -12,7 +13,9 @@ export default function TabSheet() {
   const { data, db, run, readOnly, busy } = useExam();
   const locked = data.sheets.length > 0;
   const [cfg, setCfg] = useState<SheetConfig>(data.exam.sheet_config);
-  const [copies, setCopies] = useState(1);
+  // copias por idioma: por defecto, una en el idioma de la hoja
+  const [byLang, setByLang] = useState<Record<SheetLang, number>>(() => ({ es: 0, ca: 0, en: 0, [sheetLang(data.exam.sheet_config.lang)]: 1 }));
+  const copies = SHEET_LANGS.reduce((a, l) => a + byLang[l], 0);
   const [pdf, setPdf] = useState<Uint8Array | null>(null);
   const [downloading, setDownloading] = useState(false);
   useEffect(() => setCfg(data.exam.sheet_config), [data.exam.sheet_config]);
@@ -36,8 +39,8 @@ export default function TabSheet() {
   async function download() {
     setDownloading(true);
     try {
-      const { generateSheetCopiesPdf } = await import('../../omr/sheetPdf');
-      const bytes = await generateSheetCopiesPdf(data.layout, copies);
+      const { generateSheetMixPdf } = await import('../../omr/sheetPdf');
+      const bytes = await generateSheetMixPdf(data.layout, byLang);
       downloadBlob(bytes as BlobPart, `hoja-${fileSlug(data.exam.title)}-${data.exam.code}${copies > 1 ? `-x${copies}` : ''}.pdf`, 'application/pdf');
       if (!readOnly) await run((d) => markDownloaded(db, d, copies));
     } finally {
@@ -81,11 +84,30 @@ export default function TabSheet() {
             </Notice>
           </div>
           <div className="mt-4 flex flex-wrap items-end gap-3">
-            <Field label={tr('Copias en el PDF')} hint={tr('1 = una hoja para fotocopiar; o tantas como alumnos.')}>
-              <input className="input w-28" type="number" min={1} max={1000} value={copies} onChange={(e) => setCopies(Math.max(1, Math.min(1000, Number(e.target.value) || 1)))} />
-            </Field>
-            <button className="btn-primary mb-5" disabled={dirty || downloading} onClick={download}>
-              {downloading ? tr('Generando PDF…') : tr('Descargar hojas en PDF')}
+            <fieldset>
+              <legend className="label">{tr('Copias en el PDF, por idioma')}</legend>
+              <div className="flex flex-wrap gap-3">
+                {SHEET_LANGS.map((l) => (
+                  <label key={l} className="text-xs text-slate-600">
+                    {SHEET_LANG_NAMES[l]}
+                    <input
+                      className="input mt-1 block w-24"
+                      type="number"
+                      min={0}
+                      max={1000}
+                      data-testid={`copies-${l}`}
+                      value={byLang[l]}
+                      onChange={(e) => setByLang({ ...byLang, [l]: Math.max(0, Math.min(1000, Math.round(Number(e.target.value)) || 0)) })}
+                    />
+                  </label>
+                ))}
+              </div>
+              <span className="mt-1 block text-xs text-slate-500">
+                {tr('Pon 1 para tener una hoja que fotocopiar, o tantas como alumnos. Las hojas de distintos idiomas son del mismo examen: se escanean juntas y se corrigen igual.')}
+              </span>
+            </fieldset>
+            <button className="btn-primary mb-5" disabled={dirty || downloading || copies < 1} onClick={download}>
+              {downloading ? tr('Generando PDF…') : copies > 1 ? tr('Descargar {n} hojas en PDF', { n: copies }) : tr('Descargar hojas en PDF')}
             </button>
           </div>
           {dirty && <p className="text-xs text-amber-700">{tr('Guarda la configuración antes de descargar.')}</p>}

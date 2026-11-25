@@ -7,7 +7,7 @@ import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { DEFAULT_FIELDS, DEFAULT_SHEET_CONFIG, PageLayout, computeLayout, parseQr } from '../src/omr/layout';
 import { readPage } from '../src/omr/reader';
-import { generateSheetCopiesPdf, generateSheetPdf } from '../src/omr/sheetPdf';
+import { generateSheetCopiesPdf, generateSheetMixPdf, generateSheetPdf } from '../src/omr/sheetPdf';
 import { REF, loadCv, paintBubble, renderPdf, rotateGray } from './helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,6 +116,18 @@ describe('hoja generada → lector (ida y vuelta)', () => {
       expect(Object.entries(r.respuestas!).filter(([q, v]) => q !== '7' && v !== '').length).toBe(0);
       expect(r.nia).toBe('????????');
     }
+  });
+
+  it('un mismo PDF puede llevar hojas en varios idiomas y todas se leen con el mismo layout', async () => {
+    const doc = computeLayout('MEZCLA01', { ...DEFAULT_SHEET_CONFIG, nQuestions: 30, nOptions: 4, nModels: 1 });
+    const pages = await renderPdf(await generateSheetMixPdf(doc, { es: 2, ca: 1, en: 1 }));
+    expect(pages).toHaveLength(4); // 2 en castellano, 1 en catalán, 1 en inglés
+    pages.forEach((pg, i) => {
+      paintBubble(pg, ...doc.pages[0].preguntas[String(i + 1)].B);
+      const r = readPage(cv, pg, doc, { pagina: i + 1 }).result;
+      expect(r.qr).toBe('UICOMR|MEZCLA01|v1');
+      expect(r.respuestas![String(i + 1)]).toBe('B');
+    });
   });
 
   it('hoja de 2 páginas con 3 opciones y un solo modelo; plantilla marcada', async () => {

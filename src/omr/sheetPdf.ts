@@ -5,7 +5,7 @@
 import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import qrcode from 'qrcode-generator';
 import { APP_NAME } from '../config';
-import { SHEET_TEXT, sheetLang } from './sheetText';
+import { SHEET_LANGS, SHEET_TEXT, SheetLang, sheetLang } from './sheetText';
 import { BUBBLE_R, GEO, LayoutDoc, MARGIN, MARK, PAGE_H, PAGE_W, PageLayout, QUESTIONS_PER_COLUMN } from './layout';
 
 const MM = 72 / 25.4;
@@ -260,6 +260,25 @@ export async function generateSheetCopiesPdf(doc: LayoutDoc, copies: number): Pr
       const page = out.addPage([PAGE_W * MM, PAGE_H * MM]);
       page.drawPage(ep, { x: 0, y: 0 });
     }
+  }
+  return out.save();
+}
+
+/**
+ * PDF con hojas del mismo examen en varios idiomas (p. ej. 20 en castellano y 15 en catalán).
+ * Solo cambian los textos impresos: todas se corrigen igual y se pueden escanear mezcladas.
+ */
+export async function generateSheetMixPdf(doc: LayoutDoc, copies: Partial<Record<SheetLang, number>>): Promise<Uint8Array> {
+  const parts = SHEET_LANGS.map((lang) => [lang, Math.max(0, Math.min(1000, Math.round(copies[lang] ?? 0)))] as const).filter(([, n]) => n > 0);
+  const withLang = (lang: SheetLang): LayoutDoc => ({ ...doc, config: { ...doc.config, lang } });
+  if (!parts.length) return generateSheetPdf(doc);
+  if (parts.length === 1) return generateSheetCopiesPdf(withLang(parts[0][0]), parts[0][1]);
+  const out = await PDFDocument.create();
+  out.setTitle(`Hoja de respuestas ${doc.exam_id} (${parts.map(([l, n]) => `${n} ${l}`).join(', ')})`);
+  out.setCreator(APP_NAME);
+  for (const [lang, n] of parts) {
+    const src = await PDFDocument.load(await generateSheetCopiesPdf(withLang(lang), n));
+    for (const page of await out.copyPages(src, src.getPageIndices())) out.addPage(page);
   }
   return out.save();
 }
