@@ -79,6 +79,8 @@ Deno.serve(async (req) => {
       ...(promotion ? { discounts: { 0: { promotion_code: promotion } } } : { allow_promotion_codes: true }),
       // con un código que deja el primer cobro a 0 € no se pide tarjeta (el webhook programa el fin al acabar el periodo)
       payment_method_collection: 'if_required',
+      // Stripe anuncia «luego 9,90 € cada mes»: se aclara que con el mes gratis y sin tarjeta no habrá ningún cargo
+      ...(promotion && interval !== 'year' ? { custom_text: { submit: { message: 'Sin tarjeta y sin cargos: al acabar el mes gratuito vuelves al plan gratis. Si quieres seguir con Korrige Plus, podrás suscribirte entonces.' } } } : {}),
       // siempre en euros: con la conversión automática a la moneda del visitante, los códigos en euros no valen
       adaptive_pricing: { enabled: false },
       billing_address_collection: 'required',
