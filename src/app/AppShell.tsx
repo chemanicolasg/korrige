@@ -55,7 +55,18 @@ export default function AppShell() {
   const { db, user, profile, orgs, org, setOrgId, canCreateExam, markOnboarded } = useAuth();
   const [showTutorial, setShowTutorial] = useState(false);
   const loc = useLocation();
-  if (!user) return <Navigate to={`/acceso?volver=${encodeURIComponent(loc.pathname)}`} replace />;
+  if (!user) {
+    // un enlace con código promocional (…/app/plan?codigo=X) se recuerda hasta que la persona entre o se registre
+    const codigo = new URLSearchParams(loc.search).get('codigo');
+    if (codigo) {
+      try {
+        localStorage.setItem('korrige-promo', codigo.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 40));
+      } catch {
+        /* sin almacenamiento */
+      }
+    }
+    return <Navigate to={`/acceso?volver=${encodeURIComponent(loc.pathname)}${codigo ? '&modo=crear' : ''}`} replace />;
+  }
 
   // primera visita: tutorial de inicio. En la demo no se muestra (salvo que se fuerce para las pruebas)
   const forced = typeof localStorage !== 'undefined' && localStorage.getItem('korrige-tutorial') === '1';
@@ -64,6 +75,16 @@ export default function AppShell() {
     setShowTutorial(false);
     if (firstVisit) markOnboarded();
   };
+
+  // quien llegó con un enlace promocional y acaba de registrarse va una vez a «Plan», donde le espera el código
+  let promoPending = false;
+  try {
+    promoPending = !!org && !!localStorage.getItem('korrige-promo') && !sessionStorage.getItem('korrige-promo-shown') && loc.pathname !== '/app/plan';
+    if (promoPending) sessionStorage.setItem('korrige-promo-shown', '1');
+  } catch {
+    /* sin almacenamiento */
+  }
+  if (promoPending) return <Navigate to="/app/plan" replace />;
 
   const nav = ({ isActive }: { isActive: boolean }) => `rounded-md px-3 py-1.5 text-sm font-medium ${isActive ? 'bg-brand-50 text-brand-800' : 'text-slate-600 hover:bg-slate-100'}`;
   return (

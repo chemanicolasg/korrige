@@ -12,7 +12,20 @@ const ERRORS: Record<string, string> = {
   already_subscribed: tr('Ya tienes Korrige Plus activo.'),
   no_subscription: tr('No hay ninguna suscripción que gestionar.'),
   stripe_error: tr('No se ha podido conectar con la pasarela de pago. Inténtalo de nuevo en unos minutos.'),
+  invalid_code: tr('Ese código promocional no existe o ya ha caducado. Revísalo o déjalo vacío.'),
 };
+
+const PROMO_KEY = 'korrige-promo';
+/** Guarda el código que venga en el enlace y devuelve el que haya (el del enlace o el recordado). */
+export function savedPromo(fromUrl: string | null): string {
+  try {
+    const clean = (fromUrl ?? '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 40);
+    if (clean) localStorage.setItem(PROMO_KEY, clean);
+    return clean || localStorage.getItem(PROMO_KEY) || '';
+  } catch {
+    return '';
+  }
+}
 
 /** Plan del usuario: consumo, cambio a Korrige Plus (Stripe Checkout) y gestión de la suscripción. */
 export default function PlanPage() {
@@ -21,12 +34,19 @@ export default function PlanPage() {
   const [interval, setInterval_] = useState<'month' | 'year'>('month');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // código promocional: llega en el enlace (?codigo=…) o se recuerda del enlace con el que se registró
+  const [promo, setPromo] = useState(() => savedPromo(params.get('codigo')));
   const t = getDict(appLocale()).pricing;
   const paid = params.get('pago');
 
   // tras pagar, Stripe avisa por webhook: se refresca el plan unos segundos después
   useEffect(() => {
     if (paid !== 'ok') return;
+    try {
+      localStorage.removeItem(PROMO_KEY); // el código ya se ha usado
+    } catch {
+      /* sin almacenamiento */
+    }
     const timers = [1500, 5000, 12000].map((ms) => setTimeout(() => void refresh(), ms));
     return () => timers.forEach(clearTimeout);
   }, [paid]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -35,7 +55,7 @@ export default function PlanPage() {
     setBusy(true);
     setError('');
     try {
-      const { url } = await db.invoke<{ url: string }>(fn, { interval });
+      const { url } = await db.invoke<{ url: string }>(fn, { interval, ...(fn === 'create-checkout' && promo.trim() ? { code: promo.trim().toUpperCase() } : {}) });
       location.href = url;
     } catch (e) {
       const code = (e as Error).message;
@@ -117,7 +137,18 @@ export default function PlanPage() {
                 {busy ? tr('Abriendo el pago…') : tr('Pasar a Korrige Plus')}
               </button>
               <p className="mt-2 text-xs text-slate-500">{tr('Pago seguro con tarjeta. Puedes cancelar cuando quieras y conservas el plan hasta el final del periodo pagado.')}</p>
-              <p className="mt-1 text-xs text-slate-500">{tr('¿Tienes un código promocional? Lo podrás introducir en la página de pago.')}</p>
+              <label className="mt-3 block text-left text-xs text-slate-600">
+                {tr('Código promocional (opcional)')}
+                <input
+                  className="input mt-1 font-mono uppercase"
+                  data-testid="promo-code"
+                  maxLength={40}
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={promo}
+                  onChange={(e) => setPromo(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
+                />
+              </label>
             </div>
           ),
           academy: (

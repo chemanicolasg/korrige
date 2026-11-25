@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'method' });
 
   const key = Deno.env.get('STRIPE_SECRET_KEY');
-  const { interval } = await req.json().catch(() => ({ interval: 'month' }));
+  const { interval, code } = await req.json().catch(() => ({ interval: 'month', code: undefined }));
   // los identificadores de precio no son secretos: valores de producción por defecto
   const price = interval === 'year'
     ? Deno.env.get('STRIPE_PRICE_PLUS_YEAR') ?? 'price_1UeDZSLzkykEzxyQakBeK7bh'
@@ -53,6 +53,18 @@ Deno.serve(async (req) => {
     return json(409, { error: 'already_subscribed' });
   }
   const vat = await vatRateId(key);
+  // Código promocional introducido en Korrige: se busca en Stripe y el pago se abre con el descuento ya aplicado
+  let promotion: string | null = null;
+  if (typeof code === 'string' && code.trim()) {
+    if (!/^[A-Za-z0-9_-]{3,40}$/.test(code.trim())) return json(400, { error: 'invalid_code' });
+    try {
+      const found = await stripe<{ data: { id: string }[] }>(key, 'GET', `promotion_codes?active=true&limit=1&code=${encodeURIComponent(code.trim())}`);
+      promotion = found.data[0]?.id ?? null;
+    } catch (e) {
+      console.error('create-checkout: no se pudo comprobar el código', e);
+    }
+    if (!promotion) return json(400, { error: 'invalid_code' });
+  }
   try {
     const session = await stripe<{ url: string }>(key, 'POST', 'checkout/sessions', {
       mode: 'subscription',
@@ -63,7 +75,8 @@ Deno.serve(async (req) => {
       ...(sub?.stripe_customer_id ? { customer: sub.stripe_customer_id } : { customer_email: u.user.email }),
       subscription_data: { metadata: { user_id: u.user.id } },
       metadata: { user_id: u.user.id },
-      allow_promotion_codes: true,
+      // Stripe no admite a la vez un descuento ya aplicado y el campo para teclear códigos
+      ...(promotion ? { discounts: { 0: { promotion_code: promotion } } } : { allow_promotion_codes: true }),
       // con un código que deja el primer cobro a 0 € no se pide tarjeta (el webhook programa el fin al acabar el periodo)
       payment_method_collection: 'if_required',
       // siempre en euros: con la conversión automática a la moneda del visitante, los códigos en euros no valen

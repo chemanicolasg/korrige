@@ -1,6 +1,7 @@
 /** Traducciones de la aplicación del profesor (módulo «shell»). Clave = texto en castellano. */
 export const ca: Record<string, string> = {
-  '¿Tienes un código promocional? Lo podrás introducir en la página de pago.': 'Tens un codi promocional? El podràs introduir a la pàgina de pagament.',
+  'Ese código promocional no existe o ya ha caducado. Revísalo o déjalo vacío.': 'Aquest codi promocional no existeix o ja ha caducat. Revisa’l o deixa’l buit.',
+  'Código promocional (opcional)': 'Codi promocional (opcional)',
   Idioma: 'Idioma',
   'Cargando…': 'S’està carregant…',
   Reintentar: 'Torna-ho a provar',
@@ -162,7 +163,8 @@ export const ca: Record<string, string> = {
 };
 
 export const en: Record<string, string> = {
-  '¿Tienes un código promocional? Lo podrás introducir en la página de pago.': 'Have a promotional code? You can enter it on the payment page.',
+  'Ese código promocional no existe o ya ha caducado. Revísalo o déjalo vacío.': 'That promotional code does not exist or has expired. Check it or leave it empty.',
+  'Código promocional (opcional)': 'Promotional code (optional)',
   Idioma: 'Language',
   'Cargando…': 'Loading…',
   Reintentar: 'Retry',
