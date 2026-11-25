@@ -3,6 +3,7 @@
  * (localStorage + IndexedDB para las imágenes). Imita lo esencial de las reglas
  * del servidor (código de examen, examen cerrado, layout bloqueado, cascadas).
  */
+import { PLAN } from '../config';
 import { Db, Filter, SelectOptions, SessionUser } from './db';
 import { tr } from '../i18n/app';
 
@@ -181,7 +182,14 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
     }
     if (EXAM_CHILDREN.includes(table)) {
       guardOpen(table, row);
-      row.org_id = exam(row.exam_id)!.org_id;
+      row.org_id = exam(row.exam_id)!.org_id;      // plazo de subida: como en la base de datos (trigger enforce_upload_window)
+      if (table === 'uploads' || table === 'sheets') {
+        const e = exam(row.exam_id)!;
+        if (!e.first_upload_at) e.first_upload_at = now();
+        else if (demoPlan() !== 'academy' && Date.now() > new Date(String(e.first_upload_at)).getTime() + PLAN.uploadWindowDays * 86400000) {
+          throw new Error('PLAZO_SUBIDA: el plazo de 30 días para subir hojas a este examen ha terminado. Crea un examen nuevo para seguir corrigiendo');
+        }
+      }
     }
     if (table === 'audit_log') {
       row.id = ++auditSeq;
@@ -250,6 +258,7 @@ export function createLocalDb(opts: { persist?: boolean } = {}): Db {
           const closed = row.status === 'cerrado';
           // con el examen cerrado solo se puede publicar o retirar las respuestas
           const onlyPublication = Object.keys(p).every((k) => PUBLICATION_FIELDS.includes(k));
+          delete p.first_upload_at; // la anota el sistema al subir hojas
           if (closed && (p.status ?? 'cerrado') === 'cerrado' && !onlyPublication) throw new Error('El examen está cerrado: reábrelo para modificarlo');
           if (p.answers_code) {
             if (p.answers_code === row.code) p.answers_code = null;

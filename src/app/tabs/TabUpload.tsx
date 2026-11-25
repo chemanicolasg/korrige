@@ -1,12 +1,14 @@
 import { DragEvent, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorBox, Notice, fmtDateTime } from '../../components/ui';
+import { ErrorBox, Notice, fmtDate, fmtDateTime } from '../../components/ui';
+import { PLAN } from '../../config';
 import { tr, trn } from '../../i18n/app';
 import { DuplicatePolicy, deleteUpload, duplicatesWithExisting, saveUpload } from '../../lib/service';
 import { buildReviewItems, findDuplicates } from '../../lib/review';
 import { ProcessHandle, Progress, processPdfs } from '../../omr/client';
 import { Excluded, Submission, groupPages } from '../../omr/group';
 import { modelLetters } from '../../omr/layout';
+import { useSession } from '../AuthContext';
 import { useExam } from '../ExamPage';
 
 type Stage = { s: 'idle' } | { s: 'reading'; p: Progress | null } | { s: 'summary'; submissions: Submission[]; excluded: Excluded[] } | { s: 'saving'; done: number; total: number } | { s: 'done'; n: number; incidents: number };
@@ -30,6 +32,11 @@ export default function TabUpload() {
   const handle = useRef<ProcessHandle | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const models = modelLetters(data.exam.sheet_config);
+  // plazo de subida: PLAN.uploadWindowDays días desde la primera subida (las organizaciones Academy no tienen plazo)
+  const { unlimited } = useSession();
+  const first = data.exam.first_upload_at ? new Date(data.exam.first_upload_at) : null;
+  const deadline = first && !unlimited ? new Date(first.getTime() + PLAN.uploadWindowDays * 86400000) : null;
+  const expired = !!deadline && deadline.getTime() < Date.now();
 
   async function start(files: File[]) {
     const pdfs = files.filter((f) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
@@ -118,6 +125,17 @@ export default function TabUpload() {
               )}
             </Notice>
           )}
+          {expired && (
+            <Notice tone="warn">
+              <span data-testid="upload-expired">
+                {tr('El plazo para subir hojas a este examen terminó el {date}: cada examen admite hojas durante {days} días desde la primera subida. Puedes seguir revisando, corrigiendo la plantilla y exportando las notas.', { date: fmtDate(deadline!.toISOString()), days: PLAN.uploadWindowDays })}{' '}
+                <Link className="font-medium underline" to="/app/examenes/nuevo">
+                  {tr('Crear un examen nuevo')}
+                </Link>
+              </span>
+            </Notice>
+          )}
+          {!expired && (
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -143,7 +161,15 @@ export default function TabUpload() {
             <p className="mt-4 text-xs text-slate-500">
               {tr('Las hojas se leen en tu ordenador: el PDF no se envía a ningún servidor. Solo se guarda una imagen comprimida de cada hoja para la revisión.')}
             </p>
+            {deadline ? (
+              <p className="mt-2 text-xs text-slate-500" data-testid="upload-deadline">
+                {tr('Puedes subir hojas a este examen hasta el {date}.', { date: fmtDate(deadline.toISOString()) })}
+              </p>
+            ) : (
+              !unlimited && <p className="mt-2 text-xs text-slate-500">{tr('Cada examen admite hojas durante {days} días desde la primera subida.', { days: PLAN.uploadWindowDays })}</p>
+            )}
           </div>
+          )}
         </>
       )}
 

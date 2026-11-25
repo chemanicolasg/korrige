@@ -130,6 +130,7 @@ export const es = {
     title: 'Empieza gratis. Paga solo si lo usas a menudo',
     subtitle: 'Tu primer examen es gratis y completo, sin tarjeta. Después eliges.',
     vat: 'Precios con IVA incluido.',
+    window: 'Cada examen admite subir hojas durante 30 días desde la primera subida; después sigue disponible para consultar, revisar y exportar. Korrige Academy no tiene este plazo.',
     perMonth: '/mes',
     yearly: 'o {price} al año',
     custom: 'A medida',

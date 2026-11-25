@@ -210,6 +210,27 @@ insert into public.invitations (org_id, email, invited_by, accepted_at) values (
 select tests.eq(tests.n($$select 1 from public.invitations where email = 'falsa@uni-a.test' and accepted_at is null$$), 1, 'una invitación no nace aceptada aunque el cliente lo envíe');
 delete from public.invitations where email = 'falsa@uni-a.test';
 
+-- Plazo de subida: 30 días desde la primera subida (salvo organizaciones Academy)
+select tests.login('a0000000-0000-0000-0000-000000000002'); -- Pablo
+select tests.eq(tests.n($$select 1 from public.exams where id = 'e1000000-0000-0000-0000-000000000000' and first_upload_at is not null$$), 1, 'al subir hojas se anota la fecha de la primera subida');
+update public.exams set first_upload_at = null where id = 'e1000000-0000-0000-0000-000000000000';
+update public.exams set first_upload_at = now() + interval '10 years' where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.eq(tests.n($$select 1 from public.exams where id = 'e1000000-0000-0000-0000-000000000000' and first_upload_at <= now()$$), 1, 'la fecha de la primera subida no se puede borrar ni mover');
+select tests.su();
+update public.exams set first_upload_at = now() - interval '31 days' where id = 'e1000000-0000-0000-0000-000000000000';
+select tests.login('a0000000-0000-0000-0000-000000000002');
+select tests.throws($$insert into public.uploads (exam_id, org_id, n_pages) values ('e1000000-0000-0000-0000-000000000000', '0a000000-0000-0000-0000-000000000000', 1)$$, 'fuera de plazo no se suben más hojas');
+select tests.throws($$insert into public.sheets (exam_id, org_id, upload_id, seq, identifier) values ('e1000000-0000-0000-0000-000000000000', '0a000000-0000-0000-0000-000000000000', 'f1000000-0000-0000-0000-000000000000', 99, '1')$$, 'ni se añaden hojas sueltas a una subida antigua');
+select tests.eq(tests.affected($$update public.sheets set identifier = identifier where exam_id = 'e1000000-0000-0000-0000-000000000000'$$), 1, 'fuera de plazo se pueden seguir revisando las hojas que ya había');
+select tests.su();
+update public.organizations set plan = 'academy' where id = '0a000000-0000-0000-0000-000000000000';
+select tests.login('a0000000-0000-0000-0000-000000000002');
+select tests.eq(tests.affected($$insert into public.uploads (id, exam_id, org_id, n_pages) values ('f1000000-0000-0000-0000-00000000aca1', 'e1000000-0000-0000-0000-000000000000', '0a000000-0000-0000-0000-000000000000', 1)$$), 1, 'las organizaciones Academy no tienen plazo');
+select tests.su();
+delete from public.uploads where id = 'f1000000-0000-0000-0000-00000000aca1';
+update public.organizations set plan = 'standard' where id = '0a000000-0000-0000-0000-000000000000';
+update public.exams set first_upload_at = now() where id = 'e1000000-0000-0000-0000-000000000000';
+
 -- ---------------------------------------------------------------------------
 -- 3a. Publicación de respuestas para los alumnos (sin sesión)
 -- ---------------------------------------------------------------------------

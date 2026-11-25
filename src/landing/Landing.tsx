@@ -313,7 +313,9 @@ export default function Landing({ locale = 'es' }: { locale?: Locale }) {
                 }}
               />
             </div>
-            <p className="mt-6 text-sm text-slate-500">{t.pricing.vat}</p>
+            <p className="mt-6 text-sm text-slate-500">
+              {t.pricing.vat} {t.pricing.window}
+            </p>
           </div>
         </section>
 

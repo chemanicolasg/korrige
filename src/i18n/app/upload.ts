@@ -1,5 +1,9 @@
 /** Traducciones de la aplicación del profesor (módulo «upload»). Clave = texto en castellano. */
 export const ca: Record<string, string> = {
+  'Cada examen admite hojas durante {days} días desde la primera subida.': 'Cada examen admet fulls durant {days} dies des de la primera pujada.',
+  'Puedes subir hojas a este examen hasta el {date}.': 'Pots pujar fulls a aquest examen fins al {date}.',
+  'Crear un examen nuevo': 'Crea un examen nou',
+  'El plazo para subir hojas a este examen terminó el {date}: cada examen admite hojas durante {days} días desde la primera subida. Puedes seguir revisando, corrigiendo la plantilla y exportando las notas.': 'El termini per pujar fulls a aquest examen va acabar el {date}: cada examen admet fulls durant {days} dies des de la primera pujada. Pots continuar revisant, corregint la plantilla i exportant les notes.',
   'Modelo {m}: hay {k} números y el examen tiene {n} preguntas.': 'Model {m}: hi ha {k} números i l’examen té {n} preguntes.',
   'Modelo {m}: debe ser una permutación de 1 a {n}, sin repetir.': 'Model {m}: ha de ser una permutació d’1 a {n}, sense repetir.',
   'Correspondencia entre modelos': 'Correspondència entre models',
@@ -126,6 +130,10 @@ export const ca: Record<string, string> = {
 };
 
 export const en: Record<string, string> = {
+  'Cada examen admite hojas durante {days} días desde la primera subida.': 'Each exam accepts sheets for {days} days from the first upload.',
+  'Puedes subir hojas a este examen hasta el {date}.': 'You can upload sheets to this exam until {date}.',
+  'Crear un examen nuevo': 'Create a new exam',
+  'El plazo para subir hojas a este examen terminó el {date}: cada examen admite hojas durante {days} días desde la primera subida. Puedes seguir revisando, corrigiendo la plantilla y exportando las notas.': 'The period for uploading sheets to this exam ended on {date}: each exam accepts sheets for {days} days from the first upload. You can still review, correct the answer key and export the grades.',
   'Modelo {m}: hay {k} números y el examen tiene {n} preguntas.': 'Version {m}: there are {k} numbers and the exam has {n} questions.',
   'Modelo {m}: debe ser una permutación de 1 a {n}, sin repetir.': 'Version {m}: it must be a permutation of 1 to {n}, with no repeats.',
   'Correspondencia entre modelos': 'Mapping between versions',

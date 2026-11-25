@@ -115,6 +115,8 @@ export interface Exam {
   model_map: ModelMap;
   closed_at: string | null;
   images_purged_at: string | null;
+  /** Primera subida de hojas: desde aquí cuenta el plazo de subida (PLAN.uploadWindowDays). */
+  first_upload_at?: string | null;
   /** Respuestas correctas visibles para los alumnos en /comprobar. */
   answers_published?: boolean;
   /** Desde cuándo se ven (null = todavía no se han publicado nunca). */

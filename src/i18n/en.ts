@@ -132,6 +132,7 @@ export const en: Dict = {
     title: 'Start for free. Pay only if you use it often',
     subtitle: 'Your first exam is free and complete, no card required. Then you choose.',
     vat: 'Prices include VAT.',
+    window: 'Each exam accepts sheet uploads for 30 days from the first upload; after that it remains available to view, review and export. Korrige Academy has no such limit.',
     perMonth: '/month',
     yearly: 'or {price} per year',
     custom: 'Custom',

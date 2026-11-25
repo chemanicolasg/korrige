@@ -37,4 +37,6 @@ export const PLAN = {
   plusExamsPerMonth: 5,
   plusMonthly: 9.9,
   plusYearly: 89,
+  /** Días durante los que un examen admite subir hojas, desde la primera subida (Academy: sin plazo). */
+  uploadWindowDays: 30,
 } as const;

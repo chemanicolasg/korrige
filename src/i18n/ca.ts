@@ -132,6 +132,7 @@ export const ca: Dict = {
     title: 'Comença gratis. Paga només si el fas servir sovint',
     subtitle: 'El teu primer examen és gratis i complet, sense targeta. Després tries.',
     vat: 'Preus amb IVA inclòs.',
+    window: 'Cada examen admet pujar fulls durant 30 dies des de la primera pujada; després continua disponible per consultar, revisar i exportar. Korrige Academy no té aquest termini.',
     perMonth: '/mes',
     yearly: 'o {price} l’any',
     custom: 'A mida',
