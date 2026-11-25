@@ -117,6 +117,7 @@ export default function PlanPage() {
                 {busy ? tr('Abriendo el pago…') : tr('Pasar a Korrige Plus')}
               </button>
               <p className="mt-2 text-xs text-slate-500">{tr('Pago seguro con tarjeta. Puedes cancelar cuando quieras y conservas el plan hasta el final del periodo pagado.')}</p>
+              <p className="mt-1 text-xs text-slate-500">{tr('¿Tienes un código promocional? Lo podrás introducir en la página de pago.')}</p>
             </div>
           ),
           academy: (
