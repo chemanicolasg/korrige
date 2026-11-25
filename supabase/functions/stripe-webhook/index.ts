@@ -25,6 +25,11 @@ Deno.serve(async (req) => {
       if (s.mode !== 'subscription' || !s.subscription) return new Response('ok');
       userId = s.client_reference_id ?? s.metadata?.user_id;
       sub = await stripe(key, 'GET', `subscriptions/${s.subscription}`);
+      // Alta gratuita con código promocional y sin tarjeta: al acabar el periodo gratis no hay con qué cobrar.
+      // Se programa la baja para esa fecha; si quiere seguir, vuelve a suscribirse (ya con tarjeta).
+      if (!s.amount_total && !sub.default_payment_method && !sub.cancel_at_period_end) {
+        sub = await stripe(key, 'POST', `subscriptions/${s.subscription}`, { cancel_at_period_end: true });
+      }
     } else if (event.type.startsWith('customer.subscription.')) {
       // se lee el estado actual en Stripe: los eventos pueden llegar desordenados o repetidos
       sub = await stripe(key, 'GET', `subscriptions/${event.data.object.id}`);

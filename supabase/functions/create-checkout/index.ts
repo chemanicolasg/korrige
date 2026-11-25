@@ -64,6 +64,8 @@ Deno.serve(async (req) => {
       subscription_data: { metadata: { user_id: u.user.id } },
       metadata: { user_id: u.user.id },
       allow_promotion_codes: true,
+      // con un código que deja el primer cobro a 0 € no se pide tarjeta (el webhook programa el fin al acabar el periodo)
+      payment_method_collection: 'if_required',
       billing_address_collection: 'required',
       tax_id_collection: { enabled: true },
       ...(sub?.stripe_customer_id ? { customer_update: { name: 'auto', address: 'auto' } } : {}),
